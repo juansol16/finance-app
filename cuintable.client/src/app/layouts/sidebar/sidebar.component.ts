@@ -42,7 +42,13 @@ export class SidebarComponent {
         }
     ];
 
+    showInviteForm = false;
+
     constructor(public authService: AuthService, private router: Router) { }
+
+    get canInvite(): boolean {
+        return this.authService.role === 'Owner' && this.authService.user?.email !== 'demo@migestor.com';
+    }
 
     get visibleMenuItems() {
         const role = this.authService.role;

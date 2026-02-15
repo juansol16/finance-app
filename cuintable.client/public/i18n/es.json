@@ -151,6 +151,20 @@
     "FILTER_STATUS": "Filtrar Estado",
     "ALL_STATUSES": "Todos los Estados"
   },
+  "INVITE": {
+    "TITLE": "Invitar Usuario",
+    "FULL_NAME": "Nombre Completo",
+    "EMAIL": "Correo Electrónico",
+    "PASSWORD": "Contraseña",
+    "ROLE": "Rol",
+    "LANGUAGE": "Idioma Preferido",
+    "ROLE_CONTADOR": "Contador",
+    "ROLE_PAREJA": "Pareja",
+    "SEND": "Enviar Invitación",
+    "SUCCESS": "Usuario invitado exitosamente",
+    "ERROR_EMAIL_EXISTS": "Ese correo ya está registrado",
+    "BUTTON": "Invitar Usuario"
+  },
   "SETTINGS": {
     "DARK_MODE": "Modo Oscuro",
     "LANGUAGE": "Idioma"

@@ -23,6 +23,14 @@ export interface RegisterRequest {
   preferredLanguage: string;
 }
 
+export interface InviteUserRequest {
+  email: string;
+  password: string;
+  fullName: string;
+  role: string;
+  preferredLanguage: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly TOKEN_KEY = 'auth_token';
@@ -62,6 +70,10 @@ export class AuthService {
     return this.http.post<AuthResponse>('/api/auth/register', request).pipe(
       tap(res => this.setSession(res))
     );
+  }
+
+  inviteUser(request: InviteUserRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>('/api/auth/invite', request);
   }
 
   logout(): void {

@@ -151,6 +151,20 @@
     "FILTER_STATUS": "Filter Status",
     "ALL_STATUSES": "All Statuses"
   },
+  "INVITE": {
+    "TITLE": "Invite User",
+    "FULL_NAME": "Full Name",
+    "EMAIL": "Email",
+    "PASSWORD": "Password",
+    "ROLE": "Role",
+    "LANGUAGE": "Preferred Language",
+    "ROLE_CONTADOR": "Accountant",
+    "ROLE_PAREJA": "Partner",
+    "SEND": "Send Invite",
+    "SUCCESS": "User invited successfully",
+    "ERROR_EMAIL_EXISTS": "That email is already registered",
+    "BUTTON": "Invite User"
+  },
   "SETTINGS": {
     "DARK_MODE": "Dark Mode",
     "LANGUAGE": "Language"
