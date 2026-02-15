@@ -9,7 +9,7 @@ namespace Cuintable.Server.Controllers;
 
 [ApiController]
 [Route("api/credit-cards")]
-[Authorize]
+[Authorize(Roles = "Owner,Pareja")]
 public class CreditCardsController : ControllerBase
 {
     private readonly ICreditCardService _service;
@@ -29,16 +29,19 @@ public class CreditCardsController : ControllerBase
     private Guid GetUserId() =>
         Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+    private Guid GetTenantId() =>
+        Guid.Parse(User.FindFirstValue("TenantId")!);
+
     [HttpGet]
     public async Task<ActionResult<List<CreditCardResponse>>> GetAll()
     {
-        return Ok(await _service.GetAllAsync(GetUserId()));
+        return Ok(await _service.GetAllAsync(GetTenantId()));
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<CreditCardResponse>> GetById(Guid id)
     {
-        var card = await _service.GetByIdAsync(GetUserId(), id);
+        var card = await _service.GetByIdAsync(GetTenantId(), id);
         if (card is null) return NotFound();
         return Ok(card);
     }
@@ -50,7 +53,7 @@ public class CreditCardsController : ControllerBase
         if (!validation.IsValid)
             return BadRequest(validation.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }));
 
-        var card = await _service.CreateAsync(GetUserId(), request);
+        var card = await _service.CreateAsync(GetTenantId(), GetUserId(), request);
         return CreatedAtAction(nameof(GetById), new { id = card.Id }, card);
     }
 
@@ -61,7 +64,7 @@ public class CreditCardsController : ControllerBase
         if (!validation.IsValid)
             return BadRequest(validation.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }));
 
-        var card = await _service.UpdateAsync(GetUserId(), id, request);
+        var card = await _service.UpdateAsync(GetTenantId(), id, request);
         if (card is null) return NotFound();
         return Ok(card);
     }
@@ -69,7 +72,7 @@ public class CreditCardsController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var deleted = await _service.DeleteAsync(GetUserId(), id);
+        var deleted = await _service.DeleteAsync(GetTenantId(), id);
         if (!deleted) return NotFound();
         return NoContent();
     }

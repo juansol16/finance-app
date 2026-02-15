@@ -8,7 +8,7 @@ namespace Cuintable.Server.Controllers;
 
 [ApiController]
 [Route("api/tax")]
-[Authorize]
+[Authorize(Roles = "Owner,Pareja")]
 public class TaxCalculationController : ControllerBase
 {
     private readonly IResicoTaxService _taxService;
@@ -18,8 +18,8 @@ public class TaxCalculationController : ControllerBase
         _taxService = taxService;
     }
 
-    private Guid GetUserId() =>
-        Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    private Guid GetTenantId() =>
+        Guid.Parse(User.FindFirstValue("TenantId")!);
 
     [HttpGet("summary")]
     public async Task<ActionResult<TaxSummaryResponse>> GetMonthlySummary([FromQuery] int month, [FromQuery] int year)
@@ -30,7 +30,7 @@ public class TaxCalculationController : ControllerBase
         if (year < 2000 || year > 2100)
             return BadRequest("Invalid year.");
 
-        var summary = await _taxService.GetMonthlySummaryAsync(GetUserId(), month, year);
+        var summary = await _taxService.GetMonthlySummaryAsync(GetTenantId(), month, year);
         return Ok(summary);
     }
 
@@ -40,7 +40,7 @@ public class TaxCalculationController : ControllerBase
         if (year < 2000 || year > 2100)
             return BadRequest("Invalid year.");
 
-        var summary = await _taxService.GetAnnualSummaryAsync(GetUserId(), year);
+        var summary = await _taxService.GetAnnualSummaryAsync(GetTenantId(), year);
         return Ok(summary);
     }
 }

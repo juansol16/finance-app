@@ -74,6 +74,9 @@ Cuintable/
 │       │   ├── credit-cards/
 │       │   └── tax-payments/
 │       └── i18n/                  # en.json, es.json
+├── Cuintable.Tools/               # CLI utilities (create Owner accounts)
+│   └── Program.cs
+├── Cuintable.Server.Tests/        # xUnit backend tests
 ├── docker-compose.yml             # Dokploy deployment
 ├── DEVELOPMENT_PLAN.md            # Detailed implementation phases
 └── README.md
@@ -158,6 +161,47 @@ All secrets are managed via a `.env` file in the project root (loaded automatica
 ### Production (Dokploy / Docker Compose)
 
 The `docker-compose.yml` reads the same `.env` variables and maps them to the container environment. In Dokploy, set these in the UI.
+
+## CLI Tools
+
+### Create Owner Account
+
+The `Cuintable.Tools` project provides an interactive CLI to create Owner accounts and their associated tenants. This is useful for setting up new organizations outside of the seed data.
+
+```bash
+dotnet run --project Cuintable.Tools
+```
+
+The script will prompt you for:
+
+| Field | Description |
+|-------|-------------|
+| **Nombre completo** | Full name of the owner |
+| **Email** | Login email (must be unique) |
+| **Password** | Minimum 6 characters |
+| **Nombre del tenant** | Organization name (defaults to the full name) |
+| **Idioma preferido** | `es` or `en` (defaults to `es`) |
+
+A confirmation summary is shown before creating the account. The tool reads database credentials from the `.env` file automatically.
+
+### Invite Sub-Users (Contador / Pareja)
+
+Once an Owner account exists, sub-users can be created via the API:
+
+```bash
+curl -X POST https://localhost:7071/api/auth/invite \
+  -H "Authorization: Bearer <OWNER_JWT_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "contador@example.com",
+    "password": "SecurePass123",
+    "fullName": "Maria Lopez",
+    "role": "Contador",
+    "preferredLanguage": "es"
+  }'
+```
+
+Available roles: `Contador` (access to taxable expenses and tax payments only) and `Pareja` (access to everything except incomes).
 
 ## Demo Account
 

@@ -14,28 +14,29 @@ public class IncomeService : IIncomeService
         _db = db;
     }
 
-    public async Task<List<IncomeResponse>> GetAllAsync(Guid userId)
+    public async Task<List<IncomeResponse>> GetAllAsync(Guid tenantId)
     {
         return await _db.Incomes
-            .Where(i => i.UserId == userId)
+            .Where(i => i.TenantId == tenantId)
             .OrderByDescending(i => i.Date)
             .Select(i => MapToResponse(i))
             .ToListAsync();
     }
 
-    public async Task<IncomeResponse?> GetByIdAsync(Guid userId, Guid id)
+    public async Task<IncomeResponse?> GetByIdAsync(Guid tenantId, Guid id)
     {
         var income = await _db.Incomes
-            .FirstOrDefaultAsync(i => i.Id == id && i.UserId == userId);
+            .FirstOrDefaultAsync(i => i.Id == id && i.TenantId == tenantId);
 
         return income is null ? null : MapToResponse(income);
     }
 
-    public async Task<IncomeResponse> CreateAsync(Guid userId, CreateIncomeRequest request)
+    public async Task<IncomeResponse> CreateAsync(Guid tenantId, Guid userId, CreateIncomeRequest request)
     {
         var income = new Income
         {
             Id = Guid.NewGuid(),
+            TenantId = tenantId,
             UserId = userId,
             Type = request.Type,
             Source = request.Source,
@@ -52,10 +53,10 @@ public class IncomeService : IIncomeService
         return MapToResponse(income);
     }
 
-    public async Task<IncomeResponse?> UpdateAsync(Guid userId, Guid id, UpdateIncomeRequest request)
+    public async Task<IncomeResponse?> UpdateAsync(Guid tenantId, Guid id, UpdateIncomeRequest request)
     {
         var income = await _db.Incomes
-            .FirstOrDefaultAsync(i => i.Id == id && i.UserId == userId);
+            .FirstOrDefaultAsync(i => i.Id == id && i.TenantId == tenantId);
 
         if (income is null) return null;
 
@@ -72,10 +73,10 @@ public class IncomeService : IIncomeService
         return MapToResponse(income);
     }
 
-    public async Task<bool> DeleteAsync(Guid userId, Guid id)
+    public async Task<bool> DeleteAsync(Guid tenantId, Guid id)
     {
         var income = await _db.Incomes
-            .FirstOrDefaultAsync(i => i.Id == id && i.UserId == userId);
+            .FirstOrDefaultAsync(i => i.Id == id && i.TenantId == tenantId);
 
         if (income is null) return false;
 
@@ -85,10 +86,10 @@ public class IncomeService : IIncomeService
         return true;
     }
 
-    public async Task<IncomeResponse?> UpdateFileUrlsAsync(Guid userId, Guid id, string? pdfUrl, string? xmlUrl, string? xmlMetadata)
+    public async Task<IncomeResponse?> UpdateFileUrlsAsync(Guid tenantId, Guid id, string? pdfUrl, string? xmlUrl, string? xmlMetadata)
     {
         var income = await _db.Incomes
-            .FirstOrDefaultAsync(i => i.Id == id && i.UserId == userId);
+            .FirstOrDefaultAsync(i => i.Id == id && i.TenantId == tenantId);
 
         if (income is null) return null;
 

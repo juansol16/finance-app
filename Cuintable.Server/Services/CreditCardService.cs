@@ -11,27 +11,28 @@ public class CreditCardService : ICreditCardService
 
     public CreditCardService(AppDbContext db) => _db = db;
 
-    public async Task<List<CreditCardResponse>> GetAllAsync(Guid userId)
+    public async Task<List<CreditCardResponse>> GetAllAsync(Guid tenantId)
     {
         return await _db.CreditCards
-            .Where(c => c.UserId == userId)
+            .Where(c => c.TenantId == tenantId)
             .OrderBy(c => c.Bank).ThenBy(c => c.Nickname)
             .Select(c => MapToResponse(c))
             .ToListAsync();
     }
 
-    public async Task<CreditCardResponse?> GetByIdAsync(Guid userId, Guid id)
+    public async Task<CreditCardResponse?> GetByIdAsync(Guid tenantId, Guid id)
     {
         var card = await _db.CreditCards
-            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
+            .FirstOrDefaultAsync(c => c.Id == id && c.TenantId == tenantId);
         return card is null ? null : MapToResponse(card);
     }
 
-    public async Task<CreditCardResponse> CreateAsync(Guid userId, CreateCreditCardRequest request)
+    public async Task<CreditCardResponse> CreateAsync(Guid tenantId, Guid userId, CreateCreditCardRequest request)
     {
         var card = new CreditCard
         {
             Id = Guid.NewGuid(),
+            TenantId = tenantId,
             UserId = userId,
             Bank = request.Bank,
             Nickname = request.Nickname,
@@ -43,10 +44,10 @@ public class CreditCardService : ICreditCardService
         return MapToResponse(card);
     }
 
-    public async Task<CreditCardResponse?> UpdateAsync(Guid userId, Guid id, UpdateCreditCardRequest request)
+    public async Task<CreditCardResponse?> UpdateAsync(Guid tenantId, Guid id, UpdateCreditCardRequest request)
     {
         var card = await _db.CreditCards
-            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
+            .FirstOrDefaultAsync(c => c.Id == id && c.TenantId == tenantId);
         if (card is null) return null;
 
         card.Bank = request.Bank;
@@ -58,10 +59,10 @@ public class CreditCardService : ICreditCardService
         return MapToResponse(card);
     }
 
-    public async Task<bool> DeleteAsync(Guid userId, Guid id)
+    public async Task<bool> DeleteAsync(Guid tenantId, Guid id)
     {
         var card = await _db.CreditCards
-            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
+            .FirstOrDefaultAsync(c => c.Id == id && c.TenantId == tenantId);
         if (card is null) return false;
 
         _db.CreditCards.Remove(card);

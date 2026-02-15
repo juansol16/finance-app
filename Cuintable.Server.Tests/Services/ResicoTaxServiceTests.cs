@@ -39,30 +39,31 @@ public class ResicoTaxServiceTests
     public async Task GetMonthlySummaryAsync_ReturnsCorrectSummary()
     {
         // Arrange
+        var tenantId = Guid.NewGuid();
         var userId = Guid.NewGuid();
         var year = 2024;
         var month = 5;
 
         // Add 2 Incomes
         _context.Incomes.AddRange(
-            new Income { Id = Guid.NewGuid(), UserId = userId, Date = new DateOnly(year, month, 5), AmountMXN = 20000, Source="Job", Type=IncomeType.Nomina },
-            new Income { Id = Guid.NewGuid(), UserId = userId, Date = new DateOnly(year, month, 15), AmountMXN = 30000, Source="Freelance", Type=IncomeType.Honorarios }
+            new Income { Id = Guid.NewGuid(), TenantId = tenantId, UserId = userId, Date = new DateOnly(year, month, 5), AmountMXN = 20000, Source="Job", Type=IncomeType.Nomina },
+            new Income { Id = Guid.NewGuid(), TenantId = tenantId, UserId = userId, Date = new DateOnly(year, month, 15), AmountMXN = 30000, Source="Freelance", Type=IncomeType.Honorarios }
         );
 
         // Add 1 Deductible Expense
         _context.TaxableExpenses.Add(
-            new TaxableExpense { Id = Guid.NewGuid(), UserId = userId, Date = new DateOnly(year, month, 10), AmountMXN = 5000, Vendor="CFE", Category=TaxableExpenseCategory.Luz }
+            new TaxableExpense { Id = Guid.NewGuid(), TenantId = tenantId, UserId = userId, Date = new DateOnly(year, month, 10), AmountMXN = 5000, Vendor="CFE", Category=TaxableExpenseCategory.Luz }
         );
 
         // Add 1 Expense outside date range
         _context.TaxableExpenses.Add(
-            new TaxableExpense { Id = Guid.NewGuid(), UserId = userId, Date = new DateOnly(year, month + 1, 1), AmountMXN = 1000, Vendor="Telmex", Category=TaxableExpenseCategory.Internet }
+            new TaxableExpense { Id = Guid.NewGuid(), TenantId = tenantId, UserId = userId, Date = new DateOnly(year, month + 1, 1), AmountMXN = 1000, Vendor="Telmex", Category=TaxableExpenseCategory.Internet }
         );
 
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _service.GetMonthlySummaryAsync(userId, month, year);
+        var result = await _service.GetMonthlySummaryAsync(tenantId, month, year);
 
         // Assert
         Assert.Equal(month, result.Month);
@@ -80,19 +81,20 @@ public class ResicoTaxServiceTests
     public async Task GetAnnualSummaryAsync_ReturnsCorrectAnnualTotals()
     {
         // Arrange
+        var tenantId = Guid.NewGuid();
         var userId = Guid.NewGuid();
         var year = 2024;
 
         // Month 1: 20k income (tax 200)
-        _context.Incomes.Add(new Income { Id = Guid.NewGuid(), UserId = userId, Date = new DateOnly(year, 1, 15), AmountMXN = 20000, Source="Job", Type=IncomeType.Nomina });
-        
+        _context.Incomes.Add(new Income { Id = Guid.NewGuid(), TenantId = tenantId, UserId = userId, Date = new DateOnly(year, 1, 15), AmountMXN = 20000, Source="Job", Type=IncomeType.Nomina });
+
         // Month 2: 100k income (tax 2000)
-        _context.Incomes.Add(new Income { Id = Guid.NewGuid(), UserId = userId, Date = new DateOnly(year, 2, 15), AmountMXN = 100000, Source="Job", Type=IncomeType.Honorarios });
+        _context.Incomes.Add(new Income { Id = Guid.NewGuid(), TenantId = tenantId, UserId = userId, Date = new DateOnly(year, 2, 15), AmountMXN = 100000, Source="Job", Type=IncomeType.Honorarios });
 
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _service.GetAnnualSummaryAsync(userId, year);
+        var result = await _service.GetAnnualSummaryAsync(tenantId, year);
 
         // Assert
         Assert.Equal(year, result.Year);

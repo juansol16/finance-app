@@ -3,6 +3,7 @@ namespace Cuintable.Server.Models;
 public class TaxPayment
 {
     public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
     public Guid UserId { get; set; }
     public int PeriodMonth { get; set; }
     public int PeriodYear { get; set; }
@@ -16,5 +17,6 @@ public class TaxPayment
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation
+    public Tenant Tenant { get; set; } = null!;
     public User User { get; set; } = null!;
 }

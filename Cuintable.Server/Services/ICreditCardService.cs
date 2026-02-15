@@ -4,9 +4,9 @@ namespace Cuintable.Server.Services;
 
 public interface ICreditCardService
 {
-    Task<List<CreditCardResponse>> GetAllAsync(Guid userId);
-    Task<CreditCardResponse?> GetByIdAsync(Guid userId, Guid id);
-    Task<CreditCardResponse> CreateAsync(Guid userId, CreateCreditCardRequest request);
-    Task<CreditCardResponse?> UpdateAsync(Guid userId, Guid id, UpdateCreditCardRequest request);
-    Task<bool> DeleteAsync(Guid userId, Guid id);
+    Task<List<CreditCardResponse>> GetAllAsync(Guid tenantId);
+    Task<CreditCardResponse?> GetByIdAsync(Guid tenantId, Guid id);
+    Task<CreditCardResponse> CreateAsync(Guid tenantId, Guid userId, CreateCreditCardRequest request);
+    Task<CreditCardResponse?> UpdateAsync(Guid tenantId, Guid id, UpdateCreditCardRequest request);
+    Task<bool> DeleteAsync(Guid tenantId, Guid id);
 }

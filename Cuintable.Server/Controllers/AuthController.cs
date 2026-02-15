@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using Cuintable.Server.DTOs.Auth;
 using Cuintable.Server.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cuintable.Server.Controllers;
@@ -40,6 +42,22 @@ public class AuthController : ControllerBase
         catch (UnauthorizedAccessException ex)
         {
             return Unauthorized(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("invite")]
+    [Authorize(Roles = "Owner")]
+    public async Task<ActionResult<AuthResponse>> InviteUser([FromBody] InviteUserRequest request)
+    {
+        try
+        {
+            var tenantId = Guid.Parse(User.FindFirstValue("TenantId")!);
+            var response = await _authService.InviteUserAsync(tenantId, request);
+            return Ok(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
         }
     }
 }

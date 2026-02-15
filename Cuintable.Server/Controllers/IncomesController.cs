@@ -9,7 +9,7 @@ namespace Cuintable.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Roles = "Owner")]
 public class IncomesController : ControllerBase
 {
     private readonly IIncomeService _incomeService;
@@ -32,17 +32,20 @@ public class IncomesController : ControllerBase
     private Guid GetUserId() =>
         Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+    private Guid GetTenantId() =>
+        Guid.Parse(User.FindFirstValue("TenantId")!);
+
     [HttpGet]
     public async Task<ActionResult<List<IncomeResponse>>> GetAll()
     {
-        var incomes = await _incomeService.GetAllAsync(GetUserId());
+        var incomes = await _incomeService.GetAllAsync(GetTenantId());
         return Ok(incomes);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<IncomeResponse>> GetById(Guid id)
     {
-        var income = await _incomeService.GetByIdAsync(GetUserId(), id);
+        var income = await _incomeService.GetByIdAsync(GetTenantId(), id);
         if (income is null) return NotFound();
         return Ok(income);
     }
@@ -54,7 +57,7 @@ public class IncomesController : ControllerBase
         if (!validation.IsValid)
             return BadRequest(validation.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }));
 
-        var income = await _incomeService.CreateAsync(GetUserId(), request);
+        var income = await _incomeService.CreateAsync(GetTenantId(), GetUserId(), request);
         return CreatedAtAction(nameof(GetById), new { id = income.Id }, income);
     }
 
@@ -65,7 +68,7 @@ public class IncomesController : ControllerBase
         if (!validation.IsValid)
             return BadRequest(validation.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }));
 
-        var income = await _incomeService.UpdateAsync(GetUserId(), id, request);
+        var income = await _incomeService.UpdateAsync(GetTenantId(), id, request);
         if (income is null) return NotFound();
         return Ok(income);
     }
@@ -73,7 +76,7 @@ public class IncomesController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var deleted = await _incomeService.DeleteAsync(GetUserId(), id);
+        var deleted = await _incomeService.DeleteAsync(GetTenantId(), id);
         if (!deleted) return NotFound();
         return NoContent();
     }
@@ -81,8 +84,8 @@ public class IncomesController : ControllerBase
     [HttpPost("{id:guid}/upload")]
     public async Task<ActionResult<IncomeResponse>> UploadFiles(Guid id, [FromForm] IFormFile? pdf, [FromForm] IFormFile? xml)
     {
-        var userId = GetUserId();
-        var existing = await _incomeService.GetByIdAsync(userId, id);
+        var tenantId = GetTenantId();
+        var existing = await _incomeService.GetByIdAsync(tenantId, id);
         if (existing is null) return NotFound();
 
         string? pdfUrl = null;
@@ -105,7 +108,7 @@ public class IncomesController : ControllerBase
             xmlMetadata = CfdiParser.Parse(stream);
         }
 
-        var updated = await _incomeService.UpdateFileUrlsAsync(userId, id, pdfUrl, xmlUrl, xmlMetadata);
+        var updated = await _incomeService.UpdateFileUrlsAsync(tenantId, id, pdfUrl, xmlUrl, xmlMetadata);
         return Ok(updated);
     }
 }

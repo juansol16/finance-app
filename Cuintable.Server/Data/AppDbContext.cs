@@ -7,6 +7,7 @@ public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+    public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Income> Incomes => Set<Income>();
     public DbSet<CreditCard> CreditCards => Set<CreditCard>();
@@ -18,6 +19,13 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        // Tenant
+        modelBuilder.Entity<Tenant>(e =>
+        {
+            e.HasKey(t => t.Id);
+            e.Property(t => t.Name).IsRequired().HasMaxLength(200);
+        });
+
         // User
         modelBuilder.Entity<User>(e =>
         {
@@ -27,6 +35,12 @@ public class AppDbContext : DbContext
             e.Property(u => u.PasswordHash).IsRequired();
             e.Property(u => u.FullName).IsRequired().HasMaxLength(200);
             e.Property(u => u.PreferredLanguage).HasMaxLength(5).HasDefaultValue("es");
+            e.Property(u => u.Role).HasConversion<string>().HasMaxLength(20);
+
+            e.HasOne(u => u.Tenant)
+                .WithMany(t => t.Users)
+                .HasForeignKey(u => u.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Income
@@ -39,10 +53,17 @@ public class AppDbContext : DbContext
             e.Property(i => i.AmountUSD).HasPrecision(18, 2);
             e.Property(i => i.XmlMetadata).HasColumnType("jsonb");
 
+            e.HasOne(i => i.Tenant)
+                .WithMany()
+                .HasForeignKey(i => i.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             e.HasOne(i => i.User)
                 .WithMany(u => u.Incomes)
                 .HasForeignKey(i => i.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasIndex(i => i.TenantId);
         });
 
         // CreditCard
@@ -53,10 +74,17 @@ public class AppDbContext : DbContext
             e.Property(c => c.Nickname).IsRequired().HasMaxLength(100);
             e.Property(c => c.LastFourDigits).IsRequired().HasMaxLength(4).IsFixedLength();
 
+            e.HasOne(c => c.Tenant)
+                .WithMany()
+                .HasForeignKey(c => c.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             e.HasOne(c => c.User)
                 .WithMany(u => u.CreditCards)
                 .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasIndex(c => c.TenantId);
         });
 
         // Expense
@@ -64,6 +92,11 @@ public class AppDbContext : DbContext
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.AmountMXN).HasPrecision(18, 2);
+
+            e.HasOne(x => x.Tenant)
+                .WithMany()
+                .HasForeignKey(x => x.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             e.HasOne(x => x.User)
                 .WithMany(u => u.Expenses)
@@ -74,6 +107,8 @@ public class AppDbContext : DbContext
                 .WithMany(c => c.Expenses)
                 .HasForeignKey(x => x.CreditCardId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            e.HasIndex(x => x.TenantId);
         });
 
         // TaxableExpense
@@ -83,6 +118,11 @@ public class AppDbContext : DbContext
             e.Property(t => t.AmountMXN).HasPrecision(18, 2);
             e.Property(t => t.Vendor).IsRequired().HasMaxLength(200);
             e.Property(t => t.XmlMetadata).HasColumnType("jsonb");
+
+            e.HasOne(t => t.Tenant)
+                .WithMany()
+                .HasForeignKey(t => t.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             e.HasOne(t => t.User)
                 .WithMany(u => u.TaxableExpenses)
@@ -98,6 +138,8 @@ public class AppDbContext : DbContext
                 .WithMany(x => x.TaxableExpenses)
                 .HasForeignKey(t => t.ExpenseId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            e.HasIndex(t => t.TenantId);
         });
 
         // TaxPayment
@@ -108,12 +150,17 @@ public class AppDbContext : DbContext
             e.Property(p => p.PeriodMonth).IsRequired();
             e.Property(p => p.PeriodYear).IsRequired();
 
+            e.HasOne(p => p.Tenant)
+                .WithMany()
+                .HasForeignKey(p => p.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             e.HasOne(p => p.User)
                 .WithMany(u => u.TaxPayments)
                 .HasForeignKey(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            e.HasIndex(p => new { p.UserId, p.PeriodYear, p.PeriodMonth }).IsUnique();
+            e.HasIndex(p => new { p.TenantId, p.PeriodYear, p.PeriodMonth }).IsUnique();
         });
     }
 

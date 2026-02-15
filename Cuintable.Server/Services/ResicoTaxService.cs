@@ -26,17 +26,17 @@ public class ResicoTaxService : IResicoTaxService
         };
     }
 
-    public async Task<TaxSummaryResponse> GetMonthlySummaryAsync(Guid userId, int month, int year)
+    public async Task<TaxSummaryResponse> GetMonthlySummaryAsync(Guid tenantId, int month, int year)
     {
         var startDate = new DateOnly(year, month, 1);
         var endDate = startDate.AddMonths(1).AddDays(-1);
 
         var incomes = await _context.Incomes
-            .Where(i => i.UserId == userId && i.Date >= startDate && i.Date <= endDate)
+            .Where(i => i.TenantId == tenantId && i.Date >= startDate && i.Date <= endDate)
             .ToListAsync();
 
         var taxableExpenses = await _context.TaxableExpenses
-            .Where(te => te.UserId == userId && te.Date >= startDate && te.Date <= endDate)
+            .Where(te => te.TenantId == tenantId && te.Date >= startDate && te.Date <= endDate)
             .ToListAsync();
 
         var totalIncome = incomes.Sum(i => i.AmountMXN);
@@ -60,7 +60,7 @@ public class ResicoTaxService : IResicoTaxService
         };
     }
 
-    public async Task<AnnualTaxSummaryResponse> GetAnnualSummaryAsync(Guid userId, int year)
+    public async Task<AnnualTaxSummaryResponse> GetAnnualSummaryAsync(Guid tenantId, int year)
     {
         var response = new AnnualTaxSummaryResponse
         {
@@ -69,16 +69,16 @@ public class ResicoTaxService : IResicoTaxService
 
         for (int month = 1; month <= 12; month++)
         {
-            var summary = await GetMonthlySummaryAsync(userId, month, year);
+            var summary = await GetMonthlySummaryAsync(tenantId, month, year);
             response.MonthlySummaries.Add(summary);
         }
 
         response.TotalAnnualIncome = response.MonthlySummaries.Sum(s => s.TotalIncome);
         response.TotalAnnualDeductible = response.MonthlySummaries.Sum(s => s.TotalDeductibleExpenses);
         response.TotalAnnualISR = response.MonthlySummaries.Sum(s => s.EstimatedISR);
-        
-        response.AverageEffectiveTaxRate = response.TotalAnnualIncome > 0 
-            ? (response.TotalAnnualISR / response.TotalAnnualIncome) 
+
+        response.AverageEffectiveTaxRate = response.TotalAnnualIncome > 0
+            ? (response.TotalAnnualISR / response.TotalAnnualIncome)
             : 0;
 
         return response;

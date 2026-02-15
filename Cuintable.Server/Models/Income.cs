@@ -3,6 +3,7 @@ namespace Cuintable.Server.Models;
 public class Income
 {
     public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
     public Guid UserId { get; set; }
     public IncomeType Type { get; set; }
     public string Source { get; set; } = string.Empty;
@@ -18,5 +19,6 @@ public class Income
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation
+    public Tenant Tenant { get; set; } = null!;
     public User User { get; set; } = null!;
 }

@@ -11,6 +11,7 @@ public class TaxPaymentServiceTests
 {
     private readonly AppDbContext _context;
     private readonly TaxPaymentService _service;
+    private readonly Guid _tenantId;
     private readonly Guid _userId;
 
     public TaxPaymentServiceTests()
@@ -21,6 +22,7 @@ public class TaxPaymentServiceTests
 
         _context = new AppDbContext(options);
         _service = new TaxPaymentService(_context);
+        _tenantId = Guid.NewGuid();
         _userId = Guid.NewGuid();
     }
 
@@ -37,32 +39,33 @@ public class TaxPaymentServiceTests
         };
 
         // Act
-        var result = await _service.CreateAsync(_userId, request);
+        var result = await _service.CreateAsync(_tenantId, _userId, request);
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal(request.AmountDue, result.AmountDue);
         Assert.Equal(TaxPaymentStatus.Pendiente, result.Status);
-        
+
         var inDb = await _context.TaxPayments.FindAsync(result.Id);
         Assert.NotNull(inDb);
+        Assert.Equal(_tenantId, inDb.TenantId);
         Assert.Equal(_userId, inDb.UserId);
     }
 
     [Fact]
-    public async Task GetAllAsync_ShouldReturnUserPayments()
+    public async Task GetAllAsync_ShouldReturnTenantPayments()
     {
         // Arrange
-        var otherUserId = Guid.NewGuid();
+        var otherTenantId = Guid.NewGuid();
         _context.TaxPayments.AddRange(
-            new TaxPayment { Id = Guid.NewGuid(), UserId = _userId, PeriodMonth = 1, PeriodYear = 2024, AmountDue = 100 },
-            new TaxPayment { Id = Guid.NewGuid(), UserId = _userId, PeriodMonth = 2, PeriodYear = 2024, AmountDue = 200 },
-            new TaxPayment { Id = Guid.NewGuid(), UserId = otherUserId, PeriodMonth = 1, PeriodYear = 2024, AmountDue = 300 }
+            new TaxPayment { Id = Guid.NewGuid(), TenantId = _tenantId, UserId = _userId, PeriodMonth = 1, PeriodYear = 2024, AmountDue = 100 },
+            new TaxPayment { Id = Guid.NewGuid(), TenantId = _tenantId, UserId = _userId, PeriodMonth = 2, PeriodYear = 2024, AmountDue = 200 },
+            new TaxPayment { Id = Guid.NewGuid(), TenantId = otherTenantId, UserId = Guid.NewGuid(), PeriodMonth = 1, PeriodYear = 2024, AmountDue = 300 }
         );
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _service.GetAllAsync(_userId);
+        var result = await _service.GetAllAsync(_tenantId);
 
         // Assert
         Assert.Equal(2, result.Count);
@@ -78,6 +81,7 @@ public class TaxPaymentServiceTests
         _context.TaxPayments.Add(new TaxPayment
         {
             Id = paymentId,
+            TenantId = _tenantId,
             UserId = _userId,
             Status = TaxPaymentStatus.Pendiente,
             PeriodMonth = 1,
@@ -90,7 +94,7 @@ public class TaxPaymentServiceTests
         var receiptUrl = "http://example.com/receipt.pdf";
 
         // Act
-        var result = await _service.MarkAsPaidAsync(_userId, paymentId, request, receiptUrl);
+        var result = await _service.MarkAsPaidAsync(_tenantId, paymentId, request, receiptUrl);
 
         // Assert
         Assert.NotNull(result);
@@ -110,6 +114,7 @@ public class TaxPaymentServiceTests
         _context.TaxPayments.Add(new TaxPayment
         {
             Id = paymentId,
+            TenantId = _tenantId,
             UserId = _userId,
             Status = TaxPaymentStatus.Pendiente,
             PeriodMonth = 1,
@@ -121,7 +126,7 @@ public class TaxPaymentServiceTests
         var url = "http://example.com/determination.pdf";
 
         // Act
-        var result = await _service.UpdateDeterminationUrlAsync(_userId, paymentId, url);
+        var result = await _service.UpdateDeterminationUrlAsync(_tenantId, paymentId, url);
 
         // Assert
         Assert.NotNull(result);

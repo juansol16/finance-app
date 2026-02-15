@@ -11,31 +11,32 @@ public class TaxableExpenseService : ITaxableExpenseService
 
     public TaxableExpenseService(AppDbContext db) => _db = db;
 
-    public async Task<List<TaxableExpenseResponse>> GetAllAsync(Guid userId)
+    public async Task<List<TaxableExpenseResponse>> GetAllAsync(Guid tenantId)
     {
         return await _db.TaxableExpenses
             .Include(t => t.CreditCard)
             .Include(t => t.Expense)
-            .Where(t => t.UserId == userId)
+            .Where(t => t.TenantId == tenantId)
             .OrderByDescending(t => t.Date)
             .Select(t => MapToResponse(t))
             .ToListAsync();
     }
 
-    public async Task<TaxableExpenseResponse?> GetByIdAsync(Guid userId, Guid id)
+    public async Task<TaxableExpenseResponse?> GetByIdAsync(Guid tenantId, Guid id)
     {
         var item = await _db.TaxableExpenses
             .Include(t => t.CreditCard)
             .Include(t => t.Expense)
-            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+            .FirstOrDefaultAsync(t => t.Id == id && t.TenantId == tenantId);
         return item is null ? null : MapToResponse(item);
     }
 
-    public async Task<TaxableExpenseResponse> CreateAsync(Guid userId, CreateTaxableExpenseRequest request)
+    public async Task<TaxableExpenseResponse> CreateAsync(Guid tenantId, Guid userId, CreateTaxableExpenseRequest request)
     {
         var item = new TaxableExpense
         {
             Id = Guid.NewGuid(),
+            TenantId = tenantId,
             UserId = userId,
             Category = request.Category,
             CreditCardId = request.CreditCardId,
@@ -54,12 +55,12 @@ public class TaxableExpenseService : ITaxableExpenseService
         return MapToResponse(item);
     }
 
-    public async Task<TaxableExpenseResponse?> UpdateAsync(Guid userId, Guid id, UpdateTaxableExpenseRequest request)
+    public async Task<TaxableExpenseResponse?> UpdateAsync(Guid tenantId, Guid id, UpdateTaxableExpenseRequest request)
     {
         var item = await _db.TaxableExpenses
             .Include(t => t.CreditCard)
             .Include(t => t.Expense)
-            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+            .FirstOrDefaultAsync(t => t.Id == id && t.TenantId == tenantId);
         if (item is null) return null;
 
         item.Category = request.Category;
@@ -77,10 +78,10 @@ public class TaxableExpenseService : ITaxableExpenseService
         return MapToResponse(item);
     }
 
-    public async Task<bool> DeleteAsync(Guid userId, Guid id)
+    public async Task<bool> DeleteAsync(Guid tenantId, Guid id)
     {
         var item = await _db.TaxableExpenses
-            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+            .FirstOrDefaultAsync(t => t.Id == id && t.TenantId == tenantId);
         if (item is null) return false;
 
         _db.TaxableExpenses.Remove(item);
@@ -88,12 +89,12 @@ public class TaxableExpenseService : ITaxableExpenseService
         return true;
     }
 
-    public async Task<TaxableExpenseResponse?> UpdateFileUrlsAsync(Guid userId, Guid id, string? pdfUrl, string? xmlUrl, string? xmlMetadata)
+    public async Task<TaxableExpenseResponse?> UpdateFileUrlsAsync(Guid tenantId, Guid id, string? pdfUrl, string? xmlUrl, string? xmlMetadata)
     {
         var item = await _db.TaxableExpenses
             .Include(t => t.CreditCard)
             .Include(t => t.Expense)
-            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+            .FirstOrDefaultAsync(t => t.Id == id && t.TenantId == tenantId);
         if (item is null) return null;
 
         if (pdfUrl is not null) item.InvoicePdfUrl = pdfUrl;

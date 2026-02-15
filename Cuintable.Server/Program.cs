@@ -61,7 +61,7 @@ builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<ITaxableExpenseService, TaxableExpenseService>();
 builder.Services.AddScoped<IResicoTaxService, ResicoTaxService>();
 builder.Services.AddScoped<ITaxPaymentService, TaxPaymentService>();
-builder.Services.AddSingleton<IFileStorageService, LocalFileStorageService>();
+builder.Services.AddSingleton<IFileStorageService, GcsFileStorageService>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 // Controllers + Swagger
@@ -84,18 +84,6 @@ var app = builder.Build();
 
 app.UseDefaultFiles();
 app.MapStaticAssets();
-
-// Serve uploaded files in development
-if (app.Environment.IsDevelopment())
-{
-    var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "uploads");
-    Directory.CreateDirectory(uploadsPath);
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadsPath),
-        RequestPath = "/uploads"
-    });
-}
 
 if (app.Environment.IsDevelopment())
 {

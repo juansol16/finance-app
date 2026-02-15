@@ -16,7 +16,7 @@
 
     <!-- Navigation -->
     <nav class="flex-1 px-3 mt-2 space-y-1">
-        <a *ngFor="let item of menuItems"
+        <a *ngFor="let item of visibleMenuItems"
            [routerLink]="item.route"
            class="sidebar-nav-item"
            [class.active]="isActive(item.route)">

@@ -8,6 +8,7 @@ export interface AuthResponse {
   email: string;
   fullName: string;
   preferredLanguage: string;
+  role: string;
 }
 
 export interface LoginRequest {
@@ -45,6 +46,10 @@ export class AuthService {
   get user(): AuthResponse | null {
     const data = localStorage.getItem(this.USER_KEY);
     return data ? JSON.parse(data) : null;
+  }
+
+  get role(): string {
+    return this.user?.role ?? 'Owner';
   }
 
   login(request: LoginRequest): Observable<AuthResponse> {

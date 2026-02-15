@@ -4,10 +4,10 @@ namespace Cuintable.Server.Services;
 
 public interface IIncomeService
 {
-    Task<List<IncomeResponse>> GetAllAsync(Guid userId);
-    Task<IncomeResponse?> GetByIdAsync(Guid userId, Guid id);
-    Task<IncomeResponse> CreateAsync(Guid userId, CreateIncomeRequest request);
-    Task<IncomeResponse?> UpdateAsync(Guid userId, Guid id, UpdateIncomeRequest request);
-    Task<bool> DeleteAsync(Guid userId, Guid id);
-    Task<IncomeResponse?> UpdateFileUrlsAsync(Guid userId, Guid id, string? pdfUrl, string? xmlUrl, string? xmlMetadata);
+    Task<List<IncomeResponse>> GetAllAsync(Guid tenantId);
+    Task<IncomeResponse?> GetByIdAsync(Guid tenantId, Guid id);
+    Task<IncomeResponse> CreateAsync(Guid tenantId, Guid userId, CreateIncomeRequest request);
+    Task<IncomeResponse?> UpdateAsync(Guid tenantId, Guid id, UpdateIncomeRequest request);
+    Task<bool> DeleteAsync(Guid tenantId, Guid id);
+    Task<IncomeResponse?> UpdateFileUrlsAsync(Guid tenantId, Guid id, string? pdfUrl, string? xmlUrl, string? xmlMetadata);
 }

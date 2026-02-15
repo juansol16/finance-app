@@ -4,9 +4,9 @@ namespace Cuintable.Server.Services;
 
 public interface IExpenseService
 {
-    Task<List<ExpenseResponse>> GetAllAsync(Guid userId);
-    Task<ExpenseResponse?> GetByIdAsync(Guid userId, Guid id);
-    Task<ExpenseResponse> CreateAsync(Guid userId, CreateExpenseRequest request);
-    Task<ExpenseResponse?> UpdateAsync(Guid userId, Guid id, UpdateExpenseRequest request);
-    Task<bool> DeleteAsync(Guid userId, Guid id);
+    Task<List<ExpenseResponse>> GetAllAsync(Guid tenantId);
+    Task<ExpenseResponse?> GetByIdAsync(Guid tenantId, Guid id);
+    Task<ExpenseResponse> CreateAsync(Guid tenantId, Guid userId, CreateExpenseRequest request);
+    Task<ExpenseResponse?> UpdateAsync(Guid tenantId, Guid id, UpdateExpenseRequest request);
+    Task<bool> DeleteAsync(Guid tenantId, Guid id);
 }

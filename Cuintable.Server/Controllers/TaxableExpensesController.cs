@@ -9,7 +9,7 @@ namespace Cuintable.Server.Controllers;
 
 [ApiController]
 [Route("api/taxable-expenses")]
-[Authorize]
+[Authorize(Roles = "Owner,Contador,Pareja")]
 public class TaxableExpensesController : ControllerBase
 {
     private readonly ITaxableExpenseService _service;
@@ -32,16 +32,19 @@ public class TaxableExpensesController : ControllerBase
     private Guid GetUserId() =>
         Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+    private Guid GetTenantId() =>
+        Guid.Parse(User.FindFirstValue("TenantId")!);
+
     [HttpGet]
     public async Task<ActionResult<List<TaxableExpenseResponse>>> GetAll()
     {
-        return Ok(await _service.GetAllAsync(GetUserId()));
+        return Ok(await _service.GetAllAsync(GetTenantId()));
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<TaxableExpenseResponse>> GetById(Guid id)
     {
-        var item = await _service.GetByIdAsync(GetUserId(), id);
+        var item = await _service.GetByIdAsync(GetTenantId(), id);
         if (item is null) return NotFound();
         return Ok(item);
     }
@@ -53,7 +56,7 @@ public class TaxableExpensesController : ControllerBase
         if (!validation.IsValid)
             return BadRequest(validation.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }));
 
-        var item = await _service.CreateAsync(GetUserId(), request);
+        var item = await _service.CreateAsync(GetTenantId(), GetUserId(), request);
         return CreatedAtAction(nameof(GetById), new { id = item.Id }, item);
     }
 
@@ -64,7 +67,7 @@ public class TaxableExpensesController : ControllerBase
         if (!validation.IsValid)
             return BadRequest(validation.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }));
 
-        var item = await _service.UpdateAsync(GetUserId(), id, request);
+        var item = await _service.UpdateAsync(GetTenantId(), id, request);
         if (item is null) return NotFound();
         return Ok(item);
     }
@@ -72,7 +75,7 @@ public class TaxableExpensesController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var deleted = await _service.DeleteAsync(GetUserId(), id);
+        var deleted = await _service.DeleteAsync(GetTenantId(), id);
         if (!deleted) return NotFound();
         return NoContent();
     }
@@ -80,8 +83,8 @@ public class TaxableExpensesController : ControllerBase
     [HttpPost("{id:guid}/upload")]
     public async Task<ActionResult<TaxableExpenseResponse>> UploadFiles(Guid id, [FromForm] IFormFile? pdf, [FromForm] IFormFile? xml)
     {
-        var userId = GetUserId();
-        var existing = await _service.GetByIdAsync(userId, id);
+        var tenantId = GetTenantId();
+        var existing = await _service.GetByIdAsync(tenantId, id);
         if (existing is null) return NotFound();
 
         string? pdfUrl = null;
@@ -103,7 +106,7 @@ public class TaxableExpensesController : ControllerBase
             xmlMetadata = CfdiParser.Parse(stream);
         }
 
-        var updated = await _service.UpdateFileUrlsAsync(userId, id, pdfUrl, xmlUrl, xmlMetadata);
+        var updated = await _service.UpdateFileUrlsAsync(tenantId, id, pdfUrl, xmlUrl, xmlMetadata);
         return Ok(updated);
     }
 }

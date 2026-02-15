@@ -14,10 +14,10 @@ public class TaxPaymentService : ITaxPaymentService
         _context = context;
     }
 
-    public async Task<List<TaxPaymentResponse>> GetAllAsync(Guid userId)
+    public async Task<List<TaxPaymentResponse>> GetAllAsync(Guid tenantId)
     {
         var payments = await _context.TaxPayments
-            .Where(p => p.UserId == userId)
+            .Where(p => p.TenantId == tenantId)
             .OrderByDescending(p => p.PeriodYear)
             .ThenByDescending(p => p.PeriodMonth)
             .ToListAsync();
@@ -25,19 +25,20 @@ public class TaxPaymentService : ITaxPaymentService
         return payments.Select(MapToResponse).ToList();
     }
 
-    public async Task<TaxPaymentResponse?> GetByIdAsync(Guid userId, Guid id)
+    public async Task<TaxPaymentResponse?> GetByIdAsync(Guid tenantId, Guid id)
     {
         var payment = await _context.TaxPayments
-            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
-        
+            .FirstOrDefaultAsync(p => p.Id == id && p.TenantId == tenantId);
+
         return payment is null ? null : MapToResponse(payment);
     }
 
-    public async Task<TaxPaymentResponse> CreateAsync(Guid userId, CreateTaxPaymentRequest request)
+    public async Task<TaxPaymentResponse> CreateAsync(Guid tenantId, Guid userId, CreateTaxPaymentRequest request)
     {
         var payment = new TaxPayment
         {
             Id = Guid.NewGuid(),
+            TenantId = tenantId,
             UserId = userId,
             PeriodMonth = request.PeriodMonth,
             PeriodYear = request.PeriodYear,
@@ -51,10 +52,10 @@ public class TaxPaymentService : ITaxPaymentService
         return MapToResponse(payment);
     }
 
-    public async Task<TaxPaymentResponse?> UpdateAsync(Guid userId, Guid id, UpdateTaxPaymentRequest request)
+    public async Task<TaxPaymentResponse?> UpdateAsync(Guid tenantId, Guid id, UpdateTaxPaymentRequest request)
     {
         var payment = await _context.TaxPayments
-            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+            .FirstOrDefaultAsync(p => p.Id == id && p.TenantId == tenantId);
 
         if (payment is null) return null;
 
@@ -65,10 +66,10 @@ public class TaxPaymentService : ITaxPaymentService
         return MapToResponse(payment);
     }
 
-    public async Task<TaxPaymentResponse?> UpdateDeterminationUrlAsync(Guid userId, Guid id, string determinationUrl)
+    public async Task<TaxPaymentResponse?> UpdateDeterminationUrlAsync(Guid tenantId, Guid id, string determinationUrl)
     {
         var payment = await _context.TaxPayments
-            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+            .FirstOrDefaultAsync(p => p.Id == id && p.TenantId == tenantId);
 
         if (payment is null) return null;
 
@@ -77,10 +78,10 @@ public class TaxPaymentService : ITaxPaymentService
         return MapToResponse(payment);
     }
 
-    public async Task<TaxPaymentResponse?> UpdateReceiptUrlAsync(Guid userId, Guid id, string receiptUrl)
+    public async Task<TaxPaymentResponse?> UpdateReceiptUrlAsync(Guid tenantId, Guid id, string receiptUrl)
     {
         var payment = await _context.TaxPayments
-            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+            .FirstOrDefaultAsync(p => p.Id == id && p.TenantId == tenantId);
 
         if (payment is null) return null;
 
@@ -89,10 +90,10 @@ public class TaxPaymentService : ITaxPaymentService
         return MapToResponse(payment);
     }
 
-    public async Task<TaxPaymentResponse?> MarkAsPaidAsync(Guid userId, Guid id, MarkAsPaidRequest request, string? receiptUrl)
+    public async Task<TaxPaymentResponse?> MarkAsPaidAsync(Guid tenantId, Guid id, MarkAsPaidRequest request, string? receiptUrl)
     {
         var payment = await _context.TaxPayments
-            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+            .FirstOrDefaultAsync(p => p.Id == id && p.TenantId == tenantId);
 
         if (payment is null) return null;
 
@@ -107,10 +108,10 @@ public class TaxPaymentService : ITaxPaymentService
         return MapToResponse(payment);
     }
 
-    public async Task<bool> DeleteAsync(Guid userId, Guid id)
+    public async Task<bool> DeleteAsync(Guid tenantId, Guid id)
     {
         var payment = await _context.TaxPayments
-            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+            .FirstOrDefaultAsync(p => p.Id == id && p.TenantId == tenantId);
 
         if (payment is null) return false;
 

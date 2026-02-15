@@ -17,10 +17,23 @@ public static class DbSeeder
             return; // Already seeded
         }
 
-        // 1. Create Demo User
+        // 1. Create Demo Tenant
+        var tenant = new Tenant
+        {
+            Id = Guid.NewGuid(),
+            Name = "Demo Tenant",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        context.Tenants.Add(tenant);
+        await context.SaveChangesAsync();
+
+        // 2. Create Demo User
         var user = new User
         {
             Id = Guid.NewGuid(),
+            TenantId = tenant.Id,
+            Role = UserRole.Owner,
             Email = "demo@migestor.com",
             FullName = "Demo User",
             PasswordHash = BCrypt.Net.BCrypt.HashPassword("Demo123!"),
@@ -32,10 +45,11 @@ public static class DbSeeder
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
-        // 2. Create Credit Cards (Visa and Mastercard as required)
+        // 3. Create Credit Cards (Visa and Mastercard as required)
         var card1 = new CreditCard
         {
             Id = Guid.NewGuid(),
+            TenantId = tenant.Id,
             UserId = user.Id,
             Bank = "BBVA",
             Nickname = "Visa Oro",
@@ -47,6 +61,7 @@ public static class DbSeeder
         var card2 = new CreditCard
         {
             Id = Guid.NewGuid(),
+            TenantId = tenant.Id,
             UserId = user.Id,
             Bank = "Citibanamex",
             Nickname = "Mastercard Platinum",
@@ -63,7 +78,7 @@ public static class DbSeeder
         var cards = new[] { card1, card2 };
         var startDate = DateTime.Today.AddMonths(-6);
 
-        // 3. Generate Incomes (Last 6 months)
+        // 4. Generate Incomes (Last 6 months)
         var incomes = new List<Income>();
         for (int i = 0; i < 6; i++)
         {
@@ -71,8 +86,8 @@ public static class DbSeeder
             var daysInMonth = DateTime.DaysInMonth(monthDate.Year, monthDate.Month);
 
             // Monthly Payroll (Nomina) - 15th and last day
-            incomes.Add(CreateIncome(user.Id, IncomeType.Nomina, "Tech Corp Inc.", new DateOnly(monthDate.Year, monthDate.Month, 15), 45000m, 18.50m, 2432.43m));
-            incomes.Add(CreateIncome(user.Id, IncomeType.Nomina, "Tech Corp Inc.", new DateOnly(monthDate.Year, monthDate.Month, daysInMonth), 45000m, 18.50m, 2432.43m));
+            incomes.Add(CreateIncome(tenant.Id, user.Id, IncomeType.Nomina, "Tech Corp Inc.", new DateOnly(monthDate.Year, monthDate.Month, 15), 45000m, 18.50m, 2432.43m));
+            incomes.Add(CreateIncome(tenant.Id, user.Id, IncomeType.Nomina, "Tech Corp Inc.", new DateOnly(monthDate.Year, monthDate.Month, daysInMonth), 45000m, 18.50m, 2432.43m));
 
             // Variable Freelance (Honorarios) - 1 or 2 per month
             int freelanceCount = random.Next(1, 3);
@@ -80,12 +95,12 @@ public static class DbSeeder
             {
                 var day = random.Next(1, daysInMonth);
                 var amount = random.Next(5000, 15000);
-                incomes.Add(CreateIncome(user.Id, IncomeType.Honorarios, $"Cliente Freelance {k + 1}", new DateOnly(monthDate.Year, monthDate.Month, day), amount, null, null));
+                incomes.Add(CreateIncome(tenant.Id, user.Id, IncomeType.Honorarios, $"Cliente Freelance {k + 1}", new DateOnly(monthDate.Year, monthDate.Month, day), amount, null, null));
             }
         }
         context.Incomes.AddRange(incomes);
 
-        // 4. Generate Expenses & Taxable Expenses
+        // 5. Generate Expenses & Taxable Expenses
         var expenses = new List<Expense>();
         var taxableExpenses = new List<TaxableExpense>();
 
@@ -95,22 +110,22 @@ public static class DbSeeder
             var daysInMonth = DateTime.DaysInMonth(monthDate.Year, monthDate.Month);
 
             // Monthly Fixed Deductibles
-            taxableExpenses.Add(CreateTaxableExpense(user.Id, TaxableExpenseCategory.Luz, "CFE", new DateOnly(monthDate.Year, monthDate.Month, 5), 500 + random.Next(-50, 50)));
-            taxableExpenses.Add(CreateTaxableExpense(user.Id, TaxableExpenseCategory.Internet, "Telmex", new DateOnly(monthDate.Year, monthDate.Month, 10), 389));
-            taxableExpenses.Add(CreateTaxableExpense(user.Id, TaxableExpenseCategory.Celular, "Telcel", new DateOnly(monthDate.Year, monthDate.Month, 20), 499));
+            taxableExpenses.Add(CreateTaxableExpense(tenant.Id, user.Id, TaxableExpenseCategory.Luz, "CFE", new DateOnly(monthDate.Year, monthDate.Month, 5), 500 + random.Next(-50, 50)));
+            taxableExpenses.Add(CreateTaxableExpense(tenant.Id, user.Id, TaxableExpenseCategory.Internet, "Telmex", new DateOnly(monthDate.Year, monthDate.Month, 10), 389));
+            taxableExpenses.Add(CreateTaxableExpense(tenant.Id, user.Id, TaxableExpenseCategory.Celular, "Telcel", new DateOnly(monthDate.Year, monthDate.Month, 20), 499));
 
             // Occasional Equipment and Software (every other month)
             if (i % 2 == 0)
             {
-                taxableExpenses.Add(CreateTaxableExpense(user.Id, TaxableExpenseCategory.Software, "Adobe Creative Cloud", new DateOnly(monthDate.Year, monthDate.Month, 15), 899));
+                taxableExpenses.Add(CreateTaxableExpense(tenant.Id, user.Id, TaxableExpenseCategory.Software, "Adobe Creative Cloud", new DateOnly(monthDate.Year, monthDate.Month, 15), 899));
             }
             if (i == 1)
             {
-                taxableExpenses.Add(CreateTaxableExpense(user.Id, TaxableExpenseCategory.Equipo, "Amazon MX", new DateOnly(monthDate.Year, monthDate.Month, 12), 15499));
+                taxableExpenses.Add(CreateTaxableExpense(tenant.Id, user.Id, TaxableExpenseCategory.Equipo, "Amazon MX", new DateOnly(monthDate.Year, monthDate.Month, 12), 15499));
             }
             if (i == 4)
             {
-                taxableExpenses.Add(CreateTaxableExpense(user.Id, TaxableExpenseCategory.Software, "JetBrains", new DateOnly(monthDate.Year, monthDate.Month, 8), 3200));
+                taxableExpenses.Add(CreateTaxableExpense(tenant.Id, user.Id, TaxableExpenseCategory.Software, "JetBrains", new DateOnly(monthDate.Year, monthDate.Month, 8), 3200));
             }
 
             // Credit card payments (PagoTarjeta)
@@ -124,6 +139,7 @@ public static class DbSeeder
                 expenses.Add(new Expense
                 {
                     Id = Guid.NewGuid(),
+                    TenantId = tenant.Id,
                     UserId = user.Id,
                     Category = ExpenseCategory.PagoTarjeta,
                     CreditCardId = card.Id,
@@ -139,6 +155,7 @@ public static class DbSeeder
             expenses.Add(new Expense
             {
                 Id = Guid.NewGuid(),
+                TenantId = tenant.Id,
                 UserId = user.Id,
                 Category = ExpenseCategory.Transferencia,
                 Date = new DateOnly(monthDate.Year, monthDate.Month, random.Next(1, daysInMonth)),
@@ -152,6 +169,7 @@ public static class DbSeeder
             expenses.Add(new Expense
             {
                 Id = Guid.NewGuid(),
+                TenantId = tenant.Id,
                 UserId = user.Id,
                 Category = ExpenseCategory.PagoCoche,
                 Date = new DateOnly(monthDate.Year, monthDate.Month, 5),
@@ -167,6 +185,7 @@ public static class DbSeeder
                 expenses.Add(new Expense
                 {
                     Id = Guid.NewGuid(),
+                    TenantId = tenant.Id,
                     UserId = user.Id,
                     Category = ExpenseCategory.RetiroEfectivo,
                     Date = new DateOnly(monthDate.Year, monthDate.Month, random.Next(1, daysInMonth)),
@@ -182,7 +201,7 @@ public static class DbSeeder
 
         await context.SaveChangesAsync();
 
-        // 5. Generate Tax Payments (Last 5 months closed, current month pending)
+        // 6. Generate Tax Payments (Last 5 months closed, current month pending)
         var taxPayments = new List<TaxPayment>();
 
         for (int i = 0; i < 6; i++)
@@ -200,6 +219,7 @@ public static class DbSeeder
             var taxPayment = new TaxPayment
             {
                 Id = Guid.NewGuid(),
+                TenantId = tenant.Id,
                 UserId = user.Id,
                 PeriodMonth = periodDate.Month,
                 PeriodYear = periodDate.Year,
@@ -217,11 +237,12 @@ public static class DbSeeder
         await context.SaveChangesAsync();
     }
 
-    private static Income CreateIncome(Guid userId, IncomeType type, string source, DateOnly date, decimal amountMXN, decimal? rate, decimal? amountUSD)
+    private static Income CreateIncome(Guid tenantId, Guid userId, IncomeType type, string source, DateOnly date, decimal amountMXN, decimal? rate, decimal? amountUSD)
     {
         return new Income
         {
             Id = Guid.NewGuid(),
+            TenantId = tenantId,
             UserId = userId,
             Type = type,
             Source = source,
@@ -235,11 +256,12 @@ public static class DbSeeder
         };
     }
 
-    private static TaxableExpense CreateTaxableExpense(Guid userId, TaxableExpenseCategory category, string vendor, DateOnly date, decimal amount)
+    private static TaxableExpense CreateTaxableExpense(Guid tenantId, Guid userId, TaxableExpenseCategory category, string vendor, DateOnly date, decimal amount)
     {
         return new TaxableExpense
         {
             Id = Guid.NewGuid(),
+            TenantId = tenantId,
             UserId = userId,
             Category = category,
             Vendor = vendor,

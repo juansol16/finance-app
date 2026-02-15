@@ -4,10 +4,10 @@ namespace Cuintable.Server.Services;
 
 public interface ITaxableExpenseService
 {
-    Task<List<TaxableExpenseResponse>> GetAllAsync(Guid userId);
-    Task<TaxableExpenseResponse?> GetByIdAsync(Guid userId, Guid id);
-    Task<TaxableExpenseResponse> CreateAsync(Guid userId, CreateTaxableExpenseRequest request);
-    Task<TaxableExpenseResponse?> UpdateAsync(Guid userId, Guid id, UpdateTaxableExpenseRequest request);
-    Task<bool> DeleteAsync(Guid userId, Guid id);
-    Task<TaxableExpenseResponse?> UpdateFileUrlsAsync(Guid userId, Guid id, string? pdfUrl, string? xmlUrl, string? xmlMetadata);
+    Task<List<TaxableExpenseResponse>> GetAllAsync(Guid tenantId);
+    Task<TaxableExpenseResponse?> GetByIdAsync(Guid tenantId, Guid id);
+    Task<TaxableExpenseResponse> CreateAsync(Guid tenantId, Guid userId, CreateTaxableExpenseRequest request);
+    Task<TaxableExpenseResponse?> UpdateAsync(Guid tenantId, Guid id, UpdateTaxableExpenseRequest request);
+    Task<bool> DeleteAsync(Guid tenantId, Guid id);
+    Task<TaxableExpenseResponse?> UpdateFileUrlsAsync(Guid tenantId, Guid id, string? pdfUrl, string? xmlUrl, string? xmlMetadata);
 }

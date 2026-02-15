@@ -11,29 +11,30 @@ public class ExpenseService : IExpenseService
 
     public ExpenseService(AppDbContext db) => _db = db;
 
-    public async Task<List<ExpenseResponse>> GetAllAsync(Guid userId)
+    public async Task<List<ExpenseResponse>> GetAllAsync(Guid tenantId)
     {
         return await _db.Expenses
             .Include(e => e.CreditCard)
-            .Where(e => e.UserId == userId)
+            .Where(e => e.TenantId == tenantId)
             .OrderByDescending(e => e.Date)
             .Select(e => MapToResponse(e))
             .ToListAsync();
     }
 
-    public async Task<ExpenseResponse?> GetByIdAsync(Guid userId, Guid id)
+    public async Task<ExpenseResponse?> GetByIdAsync(Guid tenantId, Guid id)
     {
         var expense = await _db.Expenses
             .Include(e => e.CreditCard)
-            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
+            .FirstOrDefaultAsync(e => e.Id == id && e.TenantId == tenantId);
         return expense is null ? null : MapToResponse(expense);
     }
 
-    public async Task<ExpenseResponse> CreateAsync(Guid userId, CreateExpenseRequest request)
+    public async Task<ExpenseResponse> CreateAsync(Guid tenantId, Guid userId, CreateExpenseRequest request)
     {
         var expense = new Expense
         {
             Id = Guid.NewGuid(),
+            TenantId = tenantId,
             UserId = userId,
             Category = request.Category,
             CreditCardId = request.CreditCardId,
@@ -50,11 +51,11 @@ public class ExpenseService : IExpenseService
         return MapToResponse(expense);
     }
 
-    public async Task<ExpenseResponse?> UpdateAsync(Guid userId, Guid id, UpdateExpenseRequest request)
+    public async Task<ExpenseResponse?> UpdateAsync(Guid tenantId, Guid id, UpdateExpenseRequest request)
     {
         var expense = await _db.Expenses
             .Include(e => e.CreditCard)
-            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
+            .FirstOrDefaultAsync(e => e.Id == id && e.TenantId == tenantId);
         if (expense is null) return null;
 
         expense.Category = request.Category;
@@ -70,10 +71,10 @@ public class ExpenseService : IExpenseService
         return MapToResponse(expense);
     }
 
-    public async Task<bool> DeleteAsync(Guid userId, Guid id)
+    public async Task<bool> DeleteAsync(Guid tenantId, Guid id)
     {
         var expense = await _db.Expenses
-            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
+            .FirstOrDefaultAsync(e => e.Id == id && e.TenantId == tenantId);
         if (expense is null) return false;
 
         _db.Expenses.Remove(expense);
