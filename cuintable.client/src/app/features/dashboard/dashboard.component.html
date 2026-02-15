@@ -1,0 +1,105 @@
+<div class="p-6">
+  <h1 class="text-3xl font-bold mb-6">{{ 'DASHBOARD.TITLE' | translate }}</h1>
+
+  <!-- Filters -->
+  <div class="flex gap-4 mb-6">
+    <select [(ngModel)]="currentMonth" (change)="onMonthChange($event)" class="select select-bordered w-full max-w-xs">
+      <option *ngFor="let m of months" [value]="m">{{ getMonthKey(m) | translate }}</option>
+    </select>
+    <select [(ngModel)]="currentYear" (change)="onYearChange($event)" class="select select-bordered w-full max-w-xs">
+      <option *ngFor="let y of years" [value]="y">{{ y }}</option>
+    </select>
+  </div>
+
+  <div *ngIf="loading" class="flex justify-center p-10">
+    <span class="loading loading-spinner loading-lg"></span>
+  </div>
+
+  <div *ngIf="summary && !loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title text-sm text-gray-500">{{ 'DASHBOARD.TOTAL_INCOME' | translate }}</h2>
+        <p class="text-2xl font-bold text-success">{{ summary.totalIncome | currency:'MXN' }}</p>
+      </div>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title text-sm text-gray-500">{{ 'DASHBOARD.DEDUCTIBLE_EXPENSES' | translate }}</h2>
+        <p class="text-2xl font-bold text-error">{{ summary.totalDeductibleExpenses | currency:'MXN' }}</p>
+      </div>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title text-sm text-gray-500">{{ 'DASHBOARD.TAXABLE_BASE' | translate }}</h2>
+        <p class="text-2xl font-bold text-info">{{ summary.taxableBase | currency:'MXN' }}</p>
+      </div>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title text-sm text-gray-500">{{ 'DASHBOARD.ESTIMATED_ISR' | translate }}</h2>
+        <p class="text-2xl font-bold text-warning">{{ summary.estimatedISR | currency:'MXN' }}</p>
+        <div class="badge badge-outline">{{ 'DASHBOARD.TAX_RATE' | translate }}: {{ summary.effectiveTaxRate | percent:'1.2-2' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div *ngIf="summary && !loading" class="card bg-base-100 shadow-xl p-6 mb-8">
+    <h2 class="text-xl font-bold mb-4">{{ 'DASHBOARD.MONTHLY_SUMMARY' | translate }}</h2>
+    <div style="display: block; height: 400px;">
+      <canvas baseChart
+        [data]="barChartData"
+        [options]="barChartOptions"
+        [type]="barChartType">
+      </canvas>
+    </div>
+  </div>
+
+  <!-- Annual Summary Toggle -->
+  <div *ngIf="!loading" class="mb-4">
+    <button class="btn btn-outline btn-primary" (click)="loadAnnualSummary()">
+      {{ showAnnual ? ('COMMON.CANCEL' | translate) : ('DASHBOARD.ANNUAL_SUMMARY' | translate) }} {{ currentYear }}
+    </button>
+  </div>
+
+  <!-- Annual Summary Table -->
+  <div *ngIf="showAnnual && annualSummary" class="card bg-base-100 shadow-xl">
+    <div class="card-body p-0 overflow-x-auto">
+      <table class="table w-full">
+        <thead>
+          <tr>
+            <th>{{ 'DASHBOARD.MONTH' | translate }}</th>
+            <th>{{ 'DASHBOARD.INCOME_LABEL' | translate }}</th>
+            <th>{{ 'DASHBOARD.EXPENSES_LABEL' | translate }}</th>
+            <th>{{ 'DASHBOARD.BASE_LABEL' | translate }}</th>
+            <th>{{ 'DASHBOARD.ISR_LABEL' | translate }}</th>
+            <th>{{ 'DASHBOARD.EFFECTIVE_RATE' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of annualSummary.monthlySummaries">
+            <td>{{ getMonthKey(row.month) | translate }}</td>
+            <td>{{ row.totalIncome | currency:'MXN' }}</td>
+            <td>{{ row.totalDeductibleExpenses | currency:'MXN' }}</td>
+            <td>{{ row.taxableBase | currency:'MXN' }}</td>
+            <td>{{ row.estimatedISR | currency:'MXN' }}</td>
+            <td>{{ row.effectiveTaxRate | percent:'1.2-2' }}</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="font-bold">
+            <td>{{ 'DASHBOARD.ANNUAL_TOTAL' | translate }}</td>
+            <td>{{ annualSummary.totalAnnualIncome | currency:'MXN' }}</td>
+            <td>{{ annualSummary.totalAnnualDeductible | currency:'MXN' }}</td>
+            <td>-</td>
+            <td>{{ annualSummary.totalAnnualISR | currency:'MXN' }}</td>
+            <td>{{ annualSummary.averageEffectiveTaxRate | percent:'1.2-2' }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>

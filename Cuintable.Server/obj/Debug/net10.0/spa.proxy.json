@@ -1,0 +1,10 @@
+{
+"SpaProxyServer": {
+"ServerUrl": "https://localhost:49822",
+"RedirectUrl": "",
+"LaunchCommand": "npm start",
+"WorkingDirectory": "C:\\Users\\sol_1\\Documents\\Cuintable\\Cuintable.Server\\..\\cuintable.client",
+"MaxTimeoutInSeconds": "120",
+"KeepRunning": "false"
+}
+}

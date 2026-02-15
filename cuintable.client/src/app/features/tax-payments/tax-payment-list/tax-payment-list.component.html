@@ -1,0 +1,100 @@
+<div class="p-6">
+    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+        <h1 class="text-3xl font-bold">{{ 'TAX_PAYMENT.TITLE' | translate }}</h1>
+        <button class="btn btn-primary" (click)="openCreateModal()">
+            {{ 'TAX_PAYMENT.NEW_PAYMENT' | translate }}
+        </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-4 mb-4">
+        <select class="select select-bordered select-sm" [(ngModel)]="filterYear" (change)="onFilterChange()">
+            <option [ngValue]="null">{{ 'TAX_PAYMENT.FILTER_YEAR' | translate }}</option>
+            <option *ngFor="let y of availableYears" [ngValue]="y">{{ y }}</option>
+        </select>
+        <select class="select select-bordered select-sm" [(ngModel)]="filterStatus" (change)="onFilterChange()">
+            <option [ngValue]="null">{{ 'TAX_PAYMENT.ALL_STATUSES' | translate }}</option>
+            <option [ngValue]="0">{{ 'TAX_PAYMENT.STATUS_PENDIENTE' | translate }}</option>
+            <option [ngValue]="1">{{ 'TAX_PAYMENT.STATUS_PAGADO' | translate }}</option>
+        </select>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body p-0 overflow-x-auto">
+            <table class="table w-full">
+                <thead>
+                    <tr>
+                        <th>{{ 'TAX_PAYMENT.PERIOD' | translate }}</th>
+                        <th>{{ 'TAX_PAYMENT.AMOUNT_DUE' | translate }}</th>
+                        <th>{{ 'TAX_PAYMENT.DUE_DATE' | translate }}</th>
+                        <th>{{ 'COMMON.STATUS' | translate }}</th>
+                        <th>{{ 'TAX_PAYMENT.PAID_ON' | translate }}</th>
+                        <th>{{ 'TAX_PAYMENT.DOCUMENTS' | translate }}</th>
+                        <th>{{ 'COMMON.ACTIONS' | translate }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let payment of filteredPayments">
+                        <td>{{ payment.periodYear }} - {{ payment.periodMonth | number:'2.0-0' }}</td>
+                        <td class="font-bold">{{ payment.amountDue | currency:'MXN' }}</td>
+                        <td>
+                            {{ payment.dueDate }}
+                            <span *ngIf="getDueDateAlert(payment) === 'overdue'" class="badge badge-error badge-sm ml-1">
+                                {{ 'TAX_PAYMENT.OVERDUE' | translate }}
+                            </span>
+                            <span *ngIf="getDueDateAlert(payment) === 'due-soon'" class="badge badge-warning badge-sm ml-1">
+                                {{ 'TAX_PAYMENT.DUE_SOON' | translate }}
+                            </span>
+                        </td>
+                        <td>
+                            <span [class]="getStatusBadgeClass(payment.status)">
+                                {{ getStatusLabel(payment.status) }}
+                            </span>
+                        </td>
+                        <td>{{ payment.paymentDate || '-' }}</td>
+                        <td>
+                            <div class="flex flex-col gap-1">
+                                <a *ngIf="payment.determinationPdfUrl" [href]="payment.determinationPdfUrl"
+                                    target="_blank" class="link link-primary text-xs">{{ 'TAX_PAYMENT.VIEW_DETERMINATION' | translate }}</a>
+                                <label *ngIf="!payment.determinationPdfUrl" class="btn btn-xs btn-outline btn-ghost">
+                                    {{ 'TAX_PAYMENT.UPLOAD_DETERMINATION' | translate }}
+                                    <input type="file" class="hidden" (change)="uploadDetermination(payment.id, $event)"
+                                        accept=".pdf">
+                                </label>
+                                <a *ngIf="payment.paymentReceiptUrl" [href]="payment.paymentReceiptUrl" target="_blank"
+                                    class="link link-success text-xs">{{ 'TAX_PAYMENT.VIEW_RECEIPT' | translate }}</a>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="flex gap-2">
+                                <button *ngIf="payment.status === 0" class="btn btn-sm btn-success btn-outline"
+                                    (click)="openMarkPaidModal(payment)" [title]="'TAX_PAYMENT.MARK_PAID' | translate">
+                                    $
+                                </button>
+                                <button class="btn btn-sm btn-error btn-outline" (click)="deletePayment(payment.id)"
+                                    [title]="'COMMON.DELETE' | translate">
+                                    X
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr *ngIf="filteredPayments.length === 0 && !loading">
+                        <td colspan="7" class="text-center py-4">{{ 'TAX_PAYMENT.NO_PAYMENTS' | translate }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex justify-center my-4">
+        <span class="loading loading-spinner loading-lg"></span>
+    </div>
+
+    <!-- Create Modal -->
+    <app-tax-payment-form *ngIf="showCreateModal" (close)="closeCreateModal()"></app-tax-payment-form>
+
+    <!-- Mark Paid Modal -->
+    <app-mark-as-paid *ngIf="showMarkPaidModal" [payment]="paymentToMarkPaid"
+        (close)="closeMarkPaidModal()"></app-mark-as-paid>
+</div>

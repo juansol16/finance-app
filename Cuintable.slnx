@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="cuintable.client/cuintable.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="Cuintable.Server/Cuintable.Server.csproj" />
+</Solution>

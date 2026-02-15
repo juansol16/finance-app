@@ -1,0 +1,26 @@
+<div class="modal modal-open">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg">{{ 'TAX_PAYMENT.CONFIRM_PAYMENT' | translate }}</h3>
+        <p class="py-4">{{ 'TAX_PAYMENT.CONFIRM_PAYMENT_TEXT' | translate }} <strong>{{ payment?.amountDue | currency:'MXN' }}</strong>
+            {{ 'TAX_PAYMENT.FOR_PERIOD' | translate }} {{ payment?.periodYear }} - {{ payment?.periodMonth }}</p>
+
+        <div class="form-control mb-4">
+            <label class="label">{{ 'TAX_PAYMENT.PAYMENT_DATE' | translate }}</label>
+            <input type="date" [(ngModel)]="paymentDate" class="input input-bordered w-full" />
+        </div>
+
+        <div class="form-control mb-4">
+            <label class="label">{{ 'TAX_PAYMENT.RECEIPT_HINT' | translate }}</label>
+            <input type="file" (change)="onFileSelected($event)" class="file-input file-input-bordered w-full"
+                accept=".pdf" />
+        </div>
+
+        <div class="modal-action">
+            <button class="btn btn-ghost" (click)="onCancel()" [disabled]="loading">{{ 'COMMON.CANCEL' | translate }}</button>
+            <button class="btn btn-success" (click)="onSubmit()" [disabled]="loading || !paymentDate">
+                <span *ngIf="loading" class="loading loading-spinner"></span>
+                {{ 'TAX_PAYMENT.CONFIRM_PAYMENT' | translate }}
+            </button>
+        </div>
+    </div>
+</div>

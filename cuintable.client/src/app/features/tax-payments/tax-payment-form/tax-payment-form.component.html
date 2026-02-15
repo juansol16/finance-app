@@ -1,0 +1,39 @@
+<div class="modal modal-open">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg">{{ 'TAX_PAYMENT.NEW_PAYMENT_TITLE' | translate }}</h3>
+        <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" class="py-4 space-y-4">
+
+            <div class="form-control">
+                <label class="label">{{ 'TAX_PAYMENT.PERIOD' | translate }}</label>
+                <div class="flex gap-2">
+                    <select formControlName="periodMonth" class="select select-bordered w-full">
+                        <option *ngFor="let m of months" [value]="m">{{ getMonthKey(m) }}</option>
+                    </select>
+                    <select formControlName="periodYear" class="select select-bordered w-full">
+                        <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-control">
+                <label class="label">{{ 'TAX_PAYMENT.AMOUNT_DUE_MXN' | translate }}</label>
+                <input type="number" formControlName="amountDue" class="input input-bordered" placeholder="0.00" step="0.01" min="0" />
+                <span *ngIf="paymentForm.get('amountDue')?.invalid && paymentForm.get('amountDue')?.touched"
+                    class="text-error text-xs mt-1">{{ 'TAX_PAYMENT.AMOUNT_DUE' | translate }} > 0</span>
+            </div>
+
+            <div class="form-control">
+                <label class="label">{{ 'TAX_PAYMENT.DUE_DATE' | translate }}</label>
+                <input type="date" formControlName="dueDate" class="input input-bordered" />
+            </div>
+
+            <div class="modal-action">
+                <button type="button" class="btn btn-ghost" (click)="onCancel()" [disabled]="loading">{{ 'COMMON.CANCEL' | translate }}</button>
+                <button type="submit" class="btn btn-primary" [disabled]="loading || paymentForm.invalid">
+                    <span *ngIf="loading" class="loading loading-spinner"></span>
+                    {{ 'COMMON.SAVE' | translate }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

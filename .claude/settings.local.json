@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet add package:*)",
+      "Bash(dotnet build:*)",
+      "Bash(npm install:*)",
+      "Bash(npx ng build)",
+      "Bash(npm ls:*)",
+      "Bash(dotnet tool install:*)",
+      "Bash(dotnet tool update:*)",
+      "Bash(dotnet ef migrations add:*)",
+      "Bash(grep:*)"
+    ]
+  }
+}
