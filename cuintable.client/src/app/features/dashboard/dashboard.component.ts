@@ -20,19 +20,30 @@ export class DashboardComponent implements OnInit {
 
     public barChartOptions: ChartConfiguration['options'] = {
         responsive: true,
+        maintainAspectRatio: false,
         scales: {
-            x: {},
-            y: { min: 0 }
+            x: {
+                grid: { color: 'rgba(255,255,255,0.04)' },
+                ticks: { color: 'rgba(148,163,184,0.7)' }
+            },
+            y: {
+                min: 0,
+                grid: { color: 'rgba(255,255,255,0.04)' },
+                ticks: { color: 'rgba(148,163,184,0.7)' }
+            }
         },
         plugins: {
-            legend: { display: true }
+            legend: { display: true, labels: { color: 'rgba(148,163,184,0.9)' } }
         }
     };
     public barChartType: ChartType = 'bar';
     public barChartData: ChartData<'bar'> = {
         labels: [],
         datasets: [
-            { data: [0, 0, 0, 0], label: '', backgroundColor: ['#34D399', '#F87171', '#60A5FA', '#FBBF24'] }
+            { data: [0, 0, 0, 0], label: '', backgroundColor: ['rgba(16,185,129,0.7)', 'rgba(239,68,68,0.7)', 'rgba(59,130,246,0.7)', 'rgba(245,158,11,0.7)'],
+                    borderColor: ['#10b981', '#ef4444', '#3b82f6', '#f59e0b'],
+                    borderWidth: 1,
+                    borderRadius: 6 }
         ]
     };
 
@@ -93,7 +104,10 @@ export class DashboardComponent implements OnInit {
                 {
                     data: [data.totalIncome, data.totalDeductibleExpenses, data.taxableBase, data.estimatedISR],
                     label: this.translate.instant('DASHBOARD.CHART_LABEL'),
-                    backgroundColor: ['#34D399', '#F87171', '#60A5FA', '#FBBF24']
+                    backgroundColor: ['rgba(16,185,129,0.7)', 'rgba(239,68,68,0.7)', 'rgba(59,130,246,0.7)', 'rgba(245,158,11,0.7)'],
+                    borderColor: ['#10b981', '#ef4444', '#3b82f6', '#f59e0b'],
+                    borderWidth: 1,
+                    borderRadius: 6
                 }
             ]
         };

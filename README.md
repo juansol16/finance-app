@@ -106,26 +106,31 @@ Cuintable/
      -p 5432:5432 postgres:16-alpine
    ```
 
-3. **Configure the backend**
+3. **Configure environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your values (DB password, JWT key, etc.)
+   ```
+
+4. **Apply database migrations**
    ```bash
    cd Cuintable.Server
-   dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Database=cuintable;Username=cuintable;Password=dev_password"
-   dotnet user-secrets set "Jwt:Key" "your-secret-key-at-least-32-characters-long"
    dotnet ef database update
    ```
 
-4. **Install frontend dependencies**
+5. **Install frontend dependencies**
    ```bash
    cd cuintable.client
    npm install
    ```
 
-5. **Run the application**
+6. **Run the application**
    ```bash
    # From the root directory
    dotnet run --project Cuintable.Server
    ```
    The backend starts on `https://localhost:7071` and proxies the Angular dev server.
+   The `.env` file is loaded automatically by the application.
 
 ### Docker Compose (Production-like)
 
@@ -137,17 +142,22 @@ Access the app at `http://localhost:8080`.
 
 ## Environment Variables
 
-For production deployment (e.g., Dokploy, Portainer), configure the following variables:
+All secrets are managed via a `.env` file in the project root (loaded automatically by `DotNetEnv`). Copy `.env.example` to `.env` and fill in your values.
+
+### Local Development (`.env` file)
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `ASPNETCORE_ENVIRONMENT` | Environment mode | `Production` |
-| `ConnectionStrings__DefaultConnection` | PostgreSQL connection string | `Host=db;Database=my_db;Username=usr;Password=pwd` |
-| `Jwt__Key` | JWT signing key (>32 chars) | `super_secret_key...` |
-| `Jwt__Issuer` | Token issuer | `MiGestorFiscal` |
-| `Jwt__Audience` | Token audience | `MiGestorFiscalApp` |
-| `GoogleCloudStorage__BucketName` | GCS Bucket Name | `my-bucket-name` |
-| `GoogleCloudStorage__CredentialsJson` | GCS Service Account JSON | `{"type": "service_account", ...}` |
+| `DB_HOST` | PostgreSQL host | `localhost` |
+| `DB_NAME` | Database name | `cuintable` |
+| `DB_USER` | Database user | `cuintable` |
+| `DB_PASSWORD` | Database password | `dev_password` |
+| `JWT_KEY` | JWT signing key (>32 chars) | `MiGestorFiscal-Dev-Secret-Key...` |
+| `GOOGLE_CREDENTIALS_BASE64` | GCS service account JSON (base64) | `ewogICJ0eXBlIjog...` |
+
+### Production (Dokploy / Docker Compose)
+
+The `docker-compose.yml` reads the same `.env` variables and maps them to the container environment. In Dokploy, set these in the UI.
 
 ## Demo Account
 

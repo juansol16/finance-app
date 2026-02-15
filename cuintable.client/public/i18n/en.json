@@ -48,7 +48,8 @@
     "SAVED_SUCCESS": "Saved successfully",
     "DELETED_SUCCESS": "Deleted successfully",
     "UPLOAD_SUCCESS": "File uploaded successfully",
-    "OPERATION_ERROR": "An error occurred. Please try again."
+    "OPERATION_ERROR": "An error occurred. Please try again.",
+    "RECORDS": "records"
   },
   "CREDIT_CARD": {
     "BANK": "Bank",

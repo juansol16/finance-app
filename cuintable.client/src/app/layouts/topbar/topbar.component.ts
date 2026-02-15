@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -8,7 +8,9 @@ import { AuthService } from '../../core/services/auth.service';
     standalone: false
 })
 export class TopbarComponent implements OnInit {
-    isDarkMode = false;
+    @Output() menuToggle = new EventEmitter<void>();
+
+    isDarkMode = true;
     currentLang = 'en';
 
     constructor(
@@ -18,12 +20,9 @@ export class TopbarComponent implements OnInit {
 
     ngOnInit() {
         this.currentLang = localStorage.getItem('lang') || 'en';
-        const savedTheme = localStorage.getItem('theme');
-
-        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            this.isDarkMode = true;
-            document.documentElement.setAttribute('data-theme', 'dark');
-        }
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        this.isDarkMode = savedTheme === 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
     }
 
     toggleLanguage() {

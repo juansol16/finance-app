@@ -1,0 +1,115 @@
+# =========================
+# .NET / ASP.NET Core
+# =========================
+## Build results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+## User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.rsuser
+
+## NuGet
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nupkg
+**/packages/repositories.config
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Visual Studio
+.vs/
+*.csproj.user
+*.dbmdl
+*.jfm
+launchSettings.json
+
+## EF Core Migrations are committed (don't ignore them)
+
+## User secrets (local dev)
+secrets.json
+
+## Uploaded files (dev local storage)
+**/uploads/
+
+# =========================
+# Angular / Node.js
+# =========================
+node_modules/
+dist/
+tmp/
+out-tsc/
+bazel-out/
+
+## Angular cache
+.angular/
+
+## npm / yarn
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+.pnpm-debug.log
+
+## Coverage
+coverage/
+
+# =========================
+# IDE / Editors
+# =========================
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*~
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# =========================
+# Environment / Secrets
+# =========================
+.env
+.env.local
+.env.*.local
+appsettings.Production.json
+
+## Google Cloud credentials
+gcs-key.json
+*-credentials.json
+*-service-account.json
+
+# =========================
+# Docker
+# =========================
+docker-compose.override.yml
+
+# =========================
+# Misc
+# =========================
+*.log
+*.tmp
+*.bak
+*.cache
+.sass-cache/
+.claude/
+Context.md
+Prompt.md

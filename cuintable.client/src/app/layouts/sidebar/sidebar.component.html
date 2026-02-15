@@ -1,48 +1,50 @@
-<div class="sidebar h-full justify-start bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
-    <section class="sidebar-title items-center p-4">
-        <div class="flex flex-col">
-            <span class="text-xl font-bold tracking-tight text-primary">MiGestor Fiscal</span>
-            <span class="text-xs text-gray-400">RESICO Management</span>
-        </div>
-    </section>
-
-    <section class="sidebar-content h-fit min-h-[20rem] overflow-visible">
-        <nav class="menu rounded-md">
-            <section class="menu-section px-4">
-                <ul class="menu-items">
-                    <li *ngFor="let item of menuItems" class="menu-item" [class.menu-active]="isActive(item.route)">
-                        <a [routerLink]="item.route" class="flex items-center gap-3 py-3">
-                            <!-- Simple icon placeholder if actual icons aren't available yet. 
-                   Ripple UI uses icon-* classes but relies on a font or SVG system. 
-                   We'll assume text-based icons or a library is present. -->
-                            <span [class]="item.icon"></span>
-                            <span>{{ item.label | translate }}</span>
-                        </a>
-                    </li>
-                </ul>
-            </section>
-        </nav>
-    </section>
-
-    <section class="sidebar-footer justify-end bg-gray-50 pt-2 dark:bg-gray-900">
-        <div class="divider my-0"></div>
-        <div class="dropdown z-50 flex h-fit w-full cursor-pointer hover:bg-gray-400/10">
-            <label class="whites mx-2 flex h-fit w-full cursor-pointer p-0 hover:bg-gray-400/10" tabindex="0">
-                <div class="flex flex-row gap-4 p-4">
-                    <div class="avatar avatar-md">
-                        <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="avatar" />
-                    </div>
-                    <div class="flex flex-col">
-                        <span>{{ authService.user?.fullName || 'User' }}</span>
-                        <span class="text-xs font-normal text-content2">{{ authService.user?.email ||
-                            'email@example.com' }}</span>
-                    </div>
-                </div>
-            </label>
-            <div class="dropdown-menu-right-top dropdown-menu ml-2">
-                <a class="dropdown-item text-sm">{{ 'NAV.PROFILE' | translate }}</a>
-                <a tabindex="-1" class="dropdown-item text-sm" (click)="authService.logout()">{{ 'NAV.LOGOUT' | translate }}</a>
+<div class="flex flex-col h-full">
+    <!-- Logo -->
+    <div class="px-5 py-6">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+            </div>
+            <div>
+                <span class="text-lg font-bold text-white tracking-tight">MiGestor</span>
+                <span class="block text-[10px] font-medium uppercase tracking-widest text-cyan-400/70">Fiscal RESICO</span>
             </div>
         </div>
-    </section>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 px-3 mt-2 space-y-1">
+        <a *ngFor="let item of menuItems"
+           [routerLink]="item.route"
+           class="sidebar-nav-item"
+           [class.active]="isActive(item.route)">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="item.icon" />
+            </svg>
+            <span>{{ item.label | translate }}</span>
+        </a>
+    </nav>
+
+    <!-- User Section -->
+    <div class="px-3 pb-4 mt-auto">
+        <div class="border-t border-white/[0.06] pt-4">
+            <div class="flex items-center gap-3 px-2">
+                <div class="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-white font-semibold text-sm">
+                    {{ (authService.user?.fullName || 'U') | slice:0:1 }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-white truncate">{{ authService.user?.fullName || 'User' }}</p>
+                    <p class="text-xs text-slate-500 truncate">{{ authService.user?.email || '' }}</p>
+                </div>
+                <button class="p-1.5 rounded-lg hover:bg-white/[0.06] text-slate-500 hover:text-red-400 transition-colors"
+                        (click)="authService.logout()" title="Logout">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
 </div>

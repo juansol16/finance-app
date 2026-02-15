@@ -1,12 +1,34 @@
 using System.Text;
 using Cuintable.Server.Data;
 using Cuintable.Server.Services;
+using DotNetEnv;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
+// Load .env file (looks in project root, then solution root)
+Env.TraversePath().Load();
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Map .env variables to configuration keys
+var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
+var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "cuintable";
+var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "cuintable";
+var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
+
+if (!string.IsNullOrEmpty(dbPassword))
+{
+    var connectionString = $"Host={dbHost};Database={dbName};Username={dbUser};Password={dbPassword}";
+    builder.Configuration["ConnectionStrings:DefaultConnection"] = connectionString;
+}
+
+if (!string.IsNullOrEmpty(jwtKey))
+{
+    builder.Configuration["Jwt:Key"] = jwtKey;
+}
 
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>

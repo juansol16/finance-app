@@ -18,13 +18,10 @@ export class App implements OnInit {
   }
 
   ngOnInit() {
-    // Initial language/theme setup can still happen here or be moved to a service
     const savedLang = localStorage.getItem('lang') || 'en';
     this.translate.use(savedLang);
 
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
   }
 }

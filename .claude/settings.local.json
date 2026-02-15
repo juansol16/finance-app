@@ -9,7 +9,12 @@
       "Bash(dotnet tool install:*)",
       "Bash(dotnet tool update:*)",
       "Bash(dotnet ef migrations add:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npx ng build --verbose)",
+      "Bash(node -e:*)"
     ]
   }
 }

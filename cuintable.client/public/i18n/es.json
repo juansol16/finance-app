@@ -48,7 +48,8 @@
     "SAVED_SUCCESS": "Guardado exitosamente",
     "DELETED_SUCCESS": "Eliminado exitosamente",
     "UPLOAD_SUCCESS": "Archivo subido exitosamente",
-    "OPERATION_ERROR": "Ocurrió un error. Intenta de nuevo."
+    "OPERATION_ERROR": "Ocurrió un error. Intenta de nuevo.",
+    "RECORDS": "registros"
   },
   "CREDIT_CARD": {
     "BANK": "Banco",

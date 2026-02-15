@@ -12,6 +12,7 @@ services:
       - Jwt__Key=${JWT_KEY}
       - Jwt__Issuer=MiGestorFiscal
       - Jwt__Audience=MiGestorFiscalApp
+      - GOOGLE_CREDENTIALS_BASE64=${GOOGLE_CREDENTIALS_BASE64}
     depends_on:
       db:
         condition: service_healthy
