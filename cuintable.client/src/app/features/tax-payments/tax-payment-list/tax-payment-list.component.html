@@ -12,15 +12,70 @@
         </button>
     </div>
 
+
+
+    <!-- Summary Cards -->
+    <div *ngIf="!loading && payments.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <app-summary-card [title]="'TAX_PAYMENT.TOTAL_PAID' | translate"
+            [value]="(summaryMetrics.totalPaid | currency:'MXN':'symbol-narrow':'1.0-0') || ''" color="success">
+            <svg icon class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </app-summary-card>
+
+        <app-summary-card [title]="'TAX_PAYMENT.TOTAL_PENDING' | translate"
+            [value]="(summaryMetrics.totalPending | currency:'MXN':'symbol-narrow':'1.0-0') || ''" color="warning">
+            <svg icon class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </app-summary-card>
+
+        <app-summary-card title="Compliance Rate" [value]="(summaryMetrics.complianceRate | percent:'1.0-0') || ''"
+            color="info">
+            <svg icon class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75z" />
+            </svg>
+        </app-summary-card>
+
+        <app-summary-card title="Next Due" [value]="(summaryMetrics.nextDueDate | date:'mediumDate') || '-'"
+            [color]="summaryMetrics.nextDueDate ? 'danger' : 'success'">
+            <svg icon class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+            </svg>
+        </app-summary-card>
+    </div>
+
     <!-- Filters -->
-    <div class="flex flex-wrap gap-2 mb-6">
+    <div class="flex flex-wrap gap-2 mb-6 ml-0">
+        <div class="form-control">
+            <label class="label py-1"><span class="label-text text-xs text-slate-400">{{ 'COMMON.START_DATE' | translate
+                    }}</span></label>
+            <input type="date" class="input input-sm input-bordered bg-white/[0.04] border-white/[0.08] text-slate-300"
+                [(ngModel)]="startDate" (change)="loadPayments()">
+        </div>
+        <div class="form-control">
+            <label class="label py-1"><span class="label-text text-xs text-slate-400">{{ 'COMMON.END_DATE' | translate
+                    }}</span></label>
+            <input type="date" class="input input-sm input-bordered bg-white/[0.04] border-white/[0.08] text-slate-300"
+                [(ngModel)]="endDate" (change)="loadPayments()">
+        </div>
         <select class="select select-sm bg-white/[0.04] border-white/[0.08] text-slate-300 text-sm min-h-0 h-9"
-                [(ngModel)]="filterYear" (change)="onFilterChange()">
+            [(ngModel)]="filterYear" (change)="onFilterChange()">
             <option [ngValue]="null">{{ 'TAX_PAYMENT.FILTER_YEAR' | translate }}</option>
             <option *ngFor="let y of availableYears" [ngValue]="y">{{ y }}</option>
         </select>
         <select class="select select-sm bg-white/[0.04] border-white/[0.08] text-slate-300 text-sm min-h-0 h-9"
-                [(ngModel)]="filterStatus" (change)="onFilterChange()">
+            [(ngModel)]="filterStatus" (change)="onFilterChange()">
             <option [ngValue]="null">{{ 'TAX_PAYMENT.ALL_STATUSES' | translate }}</option>
             <option [ngValue]="0">{{ 'TAX_PAYMENT.STATUS_PENDIENTE' | translate }}</option>
             <option [ngValue]="1">{{ 'TAX_PAYMENT.STATUS_PAGADO' | translate }}</option>
@@ -49,22 +104,24 @@
                 </thead>
                 <tbody>
                     <tr *ngFor="let payment of filteredPayments">
-                        <td class="text-slate-300 text-sm font-medium">{{ payment.periodYear }}-{{ payment.periodMonth | number:'2.0-0' }}</td>
-                        <td class="text-right font-mono text-sm text-amber-400 font-medium">{{ payment.amountDue | currency:'MXN':'symbol-narrow':'1.2-2' }}</td>
+                        <td class="text-slate-300 text-sm font-medium">{{ payment.periodYear }}-{{ payment.periodMonth |
+                            number:'2.0-0' }}</td>
+                        <td class="text-right font-mono text-sm text-amber-400 font-medium">{{ payment.amountDue |
+                            currency:'MXN':'symbol-narrow':'1.2-2' }}</td>
                         <td class="text-sm">
                             <span class="text-slate-400">{{ payment.dueDate }}</span>
                             <span *ngIf="getDueDateAlert(payment) === 'overdue'"
-                                  class="ml-1.5 text-xs font-medium px-1.5 py-0.5 rounded badge-glow-danger">
+                                class="ml-1.5 text-xs font-medium px-1.5 py-0.5 rounded badge-glow-danger">
                                 {{ 'TAX_PAYMENT.OVERDUE' | translate }}
                             </span>
                             <span *ngIf="getDueDateAlert(payment) === 'due-soon'"
-                                  class="ml-1.5 text-xs font-medium px-1.5 py-0.5 rounded badge-glow-warning">
+                                class="ml-1.5 text-xs font-medium px-1.5 py-0.5 rounded badge-glow-warning">
                                 {{ 'TAX_PAYMENT.DUE_SOON' | translate }}
                             </span>
                         </td>
                         <td>
                             <span class="text-xs font-medium px-2 py-1 rounded-md"
-                                  [class]="payment.status === 1 ? 'badge-glow-success' : 'badge-glow-warning'">
+                                [class]="payment.status === 1 ? 'badge-glow-success' : 'badge-glow-warning'">
                                 {{ getStatusLabel(payment.status) }}
                             </span>
                         </td>
@@ -72,16 +129,17 @@
                         <td>
                             <div class="flex flex-col gap-1">
                                 <a *ngIf="payment.determinationPdfUrl" [href]="payment.determinationPdfUrl"
-                                   target="_blank" class="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">
+                                    target="_blank" class="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">
                                     {{ 'TAX_PAYMENT.VIEW_DETERMINATION' | translate }}
                                 </a>
                                 <label *ngIf="!payment.determinationPdfUrl"
-                                       class="text-xs text-slate-500 hover:text-slate-300 cursor-pointer transition-colors">
+                                    class="text-xs text-slate-500 hover:text-slate-300 cursor-pointer transition-colors">
                                     {{ 'TAX_PAYMENT.UPLOAD_DETERMINATION' | translate }}
-                                    <input type="file" class="hidden" (change)="uploadDetermination(payment.id, $event)" accept=".pdf">
+                                    <input type="file" class="hidden" (change)="uploadDetermination(payment.id, $event)"
+                                        accept=".pdf">
                                 </label>
                                 <a *ngIf="payment.paymentReceiptUrl" [href]="payment.paymentReceiptUrl" target="_blank"
-                                   class="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">
+                                    class="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">
                                     {{ 'TAX_PAYMENT.VIEW_RECEIPT' | translate }}
                                 </a>
                             </div>
@@ -89,25 +147,28 @@
                         <td class="text-right">
                             <div class="flex justify-end gap-1">
                                 <button *ngIf="payment.status === 0"
-                                        class="btn btn-ghost btn-xs text-emerald-400 hover:text-emerald-300"
-                                        (click)="openMarkPaidModal(payment)"
-                                        [title]="'TAX_PAYMENT.MARK_PAID' | translate">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    class="btn btn-ghost btn-xs text-emerald-400 hover:text-emerald-300"
+                                    (click)="openMarkPaidModal(payment)" [title]="'TAX_PAYMENT.MARK_PAID' | translate">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M4.5 12.75l6 6 9-13.5" />
                                     </svg>
                                 </button>
                                 <button class="btn btn-ghost btn-xs text-slate-400 hover:text-red-400"
-                                        (click)="deletePayment(payment.id)"
-                                        [title]="'COMMON.DELETE' | translate">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                    (click)="deletePayment(payment.id)" [title]="'COMMON.DELETE' | translate">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                     </svg>
                                 </button>
                             </div>
                         </td>
                     </tr>
                     <tr *ngIf="filteredPayments.length === 0 && !loading">
-                        <td colspan="7" class="text-center py-8 text-slate-500">{{ 'TAX_PAYMENT.NO_PAYMENTS' | translate }}</td>
+                        <td colspan="7" class="text-center py-8 text-slate-500">{{ 'TAX_PAYMENT.NO_PAYMENTS' | translate
+                            }}</td>
                     </tr>
                 </tbody>
             </table>

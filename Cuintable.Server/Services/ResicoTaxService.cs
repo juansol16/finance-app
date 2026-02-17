@@ -83,4 +83,77 @@ public class ResicoTaxService : IResicoTaxService
 
         return response;
     }
+
+    public async Task<DashboardChartsResponse> GetDashboardChartsAsync(Guid tenantId)
+    {
+        var response = new DashboardChartsResponse();
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        
+        // Last 6 months
+        for (int i = 5; i >= 0; i--)
+        {
+            var date = today.AddMonths(-i);
+            var month = date.Month;
+            var year = date.Year;
+            
+            var startDate = new DateOnly(year, month, 1);
+            var endDate = startDate.AddMonths(1).AddDays(-1);
+
+            // Income
+            var incomes = await _context.Incomes
+                .Where(x => x.TenantId == tenantId && x.Date >= startDate && x.Date <= endDate)
+                .ToListAsync();
+
+            var totalIncome = incomes.Sum(x => x.AmountMXN);
+            
+            // Expenses (Only Expenses, NOT TaxableExpenses as per user request)
+            var expenses = await _context.Expenses
+                .Where(x => x.TenantId == tenantId && x.Date >= startDate && x.Date <= endDate)
+                .SumAsync(x => x.AmountMXN);
+
+            // SAT Payments (Paid in this month)
+            var taxPayments = await _context.TaxPayments
+                .Where(x => x.TenantId == tenantId && 
+                            x.Status == TaxPaymentStatus.Pagado && 
+                            x.PaymentDate >= startDate && 
+                            x.PaymentDate <= endDate)
+                .SumAsync(x => x.AmountDue);
+
+            response.CashFlow.Add(new CashFlowItem
+            {
+                Month = month,
+                Year = year,
+                TotalIncome = totalIncome,
+                TotalExpenses = expenses,
+                TotalTaxPayments = taxPayments
+            });
+
+            // Volatility (Average Exchange Rate)
+            var rates = incomes
+                .Where(x => x.ExchangeRate.HasValue && x.ExchangeRate > 0)
+                .Select(x => x.ExchangeRate!.Value)
+                .ToList();
+
+            if (rates.Any())
+            {
+                response.Volatility.Add(new VolatilityItem
+                {
+                    Month = month,
+                    Year = year,
+                    AverageExchangeRate = rates.Average()
+                });
+            }
+            else
+            {
+                 response.Volatility.Add(new VolatilityItem
+                {
+                    Month = month,
+                    Year = year,
+                    AverageExchangeRate = 0 // Or handle appropriately on frontend
+                });
+            }
+        }
+
+        return response;
+    }
 }

@@ -8,7 +8,7 @@ import { CreditCard } from '../../core/services/credit-card.service';
   template: `
     <div class="modal modal-open">
       <div class="modal-overlay" (click)="cancelled.emit()"></div>
-      <div class="modal-content w-full max-w-lg">
+      <div class="modal-content w-full max-w-lg p-6">
         <h3 class="text-lg font-bold mb-4">
           {{ expense ? ('COMMON.EDIT' | translate) : ('COMMON.ADD' | translate) }} {{ 'NAV.EXPENSES' | translate }}
         </h3>
@@ -17,12 +17,12 @@ import { CreditCard } from '../../core/services/credit-card.service';
         <div class="form-group mb-3">
           <label class="form-label">{{ 'EXPENSE.CATEGORY' | translate }}</label>
           <select class="select select-bordered w-full" [(ngModel)]="form.category">
-            <option [ngValue]="0">{{ 'EXPENSE.PAGO_TARJETA' | translate }}</option>
-            <option [ngValue]="1">{{ 'EXPENSE.TRANSFERENCIA' | translate }}</option>
-            <option [ngValue]="2">{{ 'EXPENSE.PAGO_COCHE' | translate }}</option>
-            <option [ngValue]="3">{{ 'EXPENSE.RETIRO_EFECTIVO' | translate }}</option>
-            <option [ngValue]="4">{{ 'EXPENSE.HONORARIOS' | translate }}</option>
-            <option [ngValue]="5">{{ 'EXPENSE.OTRO' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="0">{{ 'EXPENSE.PAGO_TARJETA' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="1">{{ 'EXPENSE.TRANSFERENCIA' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="2">{{ 'EXPENSE.PAGO_COCHE' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="3">{{ 'EXPENSE.RETIRO_EFECTIVO' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="4">{{ 'EXPENSE.HONORARIOS' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="5">{{ 'EXPENSE.OTRO' | translate }}</option>
           </select>
         </div>
 
@@ -30,8 +30,8 @@ import { CreditCard } from '../../core/services/credit-card.service';
         <div *ngIf="form.category === 0" class="form-group mb-3">
           <label class="form-label">{{ 'EXPENSE.CREDIT_CARD' | translate }}</label>
           <select class="select select-bordered w-full" [(ngModel)]="form.creditCardId">
-            <option [ngValue]="null" disabled>{{ 'EXPENSE.SELECT_CARD' | translate }}</option>
-            <option *ngFor="let card of creditCards" [ngValue]="card.id">
+            <option class="bg-slate-800" [ngValue]="null" disabled>{{ 'EXPENSE.SELECT_CARD' | translate }}</option>
+            <option class="bg-slate-800" *ngFor="let card of creditCards" [ngValue]="card.id">
               {{ card.nickname }} (****{{ card.lastFourDigits }})
             </option>
           </select>
@@ -82,7 +82,7 @@ export class ExpenseFormComponent implements OnInit {
   };
   saving = false;
 
-  constructor(private expenseService: ExpenseService) {}
+  constructor(private expenseService: ExpenseService) { }
 
   ngOnInit() {
     if (this.expense) {

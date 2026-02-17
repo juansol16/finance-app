@@ -4,7 +4,7 @@ namespace Cuintable.Server.Services;
 
 public interface ITaxPaymentService
 {
-    Task<List<TaxPaymentResponse>> GetAllAsync(Guid tenantId);
+    Task<List<TaxPaymentResponse>> GetAllAsync(Guid tenantId, DateOnly? startDate = null, DateOnly? endDate = null);
     Task<TaxPaymentResponse?> GetByIdAsync(Guid tenantId, Guid id);
     Task<TaxPaymentResponse> CreateAsync(Guid tenantId, Guid userId, CreateTaxPaymentRequest request);
     Task<TaxPaymentResponse?> UpdateAsync(Guid tenantId, Guid id, UpdateTaxPaymentRequest request);

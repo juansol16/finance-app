@@ -28,10 +28,13 @@ export type UpdateExpenseRequest = CreateExpenseRequest;
 export class ExpenseService {
   private readonly API = '/api/expenses';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  getAll(): Observable<Expense[]> {
-    return this.http.get<Expense[]>(this.API);
+  getAll(startDate?: string, endDate?: string): Observable<Expense[]> {
+    let params: any = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    return this.http.get<Expense[]>(this.API, { params });
   }
 
   create(data: CreateExpenseRequest): Observable<Expense> {

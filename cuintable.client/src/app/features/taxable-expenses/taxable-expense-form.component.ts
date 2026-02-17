@@ -9,7 +9,7 @@ import { Expense } from '../../core/services/expense.service';
   template: `
     <div class="modal modal-open">
       <div class="modal-overlay" (click)="cancelled.emit()"></div>
-      <div class="modal-content w-full max-w-lg">
+      <div class="modal-content w-full max-w-lg p-6">
         <h3 class="text-lg font-bold mb-4">
           {{ item ? ('COMMON.EDIT' | translate) : ('COMMON.ADD' | translate) }} {{ 'NAV.DEDUCTIBLE_EXPENSES' | translate }}
         </h3>
@@ -18,12 +18,12 @@ import { Expense } from '../../core/services/expense.service';
         <div class="form-group mb-3">
           <label class="form-label">{{ 'EXPENSE.CATEGORY' | translate }}</label>
           <select class="select select-bordered w-full" [(ngModel)]="form.category">
-            <option [ngValue]="0">{{ 'TAXABLE.LUZ' | translate }}</option>
-            <option [ngValue]="1">{{ 'TAXABLE.INTERNET' | translate }}</option>
-            <option [ngValue]="2">{{ 'TAXABLE.CELULAR' | translate }}</option>
-            <option [ngValue]="3">{{ 'TAXABLE.EQUIPO' | translate }}</option>
-            <option [ngValue]="4">{{ 'TAXABLE.SOFTWARE' | translate }}</option>
-            <option [ngValue]="5">{{ 'EXPENSE.OTRO' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="0">{{ 'TAXABLE.LUZ' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="1">{{ 'TAXABLE.INTERNET' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="2">{{ 'TAXABLE.CELULAR' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="3">{{ 'TAXABLE.EQUIPO' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="4">{{ 'TAXABLE.SOFTWARE' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="5">{{ 'EXPENSE.OTRO' | translate }}</option>
           </select>
         </div>
 
@@ -51,8 +51,8 @@ import { Expense } from '../../core/services/expense.service';
         <div class="form-group mb-3">
           <label class="form-label">{{ 'TAXABLE.PAID_WITH' | translate }}</label>
           <select class="select select-bordered w-full" [(ngModel)]="form.creditCardId">
-            <option [ngValue]="null">{{ 'TAXABLE.NO_CARD' | translate }}</option>
-            <option *ngFor="let card of creditCards" [ngValue]="card.id">
+            <option class="bg-slate-800" [ngValue]="null">{{ 'TAXABLE.NO_CARD' | translate }}</option>
+            <option class="bg-slate-800" *ngFor="let card of creditCards" [ngValue]="card.id">
               {{ card.nickname }} (****{{ card.lastFourDigits }})
             </option>
           </select>
@@ -62,8 +62,8 @@ import { Expense } from '../../core/services/expense.service';
         <div *ngIf="cardPayments.length > 0" class="form-group mb-3">
           <label class="form-label">{{ 'TAXABLE.LINKED_PAYMENT' | translate }}</label>
           <select class="select select-bordered w-full" [(ngModel)]="form.expenseId">
-            <option [ngValue]="null">{{ 'TAXABLE.NO_LINK' | translate }}</option>
-            <option *ngFor="let payment of cardPayments" [ngValue]="payment.id">
+            <option class="bg-slate-800" [ngValue]="null">{{ 'TAXABLE.NO_LINK' | translate }}</option>
+            <option class="bg-slate-800" *ngFor="let payment of cardPayments" [ngValue]="payment.id">
               {{ payment.date }} — {{ payment.creditCardLabel }} — {{ '$' }}{{ payment.amountMXN | number:'1.2-2' }}
             </option>
           </select>
@@ -129,7 +129,7 @@ export class TaxableExpenseFormComponent implements OnInit {
   xmlFile: File | null = null;
   saving = false;
 
-  constructor(private service: TaxableExpenseService) {}
+  constructor(private service: TaxableExpenseService) { }
 
   ngOnInit() {
     if (this.item) {

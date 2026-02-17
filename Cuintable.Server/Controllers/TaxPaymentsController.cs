@@ -27,9 +27,9 @@ public class TaxPaymentsController : ControllerBase
         Guid.Parse(User.FindFirstValue("TenantId")!);
 
     [HttpGet]
-    public async Task<ActionResult<List<TaxPaymentResponse>>> GetAll()
+    public async Task<ActionResult<List<TaxPaymentResponse>>> GetAll([FromQuery] DateOnly? startDate, [FromQuery] DateOnly? endDate)
     {
-        var payments = await _taxPaymentService.GetAllAsync(GetTenantId());
+        var payments = await _taxPaymentService.GetAllAsync(GetTenantId(), startDate, endDate);
         return Ok(payments);
     }
 

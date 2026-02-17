@@ -40,8 +40,11 @@ export class TaxPaymentService {
 
     constructor(private http: HttpClient) { }
 
-    getAll(): Observable<TaxPaymentResponse[]> {
-        return this.http.get<TaxPaymentResponse[]>(this.apiUrl);
+    getAll(startDate?: string, endDate?: string): Observable<TaxPaymentResponse[]> {
+        let params: any = {};
+        if (startDate) params.startDate = startDate;
+        if (endDate) params.endDate = endDate;
+        return this.http.get<TaxPaymentResponse[]>(this.apiUrl, { params });
     }
 
     create(request: CreateTaxPaymentRequest): Observable<TaxPaymentResponse> {

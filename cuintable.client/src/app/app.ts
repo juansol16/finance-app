@@ -8,7 +8,7 @@ import { TranslateService } from '@ngx-translate/core';
   styleUrl: './app.css'
 })
 export class App implements OnInit {
-  title = 'MiGestor Fiscal';
+  title = 'Cuintable';
 
   constructor(
     private translate: TranslateService

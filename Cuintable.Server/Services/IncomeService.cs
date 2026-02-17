@@ -14,10 +14,14 @@ public class IncomeService : IIncomeService
         _db = db;
     }
 
-    public async Task<List<IncomeResponse>> GetAllAsync(Guid tenantId)
+    public async Task<List<IncomeResponse>> GetAllAsync(Guid tenantId, DateOnly? startDate = null, DateOnly? endDate = null)
     {
-        return await _db.Incomes
-            .Where(i => i.TenantId == tenantId)
+        var query = _db.Incomes.Where(i => i.TenantId == tenantId);
+
+        if (startDate.HasValue) query = query.Where(i => i.Date >= startDate.Value);
+        if (endDate.HasValue) query = query.Where(i => i.Date <= endDate.Value);
+
+        return await query
             .OrderByDescending(i => i.Date)
             .Select(i => MapToResponse(i))
             .ToListAsync();

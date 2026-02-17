@@ -97,16 +97,18 @@ app.MapStaticAssets();
 
 if (app.Environment.IsDevelopment())
 {
-    using (var scope = app.Services.CreateScope())
-    {
-        var services = scope.ServiceProvider;
-        var context = services.GetRequiredService<AppDbContext>();
-        await DbSeeder.SeedAsync(context);
-    }
 
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "MiGestor Fiscal API v1"));
+}
+
+// Run migrations and seed data in all environments
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<AppDbContext>();
+    await DbSeeder.SeedAsync(context);
 }
 
 app.UseForwardedHeaders();

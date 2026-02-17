@@ -18,11 +18,13 @@ import { CreditCardListComponent } from './features/credit-cards/credit-card-lis
 import { ExpenseListComponent } from './features/expenses/expense-list.component';
 import { ExpenseFormComponent } from './features/expenses/expense-form.component';
 import { TaxableExpenseListComponent } from './features/taxable-expenses/taxable-expense-list.component';
+// SummaryCardComponent moved to SharedModule
 
 import { TaxableExpenseFormComponent } from './features/taxable-expenses/taxable-expense-form.component';
 import { DashboardModule } from './features/dashboard/dashboard.module';
 import { TaxPaymentsModule } from './features/tax-payments/tax-payments.module';
 import { LayoutsModule } from './layouts/layouts.module';
+import { SharedModule } from './shared/shared.module';
 
 
 @NgModule({
@@ -46,6 +48,7 @@ import { LayoutsModule } from './layouts/layouts.module';
     DashboardModule,
     TaxPaymentsModule,
     LayoutsModule,
+    SharedModule,
     BrowserAnimationsModule,
     ToastrModule.forRoot(),
     TranslateModule.forRoot({

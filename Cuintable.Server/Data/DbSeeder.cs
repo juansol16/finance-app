@@ -17,6 +17,16 @@ public static class DbSeeder
             return; // Already seeded
         }
 
+        // Check for Custom Owner Seeding via Env Vars
+        var customEmail = Environment.GetEnvironmentVariable("SEED_OWNER_EMAIL");
+        var customPassword = Environment.GetEnvironmentVariable("SEED_OWNER_PASSWORD");
+
+        if (!string.IsNullOrEmpty(customEmail) && !string.IsNullOrEmpty(customPassword))
+        {
+            await SeedCustomOwnerAsync(context, customEmail, customPassword);
+            return;
+        }
+        
         // 1. Create Demo Tenant
         var tenant = new Tenant
         {
@@ -271,6 +281,50 @@ public static class DbSeeder
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
+    }
+
+    private static async Task SeedCustomOwnerAsync(AppDbContext context, string email, string password)
+    {
+        // 1. Check if user exists
+        if (await context.Users.AnyAsync(u => u.Email == email))
+        {
+             // Log? Console.WriteLine($"User {email} already exists. Skipping custom seed.");
+             return;
+        }
+
+        var fullName = Environment.GetEnvironmentVariable("SEED_OWNER_FULLNAME") ?? email.Split('@')[0];
+        var tenantName = Environment.GetEnvironmentVariable("SEED_OWNER_TENANT_NAME") ?? fullName;
+        var lang = Environment.GetEnvironmentVariable("SEED_OWNER_LANG") ?? "es";
+
+        // 2. Create Tenant
+        var tenant = new Tenant
+        {
+            Id = Guid.NewGuid(),
+            Name = tenantName,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        context.Tenants.Add(tenant);
+        await context.SaveChangesAsync();
+
+        // 3. Create User
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenant.Id,
+            Role = UserRole.Owner,
+            Email = email,
+            FullName = fullName,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
+            PreferredLanguage = lang,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+        
+        Console.WriteLine($"[Seeder] Custom Owner created: {email} (Tenant: {tenantName})");
     }
 
     private static decimal CalculateResicoISR(decimal income)

@@ -1,6 +1,6 @@
 {
   "APP": {
-    "TITLE": "MiGestor Fiscal",
+    "TITLE": "Cuintable",
     "SUBTITLE": "Gestor de Finanzas Personales e Impuestos"
   },
   "NAV": {
@@ -49,7 +49,9 @@
     "DELETED_SUCCESS": "Eliminado exitosamente",
     "UPLOAD_SUCCESS": "Archivo subido exitosamente",
     "OPERATION_ERROR": "Ocurrió un error. Intenta de nuevo.",
-    "RECORDS": "registros"
+    "RECORDS": "registros",
+    "START_DATE": "Fecha Inicio",
+    "END_DATE": "Fecha Fin"
   },
   "CREDIT_CARD": {
     "BANK": "Banco",
@@ -121,7 +123,17 @@
     "MONTH_9": "Septiembre",
     "MONTH_10": "Octubre",
     "MONTH_11": "Noviembre",
-    "MONTH_12": "Diciembre"
+    "MONTH_12": "Diciembre",
+    "REAL_CASH_FLOW": "Flujo de Efectivo Real (MXN)",
+    "CASH_FLOW_DESC": "Ingresos convertidos vs. Salidas totales",
+    "INCOME": "Ingreso",
+    "EXPENSES_PLUS_SAT": "Gastos + SAT",
+    "VOLATILITY_USD": "Volatilidad USD",
+    "VOLATILITY_DESC": "Impacto del Tipo de Cambio en tus cobros",
+    "VOLATILITY_INFO": "Un TC alto favorece tu liquidez.",
+    "TOTAL_OUTFLOWS": "Gastos Totales",
+    "TOTAL_INCOME_MIX": "Ingreso Total (Mix)",
+    "PROMEDIO_TC": "PROMEDIO TC COBRADO"
   },
   "TAX_PAYMENT": {
     "TITLE": "Pagos SAT",

@@ -36,9 +36,9 @@ public class IncomesController : ControllerBase
         Guid.Parse(User.FindFirstValue("TenantId")!);
 
     [HttpGet]
-    public async Task<ActionResult<List<IncomeResponse>>> GetAll()
+    public async Task<ActionResult<List<IncomeResponse>>> GetAll([FromQuery] DateOnly? startDate, [FromQuery] DateOnly? endDate)
     {
-        var incomes = await _incomeService.GetAllAsync(GetTenantId());
+        var incomes = await _incomeService.GetAllAsync(GetTenantId(), startDate, endDate);
         return Ok(incomes);
     }
 

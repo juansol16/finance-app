@@ -43,4 +43,11 @@ public class TaxCalculationController : ControllerBase
         var summary = await _taxService.GetAnnualSummaryAsync(GetTenantId(), year);
         return Ok(summary);
     }
+
+    [HttpGet("charts")]
+    public async Task<ActionResult<DashboardChartsResponse>> GetDashboardCharts()
+    {
+        var charts = await _taxService.GetDashboardChartsAsync(GetTenantId());
+        return Ok(charts);
+    }
 }

@@ -40,4 +40,28 @@ export class TaxService {
         const params = new HttpParams().set('year', year.toString());
         return this.http.get<AnnualTaxSummaryResponse>(`${this.apiUrl}/annual-summary`, { params });
     }
+
+    getDashboardCharts(): Observable<DashboardChartsResponse> {
+        return this.http.get<DashboardChartsResponse>(`${this.apiUrl}/charts`);
+    }
+}
+
+export interface CashFlowItem {
+    month: number;
+    year: number;
+    totalIncome: number;
+    totalExpenses: number;
+    totalTaxPayments: number;
+    totalOutflow: number;
+}
+
+export interface VolatilityItem {
+    month: number;
+    year: number;
+    averageExchangeRate: number;
+}
+
+export interface DashboardChartsResponse {
+    cashFlow: CashFlowItem[];
+    volatility: VolatilityItem[];
 }

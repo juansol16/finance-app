@@ -34,10 +34,13 @@ export type UpdateIncomeRequest = CreateIncomeRequest;
 export class IncomeService {
   private readonly API = '/api/incomes';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  getAll(): Observable<Income[]> {
-    return this.http.get<Income[]>(this.API);
+  getAll(startDate?: string, endDate?: string): Observable<Income[]> {
+    let params: any = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    return this.http.get<Income[]>(this.API, { params });
   }
 
   getById(id: string): Observable<Income> {

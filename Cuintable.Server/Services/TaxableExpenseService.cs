@@ -11,12 +11,17 @@ public class TaxableExpenseService : ITaxableExpenseService
 
     public TaxableExpenseService(AppDbContext db) => _db = db;
 
-    public async Task<List<TaxableExpenseResponse>> GetAllAsync(Guid tenantId)
+    public async Task<List<TaxableExpenseResponse>> GetAllAsync(Guid tenantId, DateOnly? startDate = null, DateOnly? endDate = null)
     {
-        return await _db.TaxableExpenses
+        var query = _db.TaxableExpenses
             .Include(t => t.CreditCard)
             .Include(t => t.Expense)
-            .Where(t => t.TenantId == tenantId)
+            .Where(t => t.TenantId == tenantId);
+
+        if (startDate.HasValue) query = query.Where(t => t.Date >= startDate.Value);
+        if (endDate.HasValue) query = query.Where(t => t.Date <= endDate.Value);
+
+        return await query
             .OrderByDescending(t => t.Date)
             .Select(t => MapToResponse(t))
             .ToListAsync();

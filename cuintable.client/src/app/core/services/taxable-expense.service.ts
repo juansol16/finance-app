@@ -36,10 +36,13 @@ export type UpdateTaxableExpenseRequest = CreateTaxableExpenseRequest;
 export class TaxableExpenseService {
   private readonly API = '/api/taxable-expenses';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  getAll(): Observable<TaxableExpense[]> {
-    return this.http.get<TaxableExpense[]>(this.API);
+  getAll(startDate?: string, endDate?: string): Observable<TaxableExpense[]> {
+    let params: any = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    return this.http.get<TaxableExpense[]>(this.API, { params });
   }
 
   getById(id: string): Observable<TaxableExpense> {

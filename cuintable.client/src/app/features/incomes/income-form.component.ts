@@ -7,7 +7,7 @@ import { Income, IncomeService } from '../../core/services/income.service';
   template: `
     <div class="modal modal-open">
       <div class="modal-overlay" (click)="cancelled.emit()"></div>
-      <div class="modal-content w-full max-w-lg">
+      <div class="modal-content w-full max-w-lg p-6">
         <h3 class="text-lg font-bold mb-4">
           {{ income ? ('COMMON.EDIT' | translate) : ('COMMON.ADD' | translate) }} {{ 'NAV.INCOMES' | translate }}
         </h3>
@@ -16,8 +16,8 @@ import { Income, IncomeService } from '../../core/services/income.service';
         <div class="form-group mb-3">
           <label class="form-label">{{ 'INCOME.TYPE' | translate }}</label>
           <select class="select select-bordered w-full" [(ngModel)]="form.type">
-            <option [ngValue]="0">{{ 'INCOME.NOMINA' | translate }}</option>
-            <option [ngValue]="1">{{ 'INCOME.HONORARIOS' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="0">{{ 'INCOME.NOMINA' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="1">{{ 'INCOME.HONORARIOS' | translate }}</option>
           </select>
         </div>
 
@@ -113,7 +113,7 @@ export class IncomeFormComponent implements OnInit {
   xmlFile: File | null = null;
   saving = false;
 
-  constructor(private incomeService: IncomeService) {}
+  constructor(private incomeService: IncomeService) { }
 
   ngOnInit() {
     if (this.income) {

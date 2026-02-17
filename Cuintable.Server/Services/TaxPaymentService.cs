@@ -14,15 +14,28 @@ public class TaxPaymentService : ITaxPaymentService
         _context = context;
     }
 
-    public async Task<List<TaxPaymentResponse>> GetAllAsync(Guid tenantId)
+    public async Task<List<TaxPaymentResponse>> GetAllAsync(Guid tenantId, DateOnly? startDate = null, DateOnly? endDate = null)
     {
-        var payments = await _context.TaxPayments
-            .Where(p => p.TenantId == tenantId)
+        var query = _context.TaxPayments
+            .Where(p => p.TenantId == tenantId);
+
+        if (startDate.HasValue)
+        {
+            query = query.Where(p => (p.Status == TaxPaymentStatus.Pagado && p.PaymentDate >= startDate.Value) || 
+                                     (p.Status != TaxPaymentStatus.Pagado && p.DueDate >= startDate.Value));
+        }
+
+        if (endDate.HasValue)
+        {
+            query = query.Where(p => (p.Status == TaxPaymentStatus.Pagado && p.PaymentDate <= endDate.Value) || 
+                                     (p.Status != TaxPaymentStatus.Pagado && p.DueDate <= endDate.Value));
+        }
+
+        return await query
             .OrderByDescending(p => p.PeriodYear)
             .ThenByDescending(p => p.PeriodMonth)
+            .Select(p => MapToResponse(p))
             .ToListAsync();
-
-        return payments.Select(MapToResponse).ToList();
     }
 
     public async Task<TaxPaymentResponse?> GetByIdAsync(Guid tenantId, Guid id)

@@ -1,10 +1,10 @@
-# MiGestor Fiscal
+# Cuintable
 
 A full-stack web application for managing personal finances and tax obligations under Mexico's **RESICO** (Simplified Tax Regime for Individuals). Built as both a real-world tool and a portfolio piece demonstrating modern software engineering practices.
 
 ## Purpose
 
-As a software engineer working remotely for a US company and receiving income in both USD and MXN, managing Mexican tax obligations can be complex. MiGestor Fiscal solves this by providing:
+As a software engineer working remotely for a US company and receiving income in both USD and MXN, managing Mexican tax obligations can be complex. Cuintable solves this by providing:
 
 - **Income Tracking** — Log salary payments (USD→MXN with exchange rates) and freelance honorarium payments (MXN)
 - **Expense Management** — Track general expenses (credit card payments, transfers, cash withdrawals) and tax-deductible expenses separately

@@ -19,12 +19,25 @@ export class TaxPaymentListComponent implements OnInit {
     filterYear: number | null = null;
     filterStatus: number | null = null;
     availableYears: number[] = [];
+    startDate: string = '';
+    endDate: string = '';
+
+    summaryMetrics = {
+        totalPaid: 0,
+        totalPending: 0,
+        complianceRate: 0,
+        nextDueDate: null as Date | null
+    };
 
     constructor(
         private taxPaymentService: TaxPaymentService,
         private notification: NotificationService,
         private translate: TranslateService
-    ) { }
+    ) {
+        const now = new Date();
+        this.startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+        this.endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+    }
 
     ngOnInit(): void {
         this.loadPayments();
@@ -32,11 +45,12 @@ export class TaxPaymentListComponent implements OnInit {
 
     loadPayments(): void {
         this.loading = true;
-        this.taxPaymentService.getAll().subscribe({
+        this.taxPaymentService.getAll(this.startDate, this.endDate).subscribe({
             next: (data) => {
                 this.payments = data;
                 this.buildAvailableYears();
                 this.applyFilters();
+                this.calculateMetrics();
                 this.loading = false;
             },
             error: () => {
@@ -134,5 +148,23 @@ export class TaxPaymentListComponent implements OnInit {
                 }
             });
         }
+    }
+
+    calculateMetrics(): void {
+        const paid = this.payments.filter(p => p.status === TaxPaymentStatus.Pagado);
+        const pending = this.payments.filter(p => p.status !== TaxPaymentStatus.Pagado);
+
+        this.summaryMetrics.totalPaid = paid.reduce((acc, curr) => acc + curr.amountDue, 0);
+        this.summaryMetrics.totalPending = pending.reduce((acc, curr) => acc + curr.amountDue, 0);
+        this.summaryMetrics.complianceRate = this.payments.length > 0 ? (paid.length / this.payments.length) : 0;
+
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const upcoming = pending
+            .map(p => new Date(p.dueDate))
+            .filter(d => d >= now)
+            .sort((a, b) => a.getTime() - b.getTime());
+
+        this.summaryMetrics.nextDueDate = upcoming.length > 0 ? upcoming[0] : null;
     }
 }

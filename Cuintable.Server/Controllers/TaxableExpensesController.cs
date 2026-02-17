@@ -36,9 +36,9 @@ public class TaxableExpensesController : ControllerBase
         Guid.Parse(User.FindFirstValue("TenantId")!);
 
     [HttpGet]
-    public async Task<ActionResult<List<TaxableExpenseResponse>>> GetAll()
+    public async Task<ActionResult<List<TaxableExpenseResponse>>> GetAll([FromQuery] DateOnly? startDate, [FromQuery] DateOnly? endDate)
     {
-        return Ok(await _service.GetAllAsync(GetTenantId()));
+        return Ok(await _service.GetAllAsync(GetTenantId(), startDate, endDate));
     }
 
     [HttpGet("{id:guid}")]

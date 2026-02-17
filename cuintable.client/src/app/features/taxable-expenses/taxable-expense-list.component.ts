@@ -24,6 +24,60 @@ const CATEGORY_KEYS = ['TAXABLE.LUZ', 'TAXABLE.INTERNET', 'TAXABLE.CELULAR',
         </button>
       </div>
 
+      <!-- Summary Cards -->
+      <div *ngIf="!loading && items.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <app-summary-card
+          [title]="'DASHBOARD.DEDUCTIBLE_EXPENSES' | translate"
+          [value]="(summaryMetrics.total | currency:'MXN':'symbol-narrow':'1.0-0') || ''"
+          color="success">
+          <svg icon class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </app-summary-card>
+
+        <app-summary-card
+          title="Avg. Ticket"
+          [value]="(summaryMetrics.averageTicket | currency:'MXN':'symbol-narrow':'1.0-0') || ''"
+          color="info">
+          <svg icon class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+             <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+          </svg>
+        </app-summary-card>
+
+        <app-summary-card
+          title="Top Vendor"
+          [value]="summaryMetrics.topVendor || '-'"
+           [subtext]="(summaryMetrics.topVendorAmount | currency:'MXN':'symbol-narrow':'1.0-0') || ''"
+          color="primary">
+          <svg icon class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+             <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" />
+          </svg>
+        </app-summary-card>
+
+         <app-summary-card
+          title="Invoiced %"
+          [value]="((summaryMetrics.invoicedCount / items.length) | percent:'1.0-0') || ''"
+          color="warning">
+          <svg icon class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+          </svg>
+        </app-summary-card>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex items-center gap-2 mb-6">
+        <div class="form-control">
+          <label class="label py-1"><span class="label-text text-xs text-slate-400">{{ 'COMMON.START_DATE' | translate }}</span></label>
+          <input type="date" class="input input-sm input-bordered bg-white/[0.04] border-white/[0.08] text-slate-300" 
+                 [(ngModel)]="startDate" (change)="loadAll()">
+        </div>
+        <div class="form-control">
+          <label class="label py-1"><span class="label-text text-xs text-slate-400">{{ 'COMMON.END_DATE' | translate }}</span></label>
+          <input type="date" class="input input-sm input-bordered bg-white/[0.04] border-white/[0.08] text-slate-300" 
+                 [(ngModel)]="endDate" (change)="loadAll()">
+        </div>
+      </div>
+
       <div *ngIf="loading" class="flex items-center justify-center py-20">
         <div class="w-8 h-8 border-2 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
       </div>
@@ -146,12 +200,26 @@ export class TaxableExpenseListComponent implements OnInit {
   metadataItem: TaxableExpense | null = null;
   parsedMetadata = '';
   categoryKeys = CATEGORY_KEYS;
+  startDate: string = '';
+  endDate: string = '';
+
+  summaryMetrics = {
+    total: 0,
+    averageTicket: 0,
+    topVendor: '',
+    topVendorAmount: 0,
+    invoicedCount: 0
+  };
 
   constructor(
     private service: TaxableExpenseService,
     private creditCardService: CreditCardService,
     private expenseService: ExpenseService
-  ) {}
+  ) {
+    const now = new Date();
+    this.startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    this.endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+  }
 
   ngOnInit() { this.loadAll(); }
 
@@ -161,8 +229,12 @@ export class TaxableExpenseListComponent implements OnInit {
       this.creditCards = cards;
       this.expenseService.getAll().subscribe(expenses => {
         this.cardPayments = expenses.filter(e => e.category === 0);
-        this.service.getAll().subscribe({
-          next: (data) => { this.items = data; this.loading = false; },
+        this.service.getAll(this.startDate, this.endDate).subscribe({
+          next: (data) => {
+            this.items = data;
+            this.calculateMetrics();
+            this.loading = false;
+          },
           error: () => { this.loading = false; }
         });
       });
@@ -196,5 +268,30 @@ export class TaxableExpenseListComponent implements OnInit {
     this.showForm = false;
     this.editing = null;
     this.loadAll();
+  }
+
+  calculateMetrics() {
+    this.summaryMetrics.total = this.items.reduce((acc, curr) => acc + curr.amountMXN, 0);
+    this.summaryMetrics.averageTicket = this.items.length > 0 ? this.summaryMetrics.total / this.items.length : 0;
+    this.summaryMetrics.invoicedCount = this.items.filter(i => i.invoicePdfUrl || i.invoiceXmlUrl).length;
+
+    const vendorTotals: { [key: string]: number } = {};
+    for (const item of this.items) {
+      if (item.vendor) {
+        vendorTotals[item.vendor] = (vendorTotals[item.vendor] || 0) + item.amountMXN;
+      }
+    }
+
+    let maxVendor = '';
+    let maxAmount = 0;
+    for (const v in vendorTotals) {
+      if (vendorTotals[v] > maxAmount) {
+        maxAmount = vendorTotals[v];
+        maxVendor = v;
+      }
+    }
+
+    this.summaryMetrics.topVendor = maxVendor;
+    this.summaryMetrics.topVendorAmount = maxAmount;
   }
 }
