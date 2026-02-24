@@ -7,5 +7,5 @@ public interface IResicoTaxService
     decimal CalculateResicoISR(decimal monthlyIncome);
     Task<TaxSummaryResponse> GetMonthlySummaryAsync(Guid tenantId, int month, int year);
     Task<AnnualTaxSummaryResponse> GetAnnualSummaryAsync(Guid tenantId, int year);
-    Task<DashboardChartsResponse> GetDashboardChartsAsync(Guid tenantId);
+    Task<DashboardChartsResponse> GetDashboardChartsAsync(Guid tenantId, int months = 12);
 }

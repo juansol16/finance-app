@@ -65,4 +65,8 @@ export class IncomeService {
     if (xml) formData.append('xml', xml);
     return this.http.post<Income>(`${this.API}/${id}/upload`, formData);
   }
+
+  getFileBlob(id: string, type: 'pdf' | 'xml'): Observable<Blob> {
+    return this.http.get(`${this.API}/${id}/file/${type}`, { responseType: 'blob' });
+  }
 }

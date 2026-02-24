@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { TaxService, TaxSummaryResponse, AnnualTaxSummaryResponse, DashboardChartsResponse } from '../../core/services/tax.service';
+import { TaxService, TaxSummaryResponse, AnnualTaxSummaryResponse, DashboardChartsResponse, OperationsItem, VolatilitySummary } from '../../core/services/tax.service';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 
 @Component({
@@ -18,43 +18,34 @@ export class DashboardComponent implements OnInit {
     loading = false;
     showAnnual = false;
 
-    public barChartOptions: ChartConfiguration['options'] = {
+    months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    years = [2023, 2024, 2025, 2026];
+    chartPeriod: number = 12;
+
+    // RESICO annual limit
+    readonly RESICO_LIMIT = 3_500_000;
+    resicoPercent = 0;
+
+    // Operations table
+    operations: OperationsItem[] = [];
+    volatilitySummary: VolatilitySummary | null = null;
+
+    // Volatility mini chart
+    public volatilityMiniData: ChartData<'line'> = { labels: [], datasets: [] };
+    public volatilityMiniOptions: ChartConfiguration['options'] = {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-            x: {
-                grid: { color: 'rgba(255,255,255,0.04)' },
-                ticks: { color: 'rgba(148,163,184,0.7)' }
-            },
-            y: {
-                min: 0,
-                grid: { color: 'rgba(255,255,255,0.04)' },
-                ticks: { color: 'rgba(148,163,184,0.7)' }
-            }
+            x: { display: false },
+            y: { display: false }
         },
-        plugins: {
-            legend: { display: true, labels: { color: 'rgba(148,163,184,0.9)' } }
-        }
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        elements: { point: { radius: 0 }, line: { tension: 0.4, borderWidth: 2 } }
     };
-    public barChartType: ChartType = 'bar';
-    public barChartData: ChartData<'bar'> = {
-        labels: [],
-        datasets: [
-            {
-                data: [0, 0, 0, 0], label: '', backgroundColor: ['rgba(16,185,129,0.7)', 'rgba(239,68,68,0.7)', 'rgba(59,130,246,0.7)', 'rgba(245,158,11,0.7)'],
-                borderColor: ['#10b981', '#ef4444', '#3b82f6', '#f59e0b'],
-                borderWidth: 1,
-                borderRadius: 6
-            }
-        ]
-    };
-
-    months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-    years = [2023, 2024, 2025, 2026];
 
     constructor(private taxService: TaxService, private translate: TranslateService) {
         const now = new Date();
-        this.currentMonth = now.getMonth(); // Previous month (0-11, so getMonth() is actually previous month 1-12 index)
+        this.currentMonth = now.getMonth();
         this.currentYear = now.getFullYear();
 
         if (this.currentMonth === 0) {
@@ -78,7 +69,9 @@ export class DashboardComponent implements OnInit {
             .subscribe({
                 next: (data) => {
                     this.summary = data;
-                    this.updateChart(data);
+                    this.resicoPercent = this.RESICO_LIMIT > 0
+                        ? Math.min((data.annualAccumulatedIncome / this.RESICO_LIMIT) * 100, 100)
+                        : 0;
                     this.loading = false;
                 },
                 error: () => { this.loading = false; }
@@ -100,27 +93,6 @@ export class DashboardComponent implements OnInit {
         }
     }
 
-    updateChart(data: TaxSummaryResponse): void {
-        this.barChartData = {
-            labels: [
-                this.translate.instant('DASHBOARD.INCOME_LABEL'),
-                this.translate.instant('DASHBOARD.EXPENSES_LABEL'),
-                this.translate.instant('DASHBOARD.BASE_LABEL'),
-                this.translate.instant('DASHBOARD.ISR_LABEL')
-            ],
-            datasets: [
-                {
-                    data: [data.totalIncome, data.totalDeductibleExpenses, data.taxableBase, data.estimatedISR],
-                    label: this.translate.instant('DASHBOARD.CHART_LABEL'),
-                    backgroundColor: ['rgba(16,185,129,0.7)', 'rgba(239,68,68,0.7)', 'rgba(59,130,246,0.7)', 'rgba(245,158,11,0.7)'],
-                    borderColor: ['#10b981', '#ef4444', '#3b82f6', '#f59e0b'],
-                    borderWidth: 1,
-                    borderRadius: 6
-                }
-            ]
-        };
-    }
-
     // Cash Flow Chart
     public cashFlowChartData: ChartData<'bar' | 'line'> = { labels: [], datasets: [] };
     public cashFlowChartOptions: ChartConfiguration['options'] = {
@@ -133,31 +105,22 @@ export class DashboardComponent implements OnInit {
         plugins: { legend: { display: true, labels: { color: 'rgba(148,163,184,0.9)' } } }
     };
 
-    // Volatility Chart
-    public volatilityChartData: ChartData<'line'> = { labels: [], datasets: [] };
-    public volatilityChartOptions: ChartConfiguration['options'] = {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: 'rgba(148,163,184,0.7)' } },
-            y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: 'rgba(148,163,184,0.7)' } }
-        },
-        plugins: { legend: { display: false } },
-        elements: { line: { tension: 0.4 } }
-    };
-    public volatilityChartType: ChartType = 'line';
-
     loadCharts(): void {
-        this.taxService.getDashboardCharts().subscribe({
+        this.taxService.getDashboardCharts(this.chartPeriod).subscribe({
             next: (data) => {
+                const formatLabel = (item: { month: number; year: number }) => {
+                    const monthName = this.translate.instant(this.getMonthKey(item.month));
+                    return this.chartPeriod > 12 ? `${monthName} ${item.year}` : monthName;
+                };
+
                 // Cash Flow Data
-                const labels = data.cashFlow.map(i => this.translate.instant(this.getMonthKey(i.month)));
+                const labels = data.cashFlow.map(formatLabel);
                 this.cashFlowChartData = {
                     labels: labels,
                     datasets: [
                         {
                             type: 'line',
-                            label: this.translate.instant('DASHBOARD.TOTAL_OUTFLOWS'), // Gastos Totales
+                            label: this.translate.instant('DASHBOARD.TOTAL_OUTFLOWS'),
                             data: data.cashFlow.map(i => i.totalOutflow),
                             borderColor: '#ef4444',
                             borderWidth: 2,
@@ -168,7 +131,7 @@ export class DashboardComponent implements OnInit {
                         },
                         {
                             type: 'bar',
-                            label: this.translate.instant('DASHBOARD.TOTAL_INCOME_MIX'), // Ingreso Total (Mix)
+                            label: this.translate.instant('DASHBOARD.TOTAL_INCOME_MIX'),
                             data: data.cashFlow.map(i => i.totalIncome),
                             backgroundColor: '#10b981',
                             borderRadius: 6
@@ -176,26 +139,29 @@ export class DashboardComponent implements OnInit {
                     ]
                 };
 
-                // Volatility Data
-                const vLabels = data.volatility.map(i => this.translate.instant(this.getMonthKey(i.month)));
-                this.volatilityChartData = {
-                    labels: vLabels,
-                    datasets: [
-                        {
-                            data: data.volatility.map(i => i.averageExchangeRate),
-                            label: 'USD',
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59,130,246,0.2)',
-                            fill: true,
-                            pointBackgroundColor: '#3b82f6',
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: '#3b82f6'
-                        }
-                    ]
+                // Operations table (show last 6 months, most recent first)
+                this.operations = [...data.operations].reverse().slice(0, 6);
+
+                // Volatility summary
+                this.volatilitySummary = data.volatilitySummary;
+
+                // Volatility mini sparkline (last 6 months)
+                const recentVol = data.volatility.slice(-6);
+                this.volatilityMiniData = {
+                    labels: recentVol.map(() => ''),
+                    datasets: [{
+                        data: recentVol.map(v => v.averageExchangeRate),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59,130,246,0.1)',
+                        fill: true
+                    }]
                 };
             }
         });
+    }
+
+    onChartPeriodChange(): void {
+        this.loadCharts();
     }
 
     onMonthChange(event: any): void {
@@ -208,5 +174,13 @@ export class DashboardComponent implements OnInit {
         this.currentYear = +event.target.value;
         this.annualSummary = null;
         this.loadData();
+    }
+
+    getVolatilityNote(): string {
+        if (!this.volatilitySummary) return '';
+        if (this.volatilitySummary.trend === 'down') {
+            return this.translate.instant('DASHBOARD.VOLATILITY_NOTE_DOWN');
+        }
+        return this.translate.instant('DASHBOARD.VOLATILITY_NOTE_UP');
     }
 }

@@ -128,20 +128,42 @@
                         <td class="text-slate-400 text-sm">{{ payment.paymentDate || '&mdash;' }}</td>
                         <td>
                             <div class="flex flex-col gap-1">
-                                <a *ngIf="payment.determinationPdfUrl" [href]="payment.determinationPdfUrl"
-                                    target="_blank" class="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">
-                                    {{ 'TAX_PAYMENT.VIEW_DETERMINATION' | translate }}
-                                </a>
+                                <div *ngIf="payment.determinationPdfUrl" class="flex gap-1">
+                                    <button class="text-xs text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer"
+                                        (click)="previewDocument(payment, 'determination')">
+                                        <svg class="w-3 h-3 inline mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>{{ 'TAX_PAYMENT.VIEW_DETERMINATION' | translate }}
+                                    </button>
+                                    <button class="text-xs text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
+                                        (click)="downloadDocument(payment, 'determination')" title="{{ 'TAXABLE.DOWNLOAD_PDF' | translate }}">
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                        </svg>
+                                    </button>
+                                </div>
                                 <label *ngIf="!payment.determinationPdfUrl"
                                     class="text-xs text-slate-500 hover:text-slate-300 cursor-pointer transition-colors">
                                     {{ 'TAX_PAYMENT.UPLOAD_DETERMINATION' | translate }}
                                     <input type="file" class="hidden" (change)="uploadDetermination(payment.id, $event)"
                                         accept=".pdf">
                                 </label>
-                                <a *ngIf="payment.paymentReceiptUrl" [href]="payment.paymentReceiptUrl" target="_blank"
-                                    class="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">
-                                    {{ 'TAX_PAYMENT.VIEW_RECEIPT' | translate }}
-                                </a>
+                                <div *ngIf="payment.paymentReceiptUrl" class="flex gap-1">
+                                    <button class="text-xs text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer"
+                                        (click)="previewDocument(payment, 'receipt')">
+                                        <svg class="w-3 h-3 inline mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>{{ 'TAX_PAYMENT.VIEW_RECEIPT' | translate }}
+                                    </button>
+                                    <button class="text-xs text-slate-400 hover:text-emerald-300 transition-colors cursor-pointer"
+                                        (click)="downloadDocument(payment, 'receipt')" title="{{ 'TAXABLE.DOWNLOAD_PDF' | translate }}">
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         </td>
                         <td class="text-right">
@@ -181,4 +203,30 @@
     <!-- Mark Paid Modal -->
     <app-mark-as-paid *ngIf="showMarkPaidModal" [payment]="paymentToMarkPaid"
         (close)="closeMarkPaidModal()"></app-mark-as-paid>
+
+    <!-- PDF Preview Modal -->
+    <div *ngIf="pdfPreviewUrl" class="modal modal-open">
+        <div class="modal-overlay" (click)="closePdfPreview()"></div>
+        <div class="modal-content w-full max-w-6xl p-6" style="height: 92vh;">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-white">{{ 'TAXABLE.PREVIEW_PDF' | translate }}</h3>
+                <div class="flex gap-2">
+                    <button class="btn btn-ghost btn-sm" (click)="downloadCurrentPdf()"
+                        title="{{ 'TAXABLE.DOWNLOAD_PDF' | translate }}">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                        </svg>
+                    </button>
+                    <button class="btn btn-ghost btn-sm" (click)="closePdfPreview()">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <iframe [src]="pdfPreviewUrl" class="w-full rounded-lg border border-white/10"
+                style="height: calc(100% - 60px);"></iframe>
+        </div>
+    </div>
 </div>

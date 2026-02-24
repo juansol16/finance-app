@@ -67,4 +67,12 @@ export class TaxableExpenseService {
     if (xml) formData.append('xml', xml);
     return this.http.post<TaxableExpense>(`${this.API}/${id}/upload`, formData);
   }
+
+  getFileUrl(id: string, type: 'pdf' | 'xml', download = false): string {
+    return `${this.API}/${id}/file/${type}${download ? '?download=true' : ''}`;
+  }
+
+  getFileBlob(id: string, type: 'pdf' | 'xml'): Observable<Blob> {
+    return this.http.get(`${this.API}/${id}/file/${type}`, { responseType: 'blob' });
+  }
 }

@@ -61,8 +61,8 @@ import { Income, IncomeService } from '../../core/services/income.service';
           <textarea class="textarea textarea-bordered w-full" [(ngModel)]="form.description" rows="2"></textarea>
         </div>
 
-        <!-- File Upload (only on edit) -->
-        <div *ngIf="income" class="form-group mb-3">
+        <!-- File Upload -->
+        <div class="form-group mb-3">
           <label class="form-label">{{ 'INCOME.INVOICES' | translate }}</label>
           <div class="flex gap-2">
             <div class="flex-1">

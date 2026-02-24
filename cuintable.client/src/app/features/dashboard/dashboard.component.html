@@ -25,81 +25,69 @@
   </div>
 
   <!-- Stat Cards -->
-  <div *ngIf="summary && !loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <div *ngIf="summary && !loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+    <!-- Ingresos Brutos (Mes) -->
     <div class="stat-card stat-success animate-fade-in-up">
-      <div class="flex items-center justify-between mb-3">
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">{{ 'DASHBOARD.TOTAL_INCOME' |
-          translate }}</span>
-        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: rgba(16, 185, 129, 0.12);">
-          <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
-          </svg>
-        </div>
-      </div>
-      <p class="text-2xl font-bold text-white">{{ summary.totalIncome | currency:'MXN':'symbol-narrow':'1.0-0' }}</p>
-    </div>
-
-    <div class="stat-card stat-danger animate-fade-in-up" style="animation-delay: 0.05s;">
-      <div class="flex items-center justify-between mb-3">
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">{{ 'DASHBOARD.DEDUCTIBLE_EXPENSES' |
-          translate }}</span>
-        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: rgba(239, 68, 68, 0.12);">
-          <svg class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
-          </svg>
-        </div>
-      </div>
-      <p class="text-2xl font-bold text-white">{{ summary.totalDeductibleExpenses |
-        currency:'MXN':'symbol-narrow':'1.0-0' }}</p>
-    </div>
-
-    <div class="stat-card stat-info animate-fade-in-up" style="animation-delay: 0.1s;">
-      <div class="flex items-center justify-between mb-3">
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">{{ 'DASHBOARD.TAXABLE_BASE' |
-          translate }}</span>
-        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: rgba(59, 130, 246, 0.12);">
-          <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-          </svg>
-        </div>
-      </div>
-      <p class="text-2xl font-bold text-white">{{ summary.taxableBase | currency:'MXN':'symbol-narrow':'1.0-0' }}</p>
-    </div>
-
-    <div class="stat-card stat-warning animate-fade-in-up" style="animation-delay: 0.15s;">
-      <div class="flex items-center justify-between mb-3">
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">{{ 'DASHBOARD.ESTIMATED_ISR' |
-          translate }}</span>
-        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: rgba(245, 158, 11, 0.12);">
-          <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-      </div>
-      <p class="text-2xl font-bold text-white">{{ summary.estimatedISR | currency:'MXN':'symbol-narrow':'1.0-0' }}</p>
-      <span class="inline-block mt-2 px-2 py-0.5 text-xs rounded-md badge-glow-warning">
-        {{ 'DASHBOARD.TAX_RATE' | translate }}: {{ summary.effectiveTaxRate | percent:'1.2-2' }}
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 block">{{ 'DASHBOARD.GROSS_INCOME' | translate }}</span>
+      <p class="text-2xl font-bold text-emerald-400">{{ summary.totalIncome | currency:'MXN':'symbol-narrow':'1.0-0' }}</p>
+      <span class="text-xs mt-2 block" [class]="summary.incomeChangePercent >= 0 ? 'text-emerald-400' : 'text-red-400'">
+        <span *ngIf="summary.incomeChangePercent >= 0">&#8599;</span>
+        <span *ngIf="summary.incomeChangePercent < 0">&#8600;</span>
+        {{ summary.incomeChangePercent >= 0 ? '+' : '' }}{{ summary.incomeChangePercent | percent:'1.0-0' }} {{ 'DASHBOARD.VS_PREV_MONTH' | translate }}
       </span>
     </div>
-  </div>
 
-  <!-- Chart -->
-  <div *ngIf="summary && !loading" class="glass-card p-6 mb-8">
-    <h2 class="text-lg font-semibold text-white mb-4">{{ 'DASHBOARD.MONTHLY_SUMMARY' | translate }}</h2>
-    <div style="display: block; height: 350px;">
-      <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="barChartType">
-      </canvas>
+    <!-- Gastos Deducibles -->
+    <div class="stat-card stat-danger animate-fade-in-up" style="animation-delay: 0.05s;">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 block">{{ 'DASHBOARD.DEDUCTIBLE_EXPENSES' | translate }}</span>
+      <p class="text-2xl font-bold text-red-400">{{ summary.totalDeductibleExpenses | currency:'MXN':'symbol-narrow':'1.0-0' }}</p>
+      <span class="text-xs text-slate-400 mt-2 block">{{ summary.deductiblePercent | percent:'1.1-1' }} {{ 'DASHBOARD.OF_INCOME' | translate }}</span>
+    </div>
+
+    <!-- Utilidad Neta (Real) -->
+    <div class="stat-card stat-info animate-fade-in-up" style="animation-delay: 0.1s;">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 block">{{ 'DASHBOARD.NET_PROFIT' | translate }}</span>
+      <p class="text-2xl font-bold text-cyan-400">{{ summary.taxableBase | currency:'MXN':'symbol-narrow':'1.0-0' }}</p>
+      <span class="text-xs text-slate-400 mt-2 block">{{ 'DASHBOARD.MARGIN_OF' | translate }} {{ summary.profitMargin | percent:'1.1-1' }}</span>
+    </div>
+
+    <!-- ISR Estimado -->
+    <div class="stat-card stat-warning animate-fade-in-up" style="animation-delay: 0.15s;">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 block">{{ 'DASHBOARD.ESTIMATED_ISR' | translate }}</span>
+      <p class="text-2xl font-bold text-amber-400">{{ summary.estimatedISR | currency:'MXN':'symbol-narrow':'1.0-0' }}</p>
+      <span class="inline-block mt-2 px-2 py-0.5 text-xs rounded-md badge-glow-warning">
+        {{ 'DASHBOARD.TAX_RATE' | translate }} {{ summary.effectiveTaxRate | percent:'1.2-2' }}
+      </span>
+    </div>
+
+    <!-- IVA por Pagar -->
+    <div class="stat-card animate-fade-in-up" style="animation-delay: 0.2s; border-color: rgba(168, 85, 247, 0.25);">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 block">{{ 'DASHBOARD.ESTIMATED_IVA' | translate }}</span>
+      <p class="text-2xl font-bold text-purple-400">{{ summary.estimatedIVA | currency:'MXN':'symbol-narrow':'1.0-0' }}</p>
+      <span class="text-xs text-slate-400 mt-2 block">{{ 'DASHBOARD.CURRENT_MONTH' | translate }}</span>
     </div>
   </div>
 
-  <!-- New Charts Grid -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-    <!-- Real Cash Flow Chart -->
-    <div class="glass-card p-6">
+  <!-- Analysis & Trends Section Header with Period Selector -->
+  <div *ngIf="!loading" class="flex items-center justify-between mb-4">
+    <h2 class="text-lg font-semibold text-white">{{ 'DASHBOARD.ANALYSIS_TRENDS' | translate }}</h2>
+    <div class="flex items-center gap-2">
+      <span class="text-xs text-slate-400">{{ 'DASHBOARD.CHART_PERIOD' | translate }}:</span>
+      <div class="join">
+        <button class="join-item btn btn-xs" [class.btn-active]="chartPeriod === 12"
+          (click)="chartPeriod = 12; onChartPeriodChange()">{{ 'DASHBOARD.LAST_1_YEAR' | translate }}</button>
+        <button class="join-item btn btn-xs" [class.btn-active]="chartPeriod === 24"
+          (click)="chartPeriod = 24; onChartPeriodChange()">{{ 'DASHBOARD.LAST_2_YEARS' | translate }}</button>
+        <button class="join-item btn btn-xs" [class.btn-active]="chartPeriod === 60"
+          (click)="chartPeriod = 60; onChartPeriodChange()">{{ 'DASHBOARD.LAST_5_YEARS' | translate }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cash Flow + RESICO Limit -->
+  <div *ngIf="summary && !loading" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Cash Flow Chart (2/3) -->
+    <div class="lg:col-span-2 glass-card p-6">
       <div class="flex items-center justify-between mb-4">
         <div>
           <h2 class="text-lg font-semibold text-white">{{ 'DASHBOARD.REAL_CASH_FLOW' | translate }}</h2>
@@ -123,26 +111,114 @@
       </div>
     </div>
 
-    <!-- Volatility Chart -->
-    <div class="glass-card p-6">
-      <div class="mb-4">
-        <h2 class="text-lg font-semibold text-white">{{ 'DASHBOARD.VOLATILITY_USD' | translate }}</h2>
-        <p class="text-sm text-slate-500">{{ 'DASHBOARD.VOLATILITY_DESC' | translate }}</p>
+    <!-- RESICO Annual Limit Gauge (1/3) -->
+    <div class="glass-card p-6 flex flex-col items-center justify-center">
+      <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-6">{{ 'DASHBOARD.RESICO_ANNUAL_LIMIT' | translate }}</h3>
+
+      <!-- Semi-circle gauge -->
+      <div class="relative w-48 h-24 mb-4">
+        <svg viewBox="0 0 200 100" class="w-full h-full">
+          <!-- Background arc -->
+          <path d="M 10 100 A 90 90 0 0 1 190 100" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="16" stroke-linecap="round" />
+          <!-- Progress arc -->
+          <path d="M 10 100 A 90 90 0 0 1 190 100" fill="none"
+            [attr.stroke]="resicoPercent >= 90 ? '#ef4444' : resicoPercent >= 70 ? '#f59e0b' : '#10b981'"
+            stroke-width="16" stroke-linecap="round"
+            [attr.stroke-dasharray]="(resicoPercent / 100 * 283) + ' 283'" />
+        </svg>
+        <!-- Percentage text -->
+        <div class="absolute inset-0 flex flex-col items-center justify-end pb-0">
+          <span class="text-3xl font-bold"
+            [class]="resicoPercent >= 90 ? 'text-red-400' : resicoPercent >= 70 ? 'text-amber-400' : 'text-emerald-400'">
+            {{ resicoPercent | number:'1.0-0' }}%
+          </span>
+          <span class="text-xs text-slate-500 uppercase tracking-wider">{{ 'DASHBOARD.RESICO_EXERCISED' | translate }}</span>
+        </div>
       </div>
 
-      <div style="display: block; height: 250px;">
-        <canvas baseChart [data]="volatilityChartData" [options]="volatilityChartOptions" [type]="volatilityChartType">
+      <!-- Accumulated amount -->
+      <div class="w-full mt-4">
+        <div class="flex justify-between text-xs mb-2">
+          <span class="text-slate-400">{{ 'DASHBOARD.RESICO_ACCUMULATED' | translate }} {{ currentYear }}:</span>
+          <span class="text-white font-semibold">{{ summary.annualAccumulatedIncome | currency:'MXN':'symbol-narrow':'1.0-0' }}</span>
+        </div>
+        <!-- Progress bar -->
+        <div class="w-full h-2 rounded-full bg-white/[0.08] overflow-hidden">
+          <div class="h-full rounded-full transition-all duration-500"
+            [style.width.%]="resicoPercent"
+            [class]="resicoPercent >= 90 ? 'bg-red-500' : resicoPercent >= 70 ? 'bg-amber-500' : 'bg-emerald-500'">
+          </div>
+        </div>
+        <div class="flex justify-between text-xs mt-2">
+          <span class="text-slate-500">$0</span>
+          <span class="text-slate-500">{{ 'DASHBOARD.RESICO_SAT_LIMIT' | translate }}: {{ RESICO_LIMIT | currency:'MXN':'symbol-narrow':'1.0-0' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Operations Table + Volatility Card -->
+  <div *ngIf="!loading && operations.length > 0" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Operations Breakdown (2/3) -->
+    <div class="lg:col-span-2 glass-card p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-white">{{ 'DASHBOARD.OPERATIONS_TITLE' | translate }}</h2>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="table table-sm w-full">
+          <thead>
+            <tr>
+              <th class="text-slate-400 text-xs">{{ 'DASHBOARD.MONTH' | translate }}</th>
+              <th class="text-right text-slate-400 text-xs">{{ 'DASHBOARD.INCOME_LABEL' | translate }}</th>
+              <th class="text-right text-slate-400 text-xs">{{ 'DASHBOARD.OPS_DEDUCTIBLE' | translate }}</th>
+              <th class="text-right text-slate-400 text-xs">ISR</th>
+              <th class="text-right text-slate-400 text-xs">{{ 'DASHBOARD.OPS_IVA_NET' | translate }}</th>
+              <th class="text-right text-slate-400 text-xs">{{ 'DASHBOARD.OPS_PROFIT' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let op of operations" class="border-t border-white/[0.04]">
+              <td class="text-white font-medium">{{ getMonthKey(op.month) | translate }} {{ op.year }}</td>
+              <td class="text-right font-mono text-emerald-400">{{ op.income | currency:'MXN':'symbol-narrow':'1.0-0' }}</td>
+              <td class="text-right font-mono text-slate-300">{{ op.deductibleExpenses | currency:'MXN':'symbol-narrow':'1.0-0' }}</td>
+              <td class="text-right font-mono text-amber-400">{{ op.isr | currency:'MXN':'symbol-narrow':'1.0-0' }}</td>
+              <td class="text-right font-mono text-purple-400">{{ op.ivaNet | currency:'MXN':'symbol-narrow':'1.0-0' }}</td>
+              <td class="text-right font-mono text-cyan-400 font-semibold">{{ op.profit | currency:'MXN':'symbol-narrow':'1.0-0' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Volatility Card (1/3) -->
+    <div class="glass-card p-6 flex flex-col" *ngIf="volatilitySummary">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">{{ 'DASHBOARD.VOLATILITY_USD' | translate }}</h3>
+        <span class="text-xs px-2 py-0.5 rounded-full font-semibold"
+          [class]="volatilitySummary.trend === 'up' ? 'bg-emerald-500/20 text-emerald-400' : volatilitySummary.trend === 'down' ? 'bg-red-500/20 text-red-400' : 'bg-slate-500/20 text-slate-400'">
+          {{ volatilitySummary.trend === 'up' ? ('DASHBOARD.VOL_UP' | translate) : volatilitySummary.trend === 'down' ? ('DASHBOARD.VOL_DOWN' | translate) : 'Neutral' }}
+        </span>
+      </div>
+
+      <div class="flex items-baseline gap-3 mb-4">
+        <span class="text-3xl font-bold text-white">{{ volatilitySummary.currentRate | currency:'':'':'1.2-2' }}</span>
+        <span class="text-sm" [class]="volatilitySummary.changePercent >= 0 ? 'text-emerald-400' : 'text-red-400'">
+          {{ volatilitySummary.changePercent >= 0 ? '&#8599;' : '&#8600;' }}
+          {{ volatilitySummary.changePercent >= 0 ? '+' : '' }}{{ volatilitySummary.changePercent | percent:'1.1-1' }}
+        </span>
+      </div>
+
+      <!-- Mini sparkline -->
+      <div style="display: block; height: 100px;" class="mb-4">
+        <canvas baseChart [data]="volatilityMiniData" [options]="volatilityMiniOptions" [type]="'line'">
         </canvas>
       </div>
 
-      <div class="mt-4 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-        <div class="flex items-center">
-          <svg class="w-5 h-5 text-blue-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span class="text-sm text-blue-200">{{ 'DASHBOARD.VOLATILITY_INFO' | translate }}</span>
-        </div>
+      <!-- Analyst Note -->
+      <div class="mt-auto p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+        <p class="text-xs font-semibold text-blue-300 mb-1">{{ 'DASHBOARD.ANALYST_NOTE' | translate }}:</p>
+        <p class="text-xs text-blue-200/80 leading-relaxed">{{ getVolatilityNote() }}</p>
       </div>
     </div>
   </div>

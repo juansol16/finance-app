@@ -45,9 +45,12 @@ public class TaxCalculationController : ControllerBase
     }
 
     [HttpGet("charts")]
-    public async Task<ActionResult<DashboardChartsResponse>> GetDashboardCharts()
+    public async Task<ActionResult<DashboardChartsResponse>> GetDashboardCharts([FromQuery] int months = 12)
     {
-        var charts = await _taxService.GetDashboardChartsAsync(GetTenantId());
+        if (months is not 12 and not 24 and not 60)
+            months = 12;
+
+        var charts = await _taxService.GetDashboardChartsAsync(GetTenantId(), months);
         return Ok(charts);
     }
 }

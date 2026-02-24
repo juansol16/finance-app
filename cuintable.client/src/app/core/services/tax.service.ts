@@ -10,6 +10,11 @@ export interface TaxSummaryResponse {
     taxableBase: number;
     estimatedISR: number;
     effectiveTaxRate: number;
+    incomeChangePercent: number;
+    deductiblePercent: number;
+    profitMargin: number;
+    estimatedIVA: number;
+    annualAccumulatedIncome: number;
 }
 
 export interface AnnualTaxSummaryResponse {
@@ -41,8 +46,9 @@ export class TaxService {
         return this.http.get<AnnualTaxSummaryResponse>(`${this.apiUrl}/annual-summary`, { params });
     }
 
-    getDashboardCharts(): Observable<DashboardChartsResponse> {
-        return this.http.get<DashboardChartsResponse>(`${this.apiUrl}/charts`);
+    getDashboardCharts(months: number = 12): Observable<DashboardChartsResponse> {
+        const params = new HttpParams().set('months', months.toString());
+        return this.http.get<DashboardChartsResponse>(`${this.apiUrl}/charts`, { params });
     }
 }
 
@@ -61,7 +67,26 @@ export interface VolatilityItem {
     averageExchangeRate: number;
 }
 
+export interface OperationsItem {
+    month: number;
+    year: number;
+    income: number;
+    deductibleExpenses: number;
+    isr: number;
+    ivaNet: number;
+    profit: number;
+}
+
+export interface VolatilitySummary {
+    currentRate: number;
+    previousRate: number;
+    changePercent: number;
+    trend: string;
+}
+
 export interface DashboardChartsResponse {
     cashFlow: CashFlowItem[];
     volatility: VolatilityItem[];
+    operations: OperationsItem[];
+    volatilitySummary: VolatilitySummary;
 }

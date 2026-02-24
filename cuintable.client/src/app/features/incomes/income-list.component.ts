@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Income, IncomeService } from '../../core/services/income.service';
 import { NotificationService } from '../../core/services/notification.service';
 
@@ -119,8 +120,21 @@ import { NotificationService } from '../../core/services/notification.service';
                 </td>
                 <td>
                   <div class="flex gap-1">
-                    <span *ngIf="income.invoicePdfUrl" class="text-xs font-medium px-1.5 py-0.5 rounded badge-glow-info">PDF</span>
-                    <span *ngIf="income.invoiceXmlUrl" class="text-xs font-medium px-1.5 py-0.5 rounded badge-glow-warning">XML</span>
+                    <button *ngIf="income.invoicePdfUrl" class="text-xs font-medium px-1.5 py-0.5 rounded badge-glow-info cursor-pointer"
+                            (click)="previewPdf(income)" title="{{ 'TAXABLE.PREVIEW_PDF' | translate }}">
+                      <svg class="w-3 h-3 inline mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>PDF
+                    </button>
+                    <button *ngIf="income.invoiceXmlUrl" class="text-xs font-medium px-1.5 py-0.5 rounded badge-glow-warning cursor-pointer"
+                            (click)="downloadXml(income)" title="{{ 'TAXABLE.DOWNLOAD_XML' | translate }}">
+                      <svg class="w-3 h-3 inline mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                      </svg>XML
+                    </button>
+                    <button *ngIf="income.xmlMetadata" class="text-xs font-medium px-1.5 py-0.5 rounded badge-glow-primary cursor-pointer"
+                            (click)="showMetadata(income)">CFDI</button>
                   </div>
                 </td>
                 <td class="text-right">
@@ -170,6 +184,43 @@ import { NotificationService } from '../../core/services/notification.service';
           </div>
         </div>
       </div>
+
+      <!-- XML Metadata Modal -->
+      <div *ngIf="metadataItem" class="modal modal-open">
+        <div class="modal-overlay" (click)="metadataItem = null"></div>
+        <div class="modal-content w-full max-w-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-4">{{ 'TAXABLE.CFDI_DATA' | translate }}</h3>
+          <div class="rounded-lg p-4 overflow-auto max-h-80" style="background: rgba(0,0,0,0.3);">
+            <pre class="text-sm text-slate-300 whitespace-pre-wrap font-mono">{{ parsedMetadata }}</pre>
+          </div>
+          <div class="mt-4 text-right">
+            <button class="btn btn-ghost btn-sm" (click)="metadataItem = null">{{ 'COMMON.CANCEL' | translate }}</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PDF Preview Modal -->
+      <div *ngIf="pdfPreviewUrl" class="modal modal-open">
+        <div class="modal-overlay" (click)="closePdfPreview()"></div>
+        <div class="modal-content w-full max-w-6xl p-6" style="height: 92vh;">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-white">{{ 'TAXABLE.PREVIEW_PDF' | translate }}</h3>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost btn-sm" (click)="downloadCurrentPdf()" title="{{ 'TAXABLE.DOWNLOAD_PDF' | translate }}">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+              </button>
+              <button class="btn btn-ghost btn-sm" (click)="closePdfPreview()">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <iframe [src]="pdfPreviewUrl" class="w-full rounded-lg border border-white/10" style="height: calc(100% - 60px);"></iframe>
+        </div>
+      </div>
     </div>
   `
 })
@@ -179,6 +230,10 @@ export class IncomeListComponent implements OnInit {
   showForm = false;
   editingIncome: Income | null = null;
   deletingIncome: Income | null = null;
+  metadataItem: Income | null = null;
+  parsedMetadata = '';
+  pdfPreviewUrl: SafeResourceUrl | null = null;
+  pdfPreviewItem: Income | null = null;
 
   startDate: string = '';
   endDate: string = '';
@@ -192,7 +247,8 @@ export class IncomeListComponent implements OnInit {
 
   constructor(
     private incomeService: IncomeService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private sanitizer: DomSanitizer
   ) {
     const now = new Date();
     this.startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
@@ -245,6 +301,52 @@ export class IncomeListComponent implements OnInit {
     this.showForm = false;
     this.editingIncome = null;
     this.loadIncomes();
+  }
+
+  showMetadata(income: Income) {
+    this.metadataItem = income;
+    try {
+      this.parsedMetadata = JSON.stringify(JSON.parse(income.xmlMetadata!), null, 2);
+    } catch {
+      this.parsedMetadata = income.xmlMetadata || '';
+    }
+  }
+
+  previewPdf(income: Income) {
+    this.pdfPreviewItem = income;
+    this.incomeService.getFileBlob(income.id, 'pdf').subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        this.pdfPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+      }
+    });
+  }
+
+  closePdfPreview() {
+    this.pdfPreviewUrl = null;
+    this.pdfPreviewItem = null;
+  }
+
+  downloadCurrentPdf() {
+    if (!this.pdfPreviewItem) return;
+    this.downloadFile(this.pdfPreviewItem, 'pdf');
+  }
+
+  downloadXml(income: Income) {
+    this.downloadFile(income, 'xml');
+  }
+
+  private downloadFile(income: Income, type: 'pdf' | 'xml') {
+    this.incomeService.getFileBlob(income.id, type).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${income.source}_${income.date}.${type}`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    });
   }
 
   calculateMetrics() {

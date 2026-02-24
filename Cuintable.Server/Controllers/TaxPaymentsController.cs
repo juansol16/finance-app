@@ -103,6 +103,31 @@ public class TaxPaymentsController : ControllerBase
         return Ok(updated);
     }
 
+    [HttpGet("{id:guid}/file/{type}")]
+    public async Task<IActionResult> GetFile(Guid id, string type, [FromQuery] bool download = false)
+    {
+        if (type is not "determination" and not "receipt")
+            return BadRequest("Type must be 'determination' or 'receipt'.");
+
+        var item = await _taxPaymentService.GetByIdAsync(GetTenantId(), id);
+        if (item is null) return NotFound();
+
+        var fileUrl = type == "determination" ? item.DeterminationPdfUrl : item.PaymentReceiptUrl;
+        if (string.IsNullOrEmpty(fileUrl))
+            return NotFound("No file uploaded for this type.");
+
+        var result = await _fileStorage.GetStreamAsync(fileUrl);
+        if (result is null)
+            return NotFound("File not found in storage.");
+
+        var (stream, contentType) = result.Value;
+        var fileName = $"{item.PeriodYear}-{item.PeriodMonth:D2}_{type}.pdf";
+        var disposition = download ? "attachment" : "inline";
+
+        Response.Headers.ContentDisposition = $"{disposition}; filename=\"{fileName}\"";
+        return File(stream, contentType);
+    }
+
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {

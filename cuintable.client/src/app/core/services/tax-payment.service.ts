@@ -73,4 +73,8 @@ export class TaxPaymentService {
         }
         return this.http.put<TaxPaymentResponse>(`${this.apiUrl}/${id}/mark-paid`, formData);
     }
+
+    getFileBlob(id: string, type: 'determination' | 'receipt'): Observable<Blob> {
+        return this.http.get(`${this.apiUrl}/${id}/file/${type}`, { responseType: 'blob' });
+    }
 }

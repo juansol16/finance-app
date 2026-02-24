@@ -44,9 +44,32 @@ public class ResicoTaxService : IResicoTaxService
         var taxableBase = totalIncome - totalDeductible;
 
         // In RESICO, ISR is calculated on Total Income, not Taxable Base (Profit)
-        // However, we still return TaxableBase for user's information
         var estimatedISR = CalculateResicoISR(totalIncome);
         var effectiveRate = totalIncome > 0 ? (estimatedISR / totalIncome) : 0;
+
+        // Previous month income for % change
+        var prevDate = startDate.AddMonths(-1);
+        var prevStart = new DateOnly(prevDate.Year, prevDate.Month, 1);
+        var prevEnd = prevStart.AddMonths(1).AddDays(-1);
+        var prevIncome = await _context.Incomes
+            .Where(i => i.TenantId == tenantId && i.Date >= prevStart && i.Date <= prevEnd)
+            .SumAsync(i => i.AmountMXN);
+        var incomeChangePercent = prevIncome > 0 ? ((totalIncome - prevIncome) / prevIncome) : 0;
+
+        // Deductible as % of income
+        var deductiblePercent = totalIncome > 0 ? (totalDeductible / totalIncome) : 0;
+
+        // Profit margin
+        var profitMargin = totalIncome > 0 ? (taxableBase / totalIncome) : 0;
+
+        // IVA: RESICO charges 16% on total income
+        var estimatedIVA = totalIncome * 0.16m;
+
+        // Annual accumulated income (Jan 1 to end of selected month)
+        var yearStart = new DateOnly(year, 1, 1);
+        var annualAccumulated = await _context.Incomes
+            .Where(i => i.TenantId == tenantId && i.Date >= yearStart && i.Date <= endDate)
+            .SumAsync(i => i.AmountMXN);
 
         return new TaxSummaryResponse
         {
@@ -56,7 +79,12 @@ public class ResicoTaxService : IResicoTaxService
             TotalDeductibleExpenses = totalDeductible,
             TaxableBase = taxableBase,
             EstimatedISR = estimatedISR,
-            EffectiveTaxRate = effectiveRate
+            EffectiveTaxRate = effectiveRate,
+            IncomeChangePercent = incomeChangePercent,
+            DeductiblePercent = deductiblePercent,
+            ProfitMargin = profitMargin,
+            EstimatedIVA = estimatedIVA,
+            AnnualAccumulatedIncome = annualAccumulated
         };
     }
 
@@ -84,13 +112,12 @@ public class ResicoTaxService : IResicoTaxService
         return response;
     }
 
-    public async Task<DashboardChartsResponse> GetDashboardChartsAsync(Guid tenantId)
+    public async Task<DashboardChartsResponse> GetDashboardChartsAsync(Guid tenantId, int months = 12)
     {
         var response = new DashboardChartsResponse();
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        
-        // Last 6 months
-        for (int i = 5; i >= 0; i--)
+
+        for (int i = months - 1; i >= 0; i--)
         {
             var date = today.AddMonths(-i);
             var month = date.Month;
@@ -128,6 +155,25 @@ public class ResicoTaxService : IResicoTaxService
                 TotalTaxPayments = taxPayments
             });
 
+            // Operations breakdown
+            var deductibleExpenses = await _context.TaxableExpenses
+                .Where(x => x.TenantId == tenantId && x.Date >= startDate && x.Date <= endDate)
+                .SumAsync(x => x.AmountMXN);
+
+            var isr = CalculateResicoISR(totalIncome);
+            var iva = totalIncome * 0.16m;
+
+            response.Operations.Add(new OperationsItem
+            {
+                Month = month,
+                Year = year,
+                Income = totalIncome,
+                DeductibleExpenses = deductibleExpenses,
+                ISR = isr,
+                IVANet = iva,
+                Profit = totalIncome - deductibleExpenses
+            });
+
             // Volatility (Average Exchange Rate)
             var rates = incomes
                 .Where(x => x.ExchangeRate.HasValue && x.ExchangeRate > 0)
@@ -152,6 +198,34 @@ public class ResicoTaxService : IResicoTaxService
                     AverageExchangeRate = 0 // Or handle appropriately on frontend
                 });
             }
+        }
+
+        // Volatility Summary
+        var recentRates = response.Volatility
+            .Where(v => v.AverageExchangeRate > 0)
+            .TakeLast(2)
+            .ToList();
+
+        if (recentRates.Count >= 2)
+        {
+            var current = recentRates[^1].AverageExchangeRate;
+            var previous = recentRates[^2].AverageExchangeRate;
+            var change = previous > 0 ? ((current - previous) / previous) : 0;
+            response.VolatilitySummary = new VolatilitySummary
+            {
+                CurrentRate = current,
+                PreviousRate = previous,
+                ChangePercent = change,
+                Trend = change > 0 ? "up" : change < 0 ? "down" : "neutral"
+            };
+        }
+        else if (recentRates.Count == 1)
+        {
+            response.VolatilitySummary = new VolatilitySummary
+            {
+                CurrentRate = recentRates[0].AverageExchangeRate,
+                Trend = "neutral"
+            };
         }
 
         return response;

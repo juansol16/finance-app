@@ -39,4 +39,24 @@ public class LocalFileStorageService : IFileStorageService
 
         return Task.FromResult(false);
     }
+
+    public Task<(Stream Stream, string ContentType)?> GetStreamAsync(string fileUrl)
+    {
+        var relativePath = fileUrl.Replace(_baseUrl, "").TrimStart('/');
+        var fullPath = Path.Combine(_basePath, relativePath);
+
+        if (!File.Exists(fullPath))
+            return Task.FromResult<(Stream, string)?>(null);
+
+        var extension = Path.GetExtension(fullPath).ToLowerInvariant();
+        var contentType = extension switch
+        {
+            ".pdf" => "application/pdf",
+            ".xml" => "application/xml",
+            _ => "application/octet-stream"
+        };
+
+        Stream stream = File.OpenRead(fullPath);
+        return Task.FromResult<(Stream, string)?>((stream, contentType));
+    }
 }

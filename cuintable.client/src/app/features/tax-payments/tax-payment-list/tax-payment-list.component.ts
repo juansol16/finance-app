@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
 import { TaxPaymentService, TaxPaymentResponse, TaxPaymentStatus } from '../../../core/services/tax-payment.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -15,6 +16,9 @@ export class TaxPaymentListComponent implements OnInit {
     showCreateModal = false;
     showMarkPaidModal = false;
     paymentToMarkPaid: TaxPaymentResponse | null = null;
+    pdfPreviewUrl: SafeResourceUrl | null = null;
+    pdfPreviewItem: TaxPaymentResponse | null = null;
+    pdfPreviewType: 'determination' | 'receipt' = 'determination';
 
     filterYear: number | null = null;
     filterStatus: number | null = null;
@@ -32,7 +36,8 @@ export class TaxPaymentListComponent implements OnInit {
     constructor(
         private taxPaymentService: TaxPaymentService,
         private notification: NotificationService,
-        private translate: TranslateService
+        private translate: TranslateService,
+        private sanitizer: DomSanitizer
     ) {
         const now = new Date();
         this.startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
@@ -148,6 +153,40 @@ export class TaxPaymentListComponent implements OnInit {
                 }
             });
         }
+    }
+
+    previewDocument(payment: TaxPaymentResponse, type: 'determination' | 'receipt'): void {
+        this.pdfPreviewItem = payment;
+        this.pdfPreviewType = type;
+        this.taxPaymentService.getFileBlob(payment.id, type).subscribe({
+            next: (blob) => {
+                const url = URL.createObjectURL(blob);
+                this.pdfPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+            }
+        });
+    }
+
+    closePdfPreview(): void {
+        this.pdfPreviewUrl = null;
+        this.pdfPreviewItem = null;
+    }
+
+    downloadCurrentPdf(): void {
+        if (!this.pdfPreviewItem) return;
+        this.downloadDocument(this.pdfPreviewItem, this.pdfPreviewType);
+    }
+
+    downloadDocument(payment: TaxPaymentResponse, type: 'determination' | 'receipt'): void {
+        this.taxPaymentService.getFileBlob(payment.id, type).subscribe({
+            next: (blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${payment.periodYear}-${String(payment.periodMonth).padStart(2, '0')}_${type}.pdf`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        });
     }
 
     calculateMetrics(): void {

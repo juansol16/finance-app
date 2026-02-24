@@ -47,4 +47,34 @@ public class GcsFileStorageService : IFileStorageService
             return false;
         }
     }
+
+    public async Task<(Stream Stream, string ContentType)?> GetStreamAsync(string fileUrl)
+    {
+        var prefix = $"https://storage.googleapis.com/{BucketName}/";
+        if (!fileUrl.StartsWith(prefix))
+            return null;
+
+        var objectName = fileUrl[prefix.Length..];
+
+        try
+        {
+            var memoryStream = new MemoryStream();
+            await _storageClient.DownloadObjectAsync(BucketName, objectName, memoryStream);
+            memoryStream.Position = 0;
+
+            var extension = Path.GetExtension(objectName).ToLowerInvariant();
+            var contentType = extension switch
+            {
+                ".pdf" => "application/pdf",
+                ".xml" => "application/xml",
+                _ => "application/octet-stream"
+            };
+
+            return (memoryStream, contentType);
+        }
+        catch (Google.GoogleApiException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+    }
 }

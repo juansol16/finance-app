@@ -109,4 +109,29 @@ public class TaxableExpensesController : ControllerBase
         var updated = await _service.UpdateFileUrlsAsync(tenantId, id, pdfUrl, xmlUrl, xmlMetadata);
         return Ok(updated);
     }
+
+    [HttpGet("{id:guid}/file/{type}")]
+    public async Task<IActionResult> GetFile(Guid id, string type, [FromQuery] bool download = false)
+    {
+        if (type is not "pdf" and not "xml")
+            return BadRequest("Type must be 'pdf' or 'xml'.");
+
+        var item = await _service.GetByIdAsync(GetTenantId(), id);
+        if (item is null) return NotFound();
+
+        var fileUrl = type == "pdf" ? item.InvoicePdfUrl : item.InvoiceXmlUrl;
+        if (string.IsNullOrEmpty(fileUrl))
+            return NotFound("No file uploaded for this type.");
+
+        var result = await _fileStorage.GetStreamAsync(fileUrl);
+        if (result is null)
+            return NotFound("File not found in storage.");
+
+        var (stream, contentType) = result.Value;
+        var fileName = $"{item.Vendor}_{item.Date}.{type}";
+        var disposition = download ? "attachment" : "inline";
+
+        Response.Headers.ContentDisposition = $"{disposition}; filename=\"{fileName}\"";
+        return File(stream, contentType);
+    }
 }
