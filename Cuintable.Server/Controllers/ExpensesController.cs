@@ -9,7 +9,7 @@ namespace Cuintable.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Owner,Pareja")]
+[Authorize(Roles = "Owner,Pareja,Contador")]
 public class ExpensesController : ControllerBase
 {
     private readonly IExpenseService _service;
