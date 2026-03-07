@@ -9,7 +9,7 @@ namespace Cuintable.Server.Controllers;
 
 [ApiController]
 [Route("api/credit-cards")]
-[Authorize(Roles = "Owner,Pareja")]
+[Authorize(Roles = "Owner,Pareja,Contador")]
 public class CreditCardsController : ControllerBase
 {
     private readonly ICreditCardService _service;
