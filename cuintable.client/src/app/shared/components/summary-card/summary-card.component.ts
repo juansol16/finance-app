@@ -4,11 +4,11 @@ import { Component, Input } from '@angular/core';
   selector: 'app-summary-card',
   standalone: false,
   template: `
-    <div class="p-5 rounded-2xl border border-white/[0.08] relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl group"
-         [ngStyle]="{'background': 'linear-gradient(145deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%)'}">
+    <div class="p-5 rounded-[1.5rem] border border-white/[0.08] relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14] hover:shadow-xl group"
+         [ngStyle]="{'background': 'linear-gradient(160deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.015) 100%)'}">
       <div class="flex items-center justify-between mb-3">
         <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">{{ title }}</span>
-        <div class="w-8 h-8 rounded-lg flex items-center justify-center" [ngClass]="iconBgClass">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3" [ngClass]="iconBgClass">
           <ng-content select="[icon]"></ng-content>
         </div>
       </div>
@@ -35,12 +35,12 @@ export class SummaryCardComponent {
 
   get iconBgClass() {
     switch (this.color) {
-      case 'success': return 'bg-emerald-500/10 text-emerald-400';
-      case 'danger': return 'bg-red-500/10 text-red-400';
-      case 'info': return 'bg-blue-500/10 text-blue-400';
-      case 'warning': return 'bg-amber-500/10 text-amber-400';
-      case 'primary': return 'bg-cyan-500/10 text-cyan-400';
-      default: return 'bg-cyan-500/10 text-cyan-400';
+      case 'success': return 'bg-emerald-500/15 text-emerald-300';
+      case 'danger': return 'bg-rose-500/15 text-rose-300';
+      case 'info': return 'bg-indigo-500/15 text-indigo-300';
+      case 'warning': return 'bg-amber-500/15 text-amber-300';
+      case 'primary': return 'bg-blue-500/15 text-blue-300';
+      default: return 'bg-blue-500/15 text-blue-300';
     }
   }
 }

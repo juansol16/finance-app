@@ -1,7 +1,16 @@
-<div class="flex h-screen overflow-hidden" style="background: #0b0f19;">
+<div class="relative flex h-screen overflow-hidden app-shell">
+    <!-- Playful background blobs -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="app-blob w-[34rem] h-[34rem] -top-40 -left-40 opacity-[0.16] animate-blob"
+             style="background: radial-gradient(circle, #1d4ed8, transparent 70%);"></div>
+        <div class="app-blob w-[30rem] h-[30rem] top-1/3 -right-40 opacity-[0.13] animate-blob"
+             style="background: radial-gradient(circle, #38bdf8, transparent 70%); animation-delay: -6s;"></div>
+        <div class="app-blob w-[26rem] h-[26rem] -bottom-40 left-1/3 opacity-[0.1] animate-blob"
+             style="background: radial-gradient(circle, #2dd4bf, transparent 70%); animation-delay: -11s;"></div>
+    </div>
+
     <!-- Sidebar (Desktop) -->
-    <aside class="hidden md:flex flex-col w-64 flex-shrink-0 border-r border-white/[0.06]"
-           style="background: rgba(11, 15, 25, 0.95);">
+    <aside class="relative z-10 hidden md:flex flex-col w-64 flex-shrink-0 border-r border-white/[0.06] app-side-surface">
         <app-sidebar></app-sidebar>
     </aside>
 
@@ -11,15 +20,14 @@
          (click)="closeSidebar()"></div>
 
     <!-- Sidebar (Mobile) -->
-    <aside class="fixed inset-y-0 left-0 z-50 w-64 border-r border-white/[0.06] md:hidden transition-transform duration-300 ease-out"
+    <aside class="fixed inset-y-0 left-0 z-50 w-64 border-r border-white/[0.06] md:hidden transition-transform duration-300 ease-out app-side-surface-solid"
            [class.translate-x-0]="sidebarOpen"
-           [class.-translate-x-full]="!sidebarOpen"
-           style="background: rgba(11, 15, 25, 0.98); backdrop-filter: blur(20px);">
+           [class.-translate-x-full]="!sidebarOpen">
         <app-sidebar></app-sidebar>
     </aside>
 
     <!-- Main Content -->
-    <div class="flex flex-col flex-1 w-full overflow-hidden">
+    <div class="relative z-10 flex flex-col flex-1 w-full overflow-hidden">
         <header class="flex-shrink-0">
             <app-topbar (menuToggle)="toggleSidebar()"></app-topbar>
         </header>

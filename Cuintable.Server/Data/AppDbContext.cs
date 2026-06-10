@@ -51,6 +51,12 @@ public class AppDbContext : DbContext
             e.Property(i => i.AmountMXN).HasPrecision(18, 2);
             e.Property(i => i.ExchangeRate).HasPrecision(18, 6);
             e.Property(i => i.AmountUSD).HasPrecision(18, 2);
+            e.Property(i => i.HonorarioMXN).HasPrecision(18, 2);
+            e.Property(i => i.IvaMXN).HasPrecision(18, 2);
+            e.Property(i => i.SubtotalMXN).HasPrecision(18, 2);
+            e.Property(i => i.IsrWithheldMXN).HasPrecision(18, 2);
+            e.Property(i => i.IvaWithheldMXN).HasPrecision(18, 2);
+            e.Property(i => i.TakeHomePayUSD).HasPrecision(18, 2);
             e.Property(i => i.XmlMetadata).HasColumnType("jsonb");
 
             e.HasOne(i => i.Tenant)

@@ -7,5 +7,7 @@ public class AnnualTaxSummaryResponse
     public decimal TotalAnnualIncome { get; set; }
     public decimal TotalAnnualDeductible { get; set; }
     public decimal TotalAnnualISR { get; set; }
+    public decimal TotalAnnualIsrWithheld { get; set; }
+    public decimal TotalAnnualIsrNetDue { get; set; }
     public decimal AverageEffectiveTaxRate { get; set; }
 }

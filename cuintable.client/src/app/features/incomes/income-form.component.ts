@@ -34,9 +34,9 @@ import { Income, IncomeService } from '../../core/services/income.service';
           <input type="date" class="input input-bordered w-full" [(ngModel)]="form.date" />
         </div>
 
-        <!-- Amount MXN -->
+        <!-- Amount MXN (net deposited for USD incomes) -->
         <div class="form-group mb-3">
-          <label class="form-label">{{ 'INCOME.AMOUNT_MXN' | translate }}</label>
+          <label class="form-label">{{ (form.type === 0 ? 'INCOME.NET_DEPOSITED' : 'INCOME.AMOUNT_MXN') | translate }}</label>
           <input type="number" class="input input-bordered w-full" [(ngModel)]="form.amountMXN"
                  step="0.01" min="0" />
         </div>
@@ -52,6 +52,25 @@ import { Income, IncomeService } from '../../core/services/income.service';
             <label class="form-label">{{ 'INCOME.AMOUNT_USD' | translate }}</label>
             <input type="number" class="input input-bordered w-full" [(ngModel)]="form.amountUSD"
                    step="0.01" min="0" />
+          </div>
+        </div>
+
+        <!-- Live honorario breakdown (mirrors backend HonorarioCalculator) -->
+        <div *ngIf="form.type === 0 && breakdown" class="rounded-lg p-4 mb-3 text-sm bg-white/[0.04]">
+          <p class="font-semibold text-slate-300 mb-2">{{ 'INCOME.BREAKDOWN' | translate }}</p>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-1 font-mono">
+            <span class="text-slate-400">{{ 'INCOME.HONORARIO_AMOUNT' | translate }}</span>
+            <span class="text-right text-slate-200">$ {{ breakdown.honorario | number:'1.2-2' }}</span>
+            <span class="text-slate-400">{{ 'INCOME.IVA_AMOUNT' | translate }}</span>
+            <span class="text-right text-slate-200">$ {{ breakdown.iva | number:'1.2-2' }}</span>
+            <span class="text-slate-400">{{ 'INCOME.SUBTOTAL' | translate }}</span>
+            <span class="text-right text-slate-200">$ {{ breakdown.subtotal | number:'1.2-2' }}</span>
+            <span class="text-slate-400">{{ 'INCOME.ISR_WITHHELD' | translate }}</span>
+            <span class="text-right text-rose-300">&minus; $ {{ breakdown.isrWithheld | number:'1.2-2' }}</span>
+            <span class="text-slate-400">{{ 'INCOME.IVA_WITHHELD' | translate }}</span>
+            <span class="text-right text-rose-300">&minus; $ {{ breakdown.ivaWithheld | number:'1.2-2' }}</span>
+            <span class="text-slate-400">{{ 'INCOME.TAKE_HOME_USD' | translate }}</span>
+            <span class="text-right text-blue-300">$ {{ breakdown.takeHomePayUsd | number:'1.2-2' }}</span>
           </div>
         </div>
 
@@ -133,6 +152,24 @@ export class IncomeFormComponent implements OnInit {
     if (this.form.exchangeRate && this.form.amountMXN) {
       this.form.amountUSD = Math.round((this.form.amountMXN / this.form.exchangeRate) * 100) / 100;
     }
+  }
+
+  // Mirrors Cuintable.Server HonorarioCalculator: amountMXN is the net deposited;
+  // Honorario = Neto / (1 + 0.16 - 0.0125 - 0.10666) = Neto / 1.04084
+  get breakdown() {
+    const net = this.form.amountMXN;
+    const rate = this.form.exchangeRate;
+    if (!net || net <= 0 || !rate || rate <= 0) return null;
+
+    const round2 = (v: number) => Math.round(v * 100) / 100;
+    const honorario = round2(net / 1.04084);
+    const iva = round2(honorario * 0.16);
+    const subtotal = round2(honorario + iva);
+    const isrWithheld = round2(honorario * 0.0125);
+    const ivaWithheld = round2(honorario * 0.10666);
+    const takeHomePayUsd = round2(subtotal / rate);
+
+    return { honorario, iva, subtotal, isrWithheld, ivaWithheld, takeHomePayUsd };
   }
 
   onPdfSelected(event: Event) {

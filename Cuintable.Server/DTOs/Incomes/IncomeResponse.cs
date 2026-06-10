@@ -11,6 +11,12 @@ public class IncomeResponse
     public decimal AmountMXN { get; set; }
     public decimal? ExchangeRate { get; set; }
     public decimal? AmountUSD { get; set; }
+    public decimal? HonorarioMXN { get; set; }
+    public decimal? IvaMXN { get; set; }
+    public decimal? SubtotalMXN { get; set; }
+    public decimal? IsrWithheldMXN { get; set; }
+    public decimal? IvaWithheldMXN { get; set; }
+    public decimal? TakeHomePayUSD { get; set; }
     public string? Description { get; set; }
     public string? InvoicePdfUrl { get; set; }
     public string? InvoiceXmlUrl { get; set; }

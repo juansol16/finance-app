@@ -9,11 +9,15 @@ export interface TaxSummaryResponse {
     totalDeductibleExpenses: number;
     taxableBase: number;
     estimatedISR: number;
+    isrWithheld: number;
+    isrNetDue: number;
     effectiveTaxRate: number;
     incomeChangePercent: number;
     deductiblePercent: number;
     profitMargin: number;
     estimatedIVA: number;
+    ivaWithheld: number;
+    ivaNetDue: number;
     annualAccumulatedIncome: number;
 }
 
@@ -23,6 +27,8 @@ export interface AnnualTaxSummaryResponse {
     totalAnnualIncome: number;
     totalAnnualDeductible: number;
     totalAnnualISR: number;
+    totalAnnualIsrWithheld: number;
+    totalAnnualIsrNetDue: number;
     averageEffectiveTaxRate: number;
 }
 
@@ -50,6 +56,19 @@ export class TaxService {
         const params = new HttpParams().set('months', months.toString());
         return this.http.get<DashboardChartsResponse>(`${this.apiUrl}/charts`, { params });
     }
+
+    /** Latest income with USD data; emits null when there is none (204). */
+    getLastUsdIncome(): Observable<LastUsdIncomeResponse | null> {
+        return this.http.get<LastUsdIncomeResponse | null>(`${this.apiUrl}/last-usd-income`);
+    }
+}
+
+export interface LastUsdIncomeResponse {
+    date: string;
+    source: string;
+    takeHomePayUSD: number;
+    exchangeRate: number;
+    netReceivedMXN: number;
 }
 
 export interface CashFlowItem {

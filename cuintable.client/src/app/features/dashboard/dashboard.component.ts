@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { TaxService, TaxSummaryResponse, AnnualTaxSummaryResponse, DashboardChartsResponse, OperationsItem, VolatilitySummary } from '../../core/services/tax.service';
+import { TaxService, TaxSummaryResponse, AnnualTaxSummaryResponse, DashboardChartsResponse, OperationsItem, VolatilitySummary, LastUsdIncomeResponse } from '../../core/services/tax.service';
+import { AuthService } from '../../core/services/auth.service';
+import { ExchangeRateService } from '../../core/services/exchange-rate.service';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 
 @Component({
@@ -30,20 +32,45 @@ export class DashboardComponent implements OnInit {
     operations: OperationsItem[] = [];
     volatilitySummary: VolatilitySummary | null = null;
 
-    // Volatility mini chart
+    // Live FX banner indicator
+    currentFx: { rate: number; date: string } | null = null;
+    lastUsdIncome: LastUsdIncomeResponse | null = null;
+
+    // Volatility chart (readable: axes, labels, tooltips)
     public volatilityMiniData: ChartData<'line'> = { labels: [], datasets: [] };
     public volatilityMiniOptions: ChartConfiguration['options'] = {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-            x: { display: false },
-            y: { display: false }
+            x: {
+                grid: { display: false },
+                ticks: { color: 'rgba(124,139,161,0.9)', font: { size: 10 } }
+            },
+            y: {
+                beginAtZero: false,
+                grace: '10%',
+                grid: { color: 'rgba(124,139,161,0.14)' },
+                ticks: { color: 'rgba(124,139,161,0.9)', font: { size: 10 }, maxTicksLimit: 4 }
+            }
         },
-        plugins: { legend: { display: false }, tooltip: { enabled: false } },
-        elements: { point: { radius: 0 }, line: { tension: 0.4, borderWidth: 2 } }
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                enabled: true,
+                callbacks: {
+                    label: (ctx) => ` ${Number(ctx.parsed.y).toFixed(4)} MXN/USD`
+                }
+            }
+        },
+        elements: { point: { radius: 3, hoverRadius: 5 }, line: { tension: 0.35, borderWidth: 2 } }
     };
 
-    constructor(private taxService: TaxService, private translate: TranslateService) {
+    constructor(
+        private taxService: TaxService,
+        private translate: TranslateService,
+        private authService: AuthService,
+        private exchangeRateService: ExchangeRateService
+    ) {
         const now = new Date();
         this.currentMonth = now.getMonth();
         this.currentYear = now.getFullYear();
@@ -54,9 +81,54 @@ export class DashboardComponent implements OnInit {
         }
     }
 
+    /** First name for a friendly, personal greeting. */
+    get firstName(): string {
+        const full = this.authService.user?.fullName?.trim();
+        return full ? full.split(' ')[0] : '';
+    }
+
+    /** Time-of-day greeting translation key. */
+    get greetingKey(): string {
+        const h = new Date().getHours();
+        if (h < 12) return 'DASHBOARD.GREETING_MORNING';
+        if (h < 19) return 'DASHBOARD.GREETING_AFTERNOON';
+        return 'DASHBOARD.GREETING_EVENING';
+    }
+
     ngOnInit(): void {
         this.loadData();
         this.loadCharts();
+        this.loadFxIndicator();
+    }
+
+    loadFxIndicator(): void {
+        this.exchangeRateService.getCurrentUsdMxn().subscribe({
+            next: (fx) => { this.currentFx = fx; },
+            error: () => { this.currentFx = null; }
+        });
+        this.taxService.getLastUsdIncome().subscribe({
+            next: (income) => { this.lastUsdIncome = income; },
+            error: () => { this.lastUsdIncome = null; }
+        });
+    }
+
+    /**
+     * What today's rate would mean for the last USD payment:
+     * gross = USD x rate, then the standard withholding math forward
+     * (honorario = gross / 1.16, net = honorario x 1.04084).
+     */
+    get paidTodayProjection(): { gross: number; net: number; rateChange: number } | null {
+        if (!this.currentFx || !this.lastUsdIncome) return null;
+
+        const round2 = (v: number) => Math.round(v * 100) / 100;
+        const gross = round2(this.lastUsdIncome.takeHomePayUSD * this.currentFx.rate);
+        const honorario = round2(gross / 1.16);
+        const net = round2(honorario * 1.04084);
+        const rateChange = this.lastUsdIncome.exchangeRate > 0
+            ? (this.currentFx.rate - this.lastUsdIncome.exchangeRate) / this.lastUsdIncome.exchangeRate
+            : 0;
+
+        return { gross, net, rateChange };
     }
 
     getMonthKey(m: number): string {
@@ -95,14 +167,15 @@ export class DashboardComponent implements OnInit {
 
     // Cash Flow Chart
     public cashFlowChartData: ChartData<'bar' | 'line'> = { labels: [], datasets: [] };
+    // Chart colors are theme-neutral (readable on both dark and light backgrounds)
     public cashFlowChartOptions: ChartConfiguration['options'] = {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-            x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: 'rgba(148,163,184,0.7)' } },
-            y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: 'rgba(148,163,184,0.7)' } }
+            x: { grid: { color: 'rgba(124,139,161,0.14)' }, ticks: { color: 'rgba(124,139,161,0.9)' } },
+            y: { grid: { color: 'rgba(124,139,161,0.14)' }, ticks: { color: 'rgba(124,139,161,0.9)' } }
         },
-        plugins: { legend: { display: true, labels: { color: 'rgba(148,163,184,0.9)' } } }
+        plugins: { legend: { display: true, labels: { color: 'rgba(124,139,161,1)' } } }
     };
 
     loadCharts(): void {
@@ -122,10 +195,10 @@ export class DashboardComponent implements OnInit {
                             type: 'line',
                             label: this.translate.instant('DASHBOARD.TOTAL_OUTFLOWS'),
                             data: data.cashFlow.map(i => i.totalOutflow),
-                            borderColor: '#ef4444',
+                            borderColor: '#fb7185',
                             borderWidth: 2,
                             borderDash: [5, 5],
-                            pointBackgroundColor: '#ef4444',
+                            pointBackgroundColor: '#fb7185',
                             fill: false,
                             tension: 0.4
                         },
@@ -133,8 +206,8 @@ export class DashboardComponent implements OnInit {
                             type: 'bar',
                             label: this.translate.instant('DASHBOARD.TOTAL_INCOME_MIX'),
                             data: data.cashFlow.map(i => i.totalIncome),
-                            backgroundColor: '#10b981',
-                            borderRadius: 6
+                            backgroundColor: '#34d399',
+                            borderRadius: 10
                         }
                     ]
                 };
@@ -145,14 +218,18 @@ export class DashboardComponent implements OnInit {
                 // Volatility summary
                 this.volatilitySummary = data.volatilitySummary;
 
-                // Volatility mini sparkline (last 6 months)
-                const recentVol = data.volatility.slice(-6);
+                // Volatility chart: only months that actually had USD income
+                // (zero months would flatten the scale), last 6 of them, with labels
+                const recentVol = data.volatility
+                    .filter(v => v.averageExchangeRate > 0)
+                    .slice(-6);
                 this.volatilityMiniData = {
-                    labels: recentVol.map(() => ''),
+                    labels: recentVol.map(formatLabel),
                     datasets: [{
                         data: recentVol.map(v => v.averageExchangeRate),
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59,130,246,0.1)',
+                        borderColor: '#60a5fa',
+                        backgroundColor: 'rgba(96,165,250,0.14)',
+                        pointBackgroundColor: '#60a5fa',
                         fill: true
                     }]
                 };

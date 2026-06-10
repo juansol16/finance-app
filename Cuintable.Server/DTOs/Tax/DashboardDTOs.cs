@@ -36,6 +36,15 @@ public class VolatilitySummary
     public string Trend { get; set; } = "neutral"; // "up", "down", "neutral"
 }
 
+public class LastUsdIncomeResponse
+{
+    public DateOnly Date { get; set; }
+    public string Source { get; set; } = string.Empty;
+    public decimal TakeHomePayUSD { get; set; }
+    public decimal ExchangeRate { get; set; }
+    public decimal NetReceivedMXN { get; set; }
+}
+
 public class DashboardChartsResponse
 {
     public List<CashFlowItem> CashFlow { get; set; } = [];

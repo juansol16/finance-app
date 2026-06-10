@@ -135,6 +135,8 @@ import { NotificationService } from '../../core/services/notification.service';
                     </button>
                     <button *ngIf="income.xmlMetadata" class="text-xs font-medium px-1.5 py-0.5 rounded badge-glow-primary cursor-pointer"
                             (click)="showMetadata(income)">CFDI</button>
+                    <button *ngIf="income.honorarioMXN !== null" class="text-xs font-medium px-1.5 py-0.5 rounded badge-glow-secondary cursor-pointer"
+                            (click)="breakdownItem = income" title="{{ 'INCOME.BREAKDOWN' | translate }}">ISR/IVA</button>
                   </div>
                 </td>
                 <td class="text-right">
@@ -185,12 +187,42 @@ import { NotificationService } from '../../core/services/notification.service';
         </div>
       </div>
 
+      <!-- Honorario Breakdown Modal -->
+      <div *ngIf="breakdownItem" class="modal modal-open">
+        <div class="modal-overlay" (click)="breakdownItem = null"></div>
+        <div class="modal-content w-full max-w-md p-6">
+          <h3 class="text-lg font-semibold text-white mb-1">{{ 'INCOME.BREAKDOWN' | translate }}</h3>
+          <p class="text-xs text-slate-500 mb-4">{{ breakdownItem.source }} &middot; {{ breakdownItem.date }}</p>
+          <div class="rounded-lg p-4 text-sm bg-white/[0.04]">
+            <div class="grid grid-cols-2 gap-x-4 gap-y-2 font-mono">
+              <span class="text-slate-400">{{ 'INCOME.TAKE_HOME_USD' | translate }}</span>
+              <span class="text-right text-blue-300">$ {{ breakdownItem.takeHomePayUSD | number:'1.2-2' }}</span>
+              <span class="text-slate-400">{{ 'INCOME.HONORARIO_AMOUNT' | translate }}</span>
+              <span class="text-right text-slate-200">$ {{ breakdownItem.honorarioMXN | number:'1.2-2' }}</span>
+              <span class="text-slate-400">{{ 'INCOME.IVA_AMOUNT' | translate }}</span>
+              <span class="text-right text-slate-200">$ {{ breakdownItem.ivaMXN | number:'1.2-2' }}</span>
+              <span class="text-slate-400">{{ 'INCOME.SUBTOTAL' | translate }}</span>
+              <span class="text-right text-slate-200">$ {{ breakdownItem.subtotalMXN | number:'1.2-2' }}</span>
+              <span class="text-slate-400">{{ 'INCOME.ISR_WITHHELD' | translate }}</span>
+              <span class="text-right text-rose-300">&minus; $ {{ breakdownItem.isrWithheldMXN | number:'1.2-2' }}</span>
+              <span class="text-slate-400">{{ 'INCOME.IVA_WITHHELD' | translate }}</span>
+              <span class="text-right text-rose-300">&minus; $ {{ breakdownItem.ivaWithheldMXN | number:'1.2-2' }}</span>
+              <span class="text-slate-400 font-semibold">{{ 'INCOME.NET_RECEIVED' | translate }}</span>
+              <span class="text-right text-emerald-400 font-semibold">$ {{ breakdownItem.amountMXN | number:'1.2-2' }}</span>
+            </div>
+          </div>
+          <div class="mt-4 text-right">
+            <button class="btn btn-ghost btn-sm" (click)="breakdownItem = null">{{ 'COMMON.CANCEL' | translate }}</button>
+          </div>
+        </div>
+      </div>
+
       <!-- XML Metadata Modal -->
       <div *ngIf="metadataItem" class="modal modal-open">
         <div class="modal-overlay" (click)="metadataItem = null"></div>
         <div class="modal-content w-full max-w-lg p-6">
           <h3 class="text-lg font-semibold text-white mb-4">{{ 'TAXABLE.CFDI_DATA' | translate }}</h3>
-          <div class="rounded-lg p-4 overflow-auto max-h-80" style="background: rgba(0,0,0,0.3);">
+          <div class="rounded-lg p-4 overflow-auto max-h-80 code-panel">
             <pre class="text-sm text-slate-300 whitespace-pre-wrap font-mono">{{ parsedMetadata }}</pre>
           </div>
           <div class="mt-4 text-right">
@@ -231,6 +263,7 @@ export class IncomeListComponent implements OnInit {
   editingIncome: Income | null = null;
   deletingIncome: Income | null = null;
   metadataItem: Income | null = null;
+  breakdownItem: Income | null = null;
   parsedMetadata = '';
   pdfPreviewUrl: SafeResourceUrl | null = null;
   pdfPreviewItem: Income | null = null;

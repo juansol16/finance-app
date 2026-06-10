@@ -44,6 +44,14 @@ public class TaxCalculationController : ControllerBase
         return Ok(summary);
     }
 
+    [HttpGet("last-usd-income")]
+    public async Task<ActionResult<LastUsdIncomeResponse>> GetLastUsdIncome()
+    {
+        var result = await _taxService.GetLastUsdIncomeAsync(GetTenantId());
+        if (result is null) return NoContent();
+        return Ok(result);
+    }
+
     [HttpGet("charts")]
     public async Task<ActionResult<DashboardChartsResponse>> GetDashboardCharts([FromQuery] int months = 12)
     {

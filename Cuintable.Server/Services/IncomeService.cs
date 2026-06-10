@@ -51,6 +51,8 @@ public class IncomeService : IIncomeService
             Description = request.Description
         };
 
+        ApplyHonorarioBreakdown(income);
+
         _db.Incomes.Add(income);
         await _db.SaveChangesAsync();
 
@@ -71,6 +73,8 @@ public class IncomeService : IIncomeService
         income.ExchangeRate = request.ExchangeRate;
         income.AmountUSD = request.AmountUSD;
         income.Description = request.Description;
+
+        ApplyHonorarioBreakdown(income);
 
         await _db.SaveChangesAsync();
 
@@ -106,6 +110,31 @@ public class IncomeService : IIncomeService
         return MapToResponse(income);
     }
 
+    // AmountMXN holds the net amount deposited; when an exchange rate exists the
+    // income comes from a withholding client, so derive the full honorario breakdown.
+    private static void ApplyHonorarioBreakdown(Income income)
+    {
+        if (income.ExchangeRate is > 0)
+        {
+            var breakdown = HonorarioCalculator.FromNetAmount(income.AmountMXN, income.ExchangeRate.Value);
+            income.HonorarioMXN = breakdown.HonorarioMXN;
+            income.IvaMXN = breakdown.IvaMXN;
+            income.SubtotalMXN = breakdown.SubtotalMXN;
+            income.IsrWithheldMXN = breakdown.IsrWithheldMXN;
+            income.IvaWithheldMXN = breakdown.IvaWithheldMXN;
+            income.TakeHomePayUSD = breakdown.TakeHomePayUSD;
+        }
+        else
+        {
+            income.HonorarioMXN = null;
+            income.IvaMXN = null;
+            income.SubtotalMXN = null;
+            income.IsrWithheldMXN = null;
+            income.IvaWithheldMXN = null;
+            income.TakeHomePayUSD = null;
+        }
+    }
+
     private static IncomeResponse MapToResponse(Income income)
     {
         return new IncomeResponse
@@ -117,6 +146,12 @@ public class IncomeService : IIncomeService
             AmountMXN = income.AmountMXN,
             ExchangeRate = income.ExchangeRate,
             AmountUSD = income.AmountUSD,
+            HonorarioMXN = income.HonorarioMXN,
+            IvaMXN = income.IvaMXN,
+            SubtotalMXN = income.SubtotalMXN,
+            IsrWithheldMXN = income.IsrWithheldMXN,
+            IvaWithheldMXN = income.IvaWithheldMXN,
+            TakeHomePayUSD = income.TakeHomePayUSD,
             Description = income.Description,
             InvoicePdfUrl = income.InvoicePdfUrl,
             InvoiceXmlUrl = income.InvoiceXmlUrl,

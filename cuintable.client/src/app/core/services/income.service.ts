@@ -10,6 +10,12 @@ export interface Income {
   amountMXN: number;
   exchangeRate: number | null;
   amountUSD: number | null;
+  honorarioMXN: number | null;
+  ivaMXN: number | null;
+  subtotalMXN: number | null;
+  isrWithheldMXN: number | null;
+  ivaWithheldMXN: number | null;
+  takeHomePayUSD: number | null;
   description: string | null;
   invoicePdfUrl: string | null;
   invoiceXmlUrl: string | null;

@@ -14,7 +14,13 @@
       "Bash(wc:*)",
       "Bash(npm uninstall:*)",
       "Bash(npx ng build --verbose)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Read(//c/c/Users/sol_1/Documents/Cuintable/cuintable.client/public/i18n/**)",
+      "Bash(dd if=dist/cuintable.client/browser/styles-JA43W7H5.css bs=1 skip=96440 count=260)",
+      "Bash(dd if=dist/cuintable.client/browser/styles-JA43W7H5.css bs=1 skip=86530 count=200)",
+      "Bash(dd if=dist/cuintable.client/browser/styles-JA43W7H5.css bs=1 skip=98760 count=320)",
+      "Bash(cd \"/c/Users/sol_1/.claude/projects/c--Users-sol-1-Documents-Cuintable/memory\" && if [ -f MEMORY.md ]; then echo \"=== existing MEMORY.md ===\"; cat MEMORY.md; else echo \"NO MEMORY.md\"; fi)",
+      "Read(//c/Users/sol_1/.claude/projects/c--Users-sol-1-Documents-Cuintable/memory/**)"
     ]
   }
 }

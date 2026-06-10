@@ -170,7 +170,7 @@ const CATEGORY_KEYS = ['TAXABLE.LUZ', 'TAXABLE.INTERNET', 'TAXABLE.CELULAR',
         <div class="modal-overlay" (click)="metadataItem = null"></div>
         <div class="modal-content w-full max-w-lg p-6">
           <h3 class="text-lg font-semibold text-white mb-4">{{ 'TAXABLE.CFDI_DATA' | translate }}</h3>
-          <div class="rounded-lg p-4 overflow-auto max-h-80" style="background: rgba(0,0,0,0.3);">
+          <div class="rounded-lg p-4 overflow-auto max-h-80 code-panel">
             <pre class="text-sm text-slate-300 whitespace-pre-wrap font-mono">{{ parsedMetadata }}</pre>
           </div>
           <div class="mt-4 text-right">
