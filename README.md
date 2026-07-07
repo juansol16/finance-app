@@ -12,16 +12,18 @@ As a software engineer working remotely for a US company and receiving income in
 - **Tax Calculation** — Automatic ISR estimation using RESICO tax tables
 - **SAT Payment Tracking** — Manage monthly tax payment obligations with status tracking and document uploads
 - **Credit Card Registry** — Register credit cards and link card payments to deductible expenses
+- **AI Financial Advisor** — Upload monthly statement PDFs (credit card or bank account); Gemini extracts every movement, detects *gastos hormiga* and suspicious charges, reconciles card payments against registered expenses, and generates personalized advice
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+| ----- | ---------- |
 | **Backend** | ASP.NET Core (.NET 10) — RESTful API |
 | **Frontend** | Angular 21 with TypeScript |
 | **UI Framework** | Tailwind CSS + Ripple UI |
 | **Database** | PostgreSQL with Entity Framework Core |
 | **Authentication** | JWT (JSON Web Tokens) |
+| **AI** | Google Gemini (REST API — models configurable via env vars) |
 | **File Storage** | Google Cloud Storage |
 | **Internationalization** | ngx-translate (English / Spanish) |
 | **Testing** | xUnit + Moq (backend), Vitest (frontend) |
@@ -30,7 +32,7 @@ As a software engineer working remotely for a US company and receiving income in
 
 ## Architecture
 
-```
+```text
 ┌─────────────────┐       HTTPS/JSON        ┌──────────────────────┐
 │   Angular SPA   │ ◄─────────────────────► │  ASP.NET Core 10 API │
 │   (Ripple UI)   │                          │                      │
@@ -52,7 +54,7 @@ As a software engineer working remotely for a US company and receiving income in
 
 ## Project Structure
 
-```
+```text
 Cuintable/
 ├── Cuintable.Server/              # ASP.NET Core Web API
 │   ├── Controllers/               # API endpoints
@@ -94,12 +96,14 @@ Cuintable/
 ### Local Development
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/your-username/cuintable.git
    cd cuintable
    ```
 
 2. **Set up the database**
+
    ```bash
    # Using Docker for PostgreSQL
    docker run -d --name cuintable-db \
@@ -110,28 +114,33 @@ Cuintable/
    ```
 
 3. **Configure environment variables**
+
    ```bash
    cp .env.example .env
    # Edit .env with your values (DB password, JWT key, etc.)
    ```
 
 4. **Apply database migrations**
+
    ```bash
    cd Cuintable.Server
    dotnet ef database update
    ```
 
 5. **Install frontend dependencies**
+
    ```bash
    cd cuintable.client
    npm install
    ```
 
 6. **Run the application**
+
    ```bash
    # From the root directory
    dotnet run --project Cuintable.Server
    ```
+
    The backend starts on `https://localhost:7071` and proxies the Angular dev server.
    The `.env` file is loaded automatically by the application.
 
@@ -150,13 +159,29 @@ All secrets are managed via a `.env` file in the project root (loaded automatica
 ### Local Development (`.env` file)
 
 | Variable | Description | Example |
-|----------|-------------|---------|
+| -------- | ----------- | ------- |
 | `DB_HOST` | PostgreSQL host | `localhost` |
 | `DB_NAME` | Database name | `cuintable` |
 | `DB_USER` | Database user | `cuintable` |
 | `DB_PASSWORD` | Database password | `dev_password` |
 | `JWT_KEY` | JWT signing key (>32 chars) | `MiGestorFiscal-Dev-Secret-Key...` |
 | `GOOGLE_CREDENTIALS_BASE64` | GCS service account JSON (base64) | `ewogICJ0eXBlIjog...` |
+| `GEMINI_API_KEY` | Google Gemini API key (Financial Advisor) | `AIza...` |
+| `GEMINI_EXTRACTION_MODEL` | Gemini model that reads statement PDFs | `gemini-flash-latest` |
+| `GEMINI_ADVICE_MODEL` | Gemini model that writes financial advice | `gemini-3.1-pro-preview` |
+
+### AI Models (Financial Advisor)
+
+The Financial Advisor uses two Gemini models, both configurable **without code changes** — edit `.env` (or the Dokploy environment) and restart the app:
+
+- **`GEMINI_EXTRACTION_MODEL`** — parses the uploaded statement PDF into structured transactions. Runs once per upload/reprocess on a large multimodal input, so a **fast/cheap model** is the right fit. Requirements: PDF (multimodal) input and structured JSON output (`responseSchema`).
+- **`GEMINI_ADVICE_MODEL`** — writes the monthly summary and suggestions from pre-computed aggregates (small text-only prompt), so a **higher-quality reasoning model** pays off here. Requirements: structured JSON output only.
+
+When Google releases new models, just swap the model IDs (see the [Gemini model list](https://ai.google.dev/gemini-api/docs/models)). Notes:
+
+- The API is called directly over REST (`v1beta/models/{model}:generateContent` in `Cuintable.Server/Services/GeminiClient.cs`) — no SDK to upgrade.
+- If an env var is unset, fallback defaults apply (defined in the `StatementAnalysisService` constructor, `Cuintable.Server/Services/StatementAnalysisService.cs`). When updating models permanently, update `.env.example` and those two fallbacks too.
+- After switching the extraction model, validate with a real statement PDF (upload or *Reanalizar*) and check the extracted totals against the printed ones — extraction quality varies more across models than advice quality.
 
 ### Production (Dokploy / Docker Compose)
 
@@ -175,7 +200,7 @@ dotnet run --project Cuintable.Tools
 The script will prompt you for:
 
 | Field | Description |
-|-------|-------------|
+| ----- | ----------- |
 | **Nombre completo** | Full name of the owner |
 | **Email** | Login email (must be unique) |
 | **Password** | Minimum 6 characters |
@@ -208,7 +233,7 @@ Available roles: `Contador` (access to taxable expenses and tax payments only) a
 A pre-loaded demo account is available for exploring the application:
 
 | | |
-|---|---|
+| --- | --- |
 | **Email** | `demo@migestor.com` |
 | **Password** | `Demo123!` |
 

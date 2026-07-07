@@ -20,7 +20,26 @@
       "Bash(dd if=dist/cuintable.client/browser/styles-JA43W7H5.css bs=1 skip=86530 count=200)",
       "Bash(dd if=dist/cuintable.client/browser/styles-JA43W7H5.css bs=1 skip=98760 count=320)",
       "Bash(cd \"/c/Users/sol_1/.claude/projects/c--Users-sol-1-Documents-Cuintable/memory\" && if [ -f MEMORY.md ]; then echo \"=== existing MEMORY.md ===\"; cat MEMORY.md; else echo \"NO MEMORY.md\"; fi)",
-      "Read(//c/Users/sol_1/.claude/projects/c--Users-sol-1-Documents-Cuintable/memory/**)"
+      "Read(//c/Users/sol_1/.claude/projects/c--Users-sol-1-Documents-Cuintable/memory/**)",
+      "Bash(python -)",
+      "Bash(node -e \"const j=require\\('c:/Users/sol_1/Documents/Cuintable/cuintable.client/src/public/i18n/en.json'\\); console.log\\(JSON.stringify\\(j.CREDIT_CARD,null,1\\)\\); console.log\\(Object.keys\\(j.DASHBOARD\\).length, 'dashboard keys'\\)\")",
+      "Bash(node -e \"const j=require\\('c:/Users/sol_1/Documents/Cuintable/cuintable.client/public/i18n/en.json'\\); console.log\\(JSON.stringify\\(j.CREDIT_CARD,null,1\\)\\); const d=Object.keys\\(j.DASHBOARD\\); console.log\\(d.slice\\(-25\\).join\\(', '\\)\\)\")",
+      "Bash(node scripts/validate_palette.js \"#fbbf24,#22d3ee\" --mode dark)",
+      "Bash(node scripts/validate_palette.js \"#f59e0b,#06b6d4\" --mode dark)",
+      "Bash(node scripts/validate_palette.js \"#d97706,#0891b2\" --mode dark)",
+      "Bash(node -e ' *)",
+      "Bash(npx ng *)",
+      "Bash(node -e \"const j=require\\('./angular.json'\\); console.log\\(JSON.stringify\\(j.projects[Object.keys\\(j.projects\\)[0]].architect.test, null, 2\\)\\)\")",
+      "Bash(npx prettier *)",
+      "Bash(python -c ' *)",
+      "Bash(dotnet format *)",
+      "Bash(pip install *)",
+      "Bash(python -m pip install --quiet pypdf)",
+      "Bash(python \"C:\\\\Users\\\\sol_1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-sol-1-Documents-Cuintable\\\\7e4592f6-9b2f-44f2-b504-1aa6e40a5792\\\\scratchpad\\\\add_i18n2.py\")",
+      "Bash(echo \"build exit: $?\")",
+      "Bash(python \"C:\\\\Users\\\\sol_1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-sol-1-Documents-Cuintable\\\\7e4592f6-9b2f-44f2-b504-1aa6e40a5792\\\\scratchpad\\\\test_extraction.py\")",
+      "PowerShell(dotnet build Cuintable.Server -v q --nologo)",
+      "PowerShell(dotnet test Cuintable.Server.Tests --nologo -v q)"
     ]
   }
 }

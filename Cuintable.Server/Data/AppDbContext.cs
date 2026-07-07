@@ -14,6 +14,8 @@ public class AppDbContext : DbContext
     public DbSet<Expense> Expenses => Set<Expense>();
     public DbSet<TaxableExpense> TaxableExpenses => Set<TaxableExpense>();
     public DbSet<TaxPayment> TaxPayments => Set<TaxPayment>();
+    public DbSet<CardStatement> CardStatements => Set<CardStatement>();
+    public DbSet<StatementTransaction> StatementTransactions => Set<StatementTransaction>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -148,6 +150,73 @@ public class AppDbContext : DbContext
             e.HasIndex(t => t.TenantId);
         });
 
+        // CardStatement
+        modelBuilder.Entity<CardStatement>(e =>
+        {
+            e.HasKey(s => s.Id);
+            e.Property(s => s.BankName).HasMaxLength(100);
+            e.Property(s => s.CardLastFour).HasMaxLength(4);
+            e.Property(s => s.PdfUrl).IsRequired();
+            e.Property(s => s.PreviousBalance).HasPrecision(18, 2);
+            e.Property(s => s.TotalPayments).HasPrecision(18, 2);
+            e.Property(s => s.TotalCharges).HasPrecision(18, 2);
+            e.Property(s => s.InterestCharged).HasPrecision(18, 2);
+            e.Property(s => s.FeesCharged).HasPrecision(18, 2);
+            e.Property(s => s.NewBalance).HasPrecision(18, 2);
+            e.Property(s => s.MinimumPayment).HasPrecision(18, 2);
+            e.Property(s => s.NoInterestPayment).HasPrecision(18, 2);
+            e.Property(s => s.CreditLimit).HasPrecision(18, 2);
+            e.Property(s => s.AvailableCredit).HasPrecision(18, 2);
+            e.Property(s => s.RawExtractionJson).HasColumnType("jsonb");
+            e.Property(s => s.AdviceJson).HasColumnType("jsonb");
+
+            e.HasOne(s => s.Tenant)
+                .WithMany()
+                .HasForeignKey(s => s.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(s => s.User)
+                .WithMany()
+                .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(s => s.CreditCard)
+                .WithMany()
+                .HasForeignKey(s => s.CreditCardId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            e.HasIndex(s => s.TenantId);
+            e.HasIndex(s => new { s.TenantId, s.PeriodYear, s.PeriodMonth });
+        });
+
+        // StatementTransaction
+        modelBuilder.Entity<StatementTransaction>(e =>
+        {
+            e.HasKey(t => t.Id);
+            e.Property(t => t.RawDescription).IsRequired();
+            e.Property(t => t.Merchant).IsRequired().HasMaxLength(200);
+            e.Property(t => t.AmountMXN).HasPrecision(18, 2);
+            e.Property(t => t.SuspiciousReason).HasMaxLength(200);
+
+            e.HasOne(t => t.Tenant)
+                .WithMany()
+                .HasForeignKey(t => t.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(t => t.Statement)
+                .WithMany(s => s.Transactions)
+                .HasForeignKey(t => t.StatementId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(t => t.MatchedExpense)
+                .WithMany()
+                .HasForeignKey(t => t.MatchedExpenseId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            e.HasIndex(t => t.TenantId);
+            e.HasIndex(t => t.StatementId);
+        });
+
         // TaxPayment
         modelBuilder.Entity<TaxPayment>(e =>
         {
@@ -194,6 +263,8 @@ public class AppDbContext : DbContext
             else if (entry.Entity is TaxableExpense taxable) taxable.UpdatedAt = DateTime.UtcNow;
             else if (entry.Entity is TaxPayment payment) payment.UpdatedAt = DateTime.UtcNow;
             else if (entry.Entity is User user) user.UpdatedAt = DateTime.UtcNow;
+            else if (entry.Entity is CardStatement statement) statement.UpdatedAt = DateTime.UtcNow;
+            else if (entry.Entity is StatementTransaction transaction) transaction.UpdatedAt = DateTime.UtcNow;
         }
     }
 }

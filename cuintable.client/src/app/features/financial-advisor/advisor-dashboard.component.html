@@ -1,0 +1,377 @@
+<div class="max-w-7xl mx-auto">
+  <!-- Header -->
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-white">{{ 'ADVISOR.TITLE' | translate }}</h1>
+      <p class="text-sm text-slate-500 mt-1">{{ 'ADVISOR.SUBTITLE' | translate }}</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <select
+        class="select select-bordered select-sm"
+        [(ngModel)]="month"
+        (change)="onPeriodChange()"
+      >
+        <option *ngFor="let m of months" [ngValue]="m">{{ getMonthKey(m) | translate }}</option>
+      </select>
+      <select
+        class="select select-bordered select-sm"
+        [(ngModel)]="year"
+        (change)="onPeriodChange()"
+      >
+        <option *ngFor="let y of years" [ngValue]="y">{{ y }}</option>
+      </select>
+      <button class="btn btn-primary btn-sm" (click)="showUpload = true">
+        <svg
+          class="w-4 h-4 mr-1"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+          />
+        </svg>
+        {{ 'ADVISOR.UPLOAD' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex items-center justify-center py-20">
+    <div
+      class="w-8 h-8 border-2 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"
+    ></div>
+  </div>
+
+  <!-- Month analytics -->
+  <ng-container *ngIf="!loading && dashboard as d">
+    <!-- Empty month -->
+    <div *ngIf="d.statementCount === 0" class="glass-card p-10 text-center mb-6">
+      <svg
+        class="w-12 h-12 mx-auto text-slate-600 mb-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="1"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+        />
+      </svg>
+      <p class="text-slate-400 text-sm">{{ 'ADVISOR.NO_DATA_MONTH' | translate }}</p>
+      <button class="btn btn-primary btn-sm mt-4" (click)="showUpload = true">
+        {{ 'ADVISOR.UPLOAD' | translate }}
+      </button>
+    </div>
+
+    <ng-container *ngIf="d.statementCount > 0">
+      <!-- KPI tiles -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="glass-card p-5">
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">
+            {{ 'ADVISOR.TOTAL_SPENT' | translate }}
+          </p>
+          <p class="text-2xl font-bold text-white mt-2">
+            {{ d.totalChargesMXN | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+          </p>
+          <p class="text-xs text-slate-500 mt-1" *ngIf="d.interestAndFeesMXN > 0">
+            {{ 'ADVISOR.INTEREST_FEES' | translate }}:
+            <span class="text-red-400">{{
+              d.interestAndFeesMXN | currency: 'MXN' : 'symbol-narrow' : '1.0-0'
+            }}</span>
+          </p>
+        </div>
+        <div class="glass-card p-5">
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">
+            {{ 'ADVISOR.ANT_EXPENSES' | translate }} 🐜
+          </p>
+          <p class="text-2xl font-bold text-amber-400 mt-2">
+            {{ d.antTotalMXN | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+          </p>
+          <p class="text-xs text-slate-500 mt-1">
+            {{ d.antAnnualProjectionMXN | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+            {{ 'ADVISOR.PER_YEAR' | translate }}
+          </p>
+        </div>
+        <div class="glass-card p-5">
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">
+            {{ 'ADVISOR.SUSPICIOUS' | translate }}
+          </p>
+          <p
+            class="text-2xl font-bold mt-2"
+            [class]="d.suspiciousPendingCount > 0 ? 'text-red-400' : 'text-emerald-400'"
+          >
+            {{ d.suspiciousPendingCount }}
+          </p>
+          <p class="text-xs text-slate-500 mt-1">
+            {{ 'ADVISOR.PENDING_REVIEW' | translate }} · {{ d.suspiciousCount }}
+            {{ 'ADVISOR.FLAGGED_TOTAL' | translate }}
+          </p>
+        </div>
+        <div class="glass-card p-5">
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">
+            {{ 'ADVISOR.SUBSCRIPTIONS' | translate }}
+          </p>
+          <p class="text-2xl font-bold text-white mt-2">
+            {{ d.subscriptionsMXN | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+          </p>
+          <p class="text-xs text-slate-500 mt-1">
+            {{ 'ADVISOR.MSI_LOAD' | translate }}:
+            {{ d.msiLoadMXN | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Category chart + ant clusters -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <div class="glass-card p-5 lg:col-span-2">
+          <h3 class="text-sm font-semibold text-white mb-4">
+            {{ 'ADVISOR.BY_CATEGORY' | translate }}
+          </h3>
+          <div class="h-72">
+            <canvas
+              baseChart
+              type="bar"
+              [data]="categoryChartData"
+              [options]="categoryChartOptions"
+            ></canvas>
+          </div>
+        </div>
+        <div class="glass-card p-5">
+          <h3 class="text-sm font-semibold text-white mb-1">
+            {{ 'ADVISOR.ANT_CLUSTERS' | translate }} 🐜
+          </h3>
+          <p class="text-xs text-slate-500 mb-4">{{ 'ADVISOR.ANT_CLUSTERS_DESC' | translate }}</p>
+          <p *ngIf="d.antClusters.length === 0" class="text-sm text-slate-500 py-6 text-center">
+            {{ 'ADVISOR.NO_ANT_EXPENSES' | translate }} 🎉
+          </p>
+          <div class="space-y-3 max-h-64 overflow-y-auto pr-1">
+            <div
+              *ngFor="let cluster of d.antClusters"
+              class="flex items-center justify-between text-sm bg-white/[0.03] rounded-lg px-3 py-2"
+            >
+              <div class="min-w-0">
+                <p class="text-slate-200 font-medium truncate">{{ cluster.merchant }}</p>
+                <p class="text-xs text-slate-500">
+                  {{ cluster.count }}× · {{ categoryKey(cluster.category) | translate }}
+                </p>
+              </div>
+              <div class="text-right shrink-0 ml-3">
+                <p class="text-amber-400 font-semibold">
+                  {{ cluster.totalMXN | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+                </p>
+                <p class="text-xs text-slate-500">
+                  {{ cluster.annualProjectionMXN | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+                  {{ 'ADVISOR.PER_YEAR' | translate }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trend + reconciliation -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <div class="glass-card p-5 lg:col-span-2">
+          <h3 class="text-sm font-semibold text-white mb-4">{{ 'ADVISOR.TREND' | translate }}</h3>
+          <div class="h-56">
+            <canvas
+              baseChart
+              type="line"
+              [data]="trendChartData"
+              [options]="trendChartOptions"
+            ></canvas>
+          </div>
+        </div>
+        <div class="glass-card p-5">
+          <h3 class="text-sm font-semibold text-white mb-1">
+            {{ 'ADVISOR.RECONCILIATION' | translate }}
+          </h3>
+          <p class="text-xs text-slate-500 mb-4">{{ 'ADVISOR.RECONCILIATION_DESC' | translate }}</p>
+          <ng-container *ngIf="d.reconciliation as r; else noRecon">
+            <div class="space-y-3 text-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">{{ 'ADVISOR.RECON_MATCHED' | translate }}</span>
+                <span class="text-emerald-400 font-semibold"
+                  >{{ r.matchedPayments }} ·
+                  {{ r.matchedAmountMXN | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}</span
+                >
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">{{
+                  'ADVISOR.RECON_UNMATCHED_STATEMENT' | translate
+                }}</span>
+                <span
+                  class="font-semibold"
+                  [class]="r.unmatchedStatementPayments > 0 ? 'text-amber-400' : 'text-slate-300'"
+                  >{{ r.unmatchedStatementPayments }} ·
+                  {{
+                    r.unmatchedStatementAmountMXN | currency: 'MXN' : 'symbol-narrow' : '1.0-0'
+                  }}</span
+                >
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">{{
+                  'ADVISOR.RECON_UNMATCHED_PLATFORM' | translate
+                }}</span>
+                <span
+                  class="font-semibold"
+                  [class]="r.unmatchedPlatformPayments > 0 ? 'text-amber-400' : 'text-slate-300'"
+                  >{{ r.unmatchedPlatformPayments }} ·
+                  {{
+                    r.unmatchedPlatformAmountMXN | currency: 'MXN' : 'symbol-narrow' : '1.0-0'
+                  }}</span
+                >
+              </div>
+              <p
+                *ngIf="r.unmatchedStatementPayments === 0 && r.unmatchedPlatformPayments === 0"
+                class="text-xs text-emerald-400/90 pt-2 border-t border-white/[0.06]"
+              >
+                ✓ {{ 'ADVISOR.RECON_OK' | translate }}
+              </p>
+            </div>
+          </ng-container>
+          <ng-template #noRecon>
+            <p class="text-sm text-slate-500 py-6 text-center">
+              {{ 'COMMON.NO_DATA' | translate }}
+            </p>
+          </ng-template>
+        </div>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <!-- Statements list -->
+  <div *ngIf="!loading" class="glass-card p-5">
+    <h3 class="text-sm font-semibold text-white mb-4">
+      {{ 'ADVISOR.STATEMENTS' | translate }}
+      <span class="text-slate-500 font-normal">({{ statements.length }})</span>
+    </h3>
+
+    <p *ngIf="statements.length === 0" class="text-sm text-slate-500 py-6 text-center">
+      {{ 'ADVISOR.NO_STATEMENTS' | translate }}
+    </p>
+
+    <div *ngIf="statements.length > 0" class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left text-xs text-slate-500 border-b border-white/[0.06]">
+            <th class="pb-2 pr-4 font-medium">{{ 'ADVISOR.PERIOD' | translate }}</th>
+            <th class="pb-2 pr-4 font-medium">{{ 'NAV.CREDIT_CARDS' | translate }}</th>
+            <th class="pb-2 pr-4 font-medium text-right">
+              {{ 'ADVISOR.TOTAL_SPENT' | translate }}
+            </th>
+            <th class="pb-2 pr-4 font-medium text-center">🐜</th>
+            <th class="pb-2 pr-4 font-medium text-center">⚠️</th>
+            <th class="pb-2 pr-4 font-medium">{{ 'COMMON.STATUS' | translate }}</th>
+            <th class="pb-2 font-medium"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let s of statements"
+            class="border-b border-white/[0.04] hover:bg-white/[0.03] cursor-pointer transition-colors"
+            (click)="openStatement(s)"
+          >
+            <td class="py-3 pr-4 text-slate-200 font-medium">{{ monthLabel(s) }}</td>
+            <td class="py-3 pr-4 text-slate-400">{{ cardLabel(s) }}</td>
+            <td class="py-3 pr-4 text-right text-slate-200">
+              {{
+                s.totalCharges !== null
+                  ? (s.totalCharges | currency: 'MXN' : 'symbol-narrow' : '1.0-0')
+                  : '—'
+              }}
+            </td>
+            <td class="py-3 pr-4 text-center text-amber-400">{{ s.antExpenseCount || '' }}</td>
+            <td class="py-3 pr-4 text-center text-red-400">{{ s.suspiciousCount || '' }}</td>
+            <td class="py-3 pr-4">
+              <span
+                class="text-xs font-medium px-2 py-1 rounded-md"
+                [class]="
+                  s.status === StatementStatus.Completed
+                    ? 'badge-glow-success'
+                    : s.status === StatementStatus.Failed
+                      ? 'badge-glow-danger'
+                      : 'bg-white/[0.06] text-slate-300'
+                "
+                [title]="s.errorMessage ?? ''"
+              >
+                {{ statusKey(s.status) | translate }}
+              </span>
+            </td>
+            <td class="py-3 text-right whitespace-nowrap">
+              <button
+                *ngIf="s.status === StatementStatus.Failed"
+                class="btn btn-ghost btn-xs text-slate-400 hover:text-cyan-400"
+                [disabled]="reprocessingId === s.id"
+                (click)="reprocess(s, $event)"
+              >
+                <span
+                  *ngIf="reprocessingId === s.id"
+                  class="w-3 h-3 border border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin inline-block mr-1"
+                ></span>
+                {{ 'ADVISOR.REPROCESS' | translate }}
+              </button>
+              <button
+                class="btn btn-ghost btn-xs text-slate-400 hover:text-red-400"
+                (click)="confirmDelete(s, $event)"
+              >
+                {{ 'COMMON.DELETE' | translate }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Upload modal -->
+  <app-statement-upload
+    *ngIf="showUpload"
+    [cards]="cards"
+    (closed)="showUpload = false"
+    (uploaded)="onUploaded($event)"
+  ></app-statement-upload>
+
+  <!-- Delete confirmation -->
+  <div *ngIf="deleting" class="modal modal-open">
+    <div class="modal-overlay" (click)="deleting = null"></div>
+    <div class="modal-content w-full max-w-sm p-6">
+      <div class="text-center">
+        <div
+          class="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center"
+          style="background: rgba(239, 68, 68, 0.12)"
+        >
+          <svg
+            class="w-6 h-6 text-red-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+            />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-white mb-2">{{ 'COMMON.DELETE' | translate }}</h3>
+        <p class="text-sm text-slate-400 mb-6">{{ 'COMMON.CONFIRM_DELETE' | translate }}</p>
+      </div>
+      <div class="flex gap-3">
+        <button class="btn btn-ghost flex-1" (click)="deleting = null">
+          {{ 'COMMON.CANCEL' | translate }}
+        </button>
+        <button class="btn btn-error flex-1" (click)="deleteStatement()">
+          {{ 'COMMON.DELETE' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

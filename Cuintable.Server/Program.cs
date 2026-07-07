@@ -31,6 +31,23 @@ if (!string.IsNullOrEmpty(jwtKey))
     builder.Configuration["Jwt:Key"] = jwtKey;
 }
 
+// Gemini (Asesor financiero)
+var geminiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY");
+if (!string.IsNullOrEmpty(geminiKey))
+{
+    builder.Configuration["Gemini:ApiKey"] = geminiKey;
+}
+var geminiExtractionModel = Environment.GetEnvironmentVariable("GEMINI_EXTRACTION_MODEL");
+if (!string.IsNullOrEmpty(geminiExtractionModel))
+{
+    builder.Configuration["Gemini:ExtractionModel"] = geminiExtractionModel;
+}
+var geminiAdviceModel = Environment.GetEnvironmentVariable("GEMINI_ADVICE_MODEL");
+if (!string.IsNullOrEmpty(geminiAdviceModel))
+{
+    builder.Configuration["Gemini:AdviceModel"] = geminiAdviceModel;
+}
+
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -63,6 +80,9 @@ builder.Services.AddScoped<ITaxableExpenseService, TaxableExpenseService>();
 builder.Services.AddScoped<IResicoTaxService, ResicoTaxService>();
 builder.Services.AddScoped<ITaxPaymentService, TaxPaymentService>();
 builder.Services.AddSingleton<IFileStorageService, GcsFileStorageService>();
+builder.Services.AddHttpClient<IGeminiClient, GeminiClient>();
+builder.Services.AddScoped<IStatementAnalysisService, StatementAnalysisService>();
+builder.Services.AddScoped<IFinancialAdvisorService, FinancialAdvisorService>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 // Controllers + Swagger

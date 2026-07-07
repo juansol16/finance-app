@@ -1,5 +1,9 @@
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { NgModule, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import {
+  NgModule,
+  provideBrowserGlobalErrorListeners,
+  provideZoneChangeDetection,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -22,10 +26,10 @@ import { TaxableExpenseListComponent } from './features/taxable-expenses/taxable
 
 import { TaxableExpenseFormComponent } from './features/taxable-expenses/taxable-expense-form.component';
 import { DashboardModule } from './features/dashboard/dashboard.module';
+import { FinancialAdvisorModule } from './features/financial-advisor/financial-advisor.module';
 import { TaxPaymentsModule } from './features/tax-payments/tax-payments.module';
 import { LayoutsModule } from './layouts/layouts.module';
 import { SharedModule } from './shared/shared.module';
-
 
 @NgModule({
   declarations: [
@@ -38,7 +42,7 @@ import { SharedModule } from './shared/shared.module';
     ExpenseListComponent,
     ExpenseFormComponent,
     TaxableExpenseListComponent,
-    TaxableExpenseFormComponent
+    TaxableExpenseFormComponent,
   ],
   imports: [
     BrowserModule,
@@ -46,6 +50,7 @@ import { SharedModule } from './shared/shared.module';
     FormsModule,
     AppRoutingModule,
     DashboardModule,
+    FinancialAdvisorModule,
     TaxPaymentsModule,
     LayoutsModule,
     SharedModule,
@@ -53,14 +58,14 @@ import { SharedModule } from './shared/shared.module';
     ToastrModule.forRoot(),
     TranslateModule.forRoot({
       fallbackLang: 'en',
-      loader: provideTranslateHttpLoader({ prefix: '/i18n/' })
-    })
+      loader: provideTranslateHttpLoader({ prefix: '/i18n/' }),
+    }),
   ],
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideBrowserGlobalErrorListeners(),
-    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
   ],
-  bootstrap: [App]
+  bootstrap: [App],
 })
-export class AppModule { }
+export class AppModule {}

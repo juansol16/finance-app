@@ -10,6 +10,8 @@ import { ExpenseListComponent } from './features/expenses/expense-list.component
 import { TaxableExpenseListComponent } from './features/taxable-expenses/taxable-expense-list.component';
 import { TaxPaymentListComponent } from './features/tax-payments/tax-payment-list/tax-payment-list.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
+import { AdvisorDashboardComponent } from './features/financial-advisor/advisor-dashboard.component';
+import { StatementDetailComponent } from './features/financial-advisor/statement-detail.component';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 
 const routes: Routes = [
@@ -20,20 +22,62 @@ const routes: Routes = [
     component: MainLayoutComponent,
     canActivate: [AuthGuard],
     children: [
-      { path: 'dashboard', component: DashboardComponent, canActivate: [RoleGuard], data: { roles: ['Owner', 'Pareja'] } },
-      { path: 'incomes', component: IncomeListComponent, canActivate: [RoleGuard], data: { roles: ['Owner'] } },
-      { path: 'credit-cards', component: CreditCardListComponent, canActivate: [RoleGuard], data: { roles: ['Owner', 'Pareja'] } },
-      { path: 'expenses', component: ExpenseListComponent, canActivate: [RoleGuard], data: { roles: ['Owner', 'Pareja'] } },
-      { path: 'taxable-expenses', component: TaxableExpenseListComponent, canActivate: [RoleGuard], data: { roles: ['Owner', 'Contador', 'Pareja'] } },
-      { path: 'tax-payments', component: TaxPaymentListComponent, canActivate: [RoleGuard], data: { roles: ['Owner', 'Contador', 'Pareja'] } },
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
-    ]
+      {
+        path: 'dashboard',
+        component: DashboardComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['Owner', 'Pareja'] },
+      },
+      {
+        path: 'incomes',
+        component: IncomeListComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['Owner'] },
+      },
+      {
+        path: 'credit-cards',
+        component: CreditCardListComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['Owner', 'Pareja'] },
+      },
+      {
+        path: 'expenses',
+        component: ExpenseListComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['Owner', 'Pareja'] },
+      },
+      {
+        path: 'taxable-expenses',
+        component: TaxableExpenseListComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['Owner', 'Contador', 'Pareja'] },
+      },
+      {
+        path: 'tax-payments',
+        component: TaxPaymentListComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['Owner', 'Contador', 'Pareja'] },
+      },
+      {
+        path: 'financial-advisor',
+        component: AdvisorDashboardComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['Owner', 'Pareja'] },
+      },
+      {
+        path: 'financial-advisor/statements/:id',
+        component: StatementDetailComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['Owner', 'Pareja'] },
+      },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+    ],
   },
-  { path: '**', redirectTo: '/dashboard' }
+  { path: '**', redirectTo: '/dashboard' },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}
