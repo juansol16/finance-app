@@ -36,7 +36,9 @@ public class CreditCardService : ICreditCardService
             UserId = userId,
             Bank = request.Bank,
             Nickname = request.Nickname,
-            LastFourDigits = request.LastFourDigits
+            LastFourDigits = request.LastFourDigits,
+            CutoffDay = request.CutoffDay,
+            PaymentDueDay = request.PaymentDueDay
         };
 
         _db.CreditCards.Add(card);
@@ -53,6 +55,8 @@ public class CreditCardService : ICreditCardService
         card.Bank = request.Bank;
         card.Nickname = request.Nickname;
         card.LastFourDigits = request.LastFourDigits;
+        card.CutoffDay = request.CutoffDay;
+        card.PaymentDueDay = request.PaymentDueDay;
         card.IsActive = request.IsActive;
 
         await _db.SaveChangesAsync();
@@ -76,6 +80,8 @@ public class CreditCardService : ICreditCardService
         Bank = card.Bank,
         Nickname = card.Nickname,
         LastFourDigits = card.LastFourDigits,
+        CutoffDay = card.CutoffDay,
+        PaymentDueDay = card.PaymentDueDay,
         IsActive = card.IsActive,
         CreatedAt = card.CreatedAt
     };

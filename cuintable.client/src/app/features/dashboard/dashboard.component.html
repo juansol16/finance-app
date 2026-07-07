@@ -3,41 +3,69 @@
   <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
     <div>
       <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-        {{ greetingKey | translate }}<ng-container *ngIf="firstName">, <span class="text-gradient-primary">{{ firstName }}</span></ng-container>
+        {{ greetingKey | translate
+        }}<ng-container *ngIf="firstName"
+          >, <span class="text-gradient-primary">{{ firstName }}</span></ng-container
+        >
         <span class="inline-block hover-wiggle">👋</span>
       </h1>
       <p class="text-sm text-slate-400 mt-1.5">{{ 'DASHBOARD.GREETING_SUB' | translate }}</p>
     </div>
 
     <!-- Live USD/MXN indicator -->
-    <div *ngIf="paidTodayProjection as proj" class="px-4 py-2.5 rounded-2xl border border-white/[0.06] bg-white/[0.03]">
+    <div
+      *ngIf="paidTodayProjection as proj"
+      class="px-4 py-2.5 rounded-2xl border border-white/[0.06] bg-white/[0.03]"
+    >
       <div class="flex items-center gap-2 text-xs">
-        <span class="text-slate-400 font-semibold uppercase tracking-wider">{{ 'DASHBOARD.FX_TODAY' | translate }}</span>
-        <span class="text-white font-bold text-sm font-mono">{{ currentFx!.rate | number:'1.2-4' }}</span>
-        <span class="font-semibold" [class]="proj.rateChange >= 0 ? 'text-emerald-400' : 'text-red-400'">
+        <span class="text-slate-400 font-semibold uppercase tracking-wider">{{
+          'DASHBOARD.FX_TODAY' | translate
+        }}</span>
+        <span class="text-white font-bold text-sm font-mono">{{
+          currentFx!.rate | number: '1.2-4'
+        }}</span>
+        <span
+          class="font-semibold"
+          [class]="proj.rateChange >= 0 ? 'text-emerald-400' : 'text-red-400'"
+        >
           <span *ngIf="proj.rateChange >= 0">&#8599;</span>
           <span *ngIf="proj.rateChange < 0">&#8600;</span>
-          {{ proj.rateChange >= 0 ? '+' : '' }}{{ proj.rateChange | percent:'1.1-1' }}
+          {{ proj.rateChange >= 0 ? '+' : '' }}{{ proj.rateChange | percent: '1.1-1' }}
         </span>
         <span class="text-slate-500">{{ 'DASHBOARD.FX_VS_LAST' | translate }}</span>
       </div>
       <div class="text-xs text-slate-400 mt-1.5">
-        {{ 'DASHBOARD.FX_IF_PAID_TODAY' | translate }} ({{ lastUsdIncome!.takeHomePayUSD | currency:'USD':'symbol-narrow':'1.0-0' }} USD):
-        <span class="text-blue-300 font-bold font-mono">{{ proj.gross | currency:'MXN':'symbol-narrow':'1.0-0' }}</span>
+        {{ 'DASHBOARD.FX_IF_PAID_TODAY' | translate }} ({{
+          lastUsdIncome!.takeHomePayUSD | currency: 'USD' : 'symbol-narrow' : '1.0-0'
+        }}
+        USD):
+        <span class="text-blue-300 font-bold font-mono">{{
+          proj.gross | currency: 'MXN' : 'symbol-narrow' : '1.0-0'
+        }}</span>
         <span class="text-slate-600">&middot;</span>
         {{ 'DASHBOARD.FX_NET' | translate }}
-        <span class="text-emerald-400 font-bold font-mono">{{ proj.net | currency:'MXN':'symbol-narrow':'1.0-0' }}</span>
+        <span class="text-emerald-400 font-bold font-mono">{{
+          proj.net | currency: 'MXN' : 'symbol-narrow' : '1.0-0'
+        }}</span>
       </div>
     </div>
 
     <!-- Period filters -->
-    <div class="flex items-center gap-2 p-1.5 rounded-2xl border border-white/[0.06] bg-white/[0.03]">
-      <select [(ngModel)]="currentMonth" (change)="onMonthChange($event)"
-        class="select select-sm rounded-xl bg-white/[0.04] border-white/[0.08] text-slate-200 font-semibold text-sm min-h-0 h-9">
+    <div
+      class="flex items-center gap-2 p-1.5 rounded-2xl border border-white/[0.06] bg-white/[0.03]"
+    >
+      <select
+        [(ngModel)]="currentMonth"
+        (change)="onMonthChange($event)"
+        class="select select-sm rounded-xl bg-white/[0.04] border-white/[0.08] text-slate-200 font-semibold text-sm min-h-0 h-9"
+      >
         <option *ngFor="let m of months" [value]="m">{{ getMonthKey(m) | translate }}</option>
       </select>
-      <select [(ngModel)]="currentYear" (change)="onYearChange($event)"
-        class="select select-sm rounded-xl bg-white/[0.04] border-white/[0.08] text-slate-200 font-semibold text-sm min-h-0 h-9">
+      <select
+        [(ngModel)]="currentYear"
+        (change)="onYearChange($event)"
+        class="select select-sm rounded-xl bg-white/[0.04] border-white/[0.08] text-slate-200 font-semibold text-sm min-h-0 h-9"
+      >
         <option *ngFor="let y of years" [value]="y">{{ y }}</option>
       </select>
     </div>
@@ -45,57 +73,98 @@
 
   <!-- Loading -->
   <div *ngIf="loading" class="flex flex-col items-center justify-center py-20 gap-3">
-    <div class="w-9 h-9 border-[3px] border-blue-500/25 border-t-blue-400 rounded-full animate-spin"></div>
+    <div
+      class="w-9 h-9 border-[3px] border-blue-500/25 border-t-blue-400 rounded-full animate-spin"
+    ></div>
     <span class="text-xs text-slate-500">{{ 'COMMON.LOADING' | translate }}</span>
   </div>
 
   <!-- Stat Cards -->
-  <div *ngIf="summary && !loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+  <div
+    *ngIf="summary && !loading"
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8"
+  >
     <!-- Ingresos Brutos (Mes) -->
     <div class="stat-card stat-success animate-fade-in-up">
-      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 block">{{ 'DASHBOARD.GROSS_INCOME' | translate }}</span>
-      <p class="text-2xl font-bold text-emerald-400">{{ summary.totalIncome | currency:'MXN':'symbol-narrow':'1.0-0' }}</p>
-      <span class="text-xs mt-2 block" [class]="summary.incomeChangePercent >= 0 ? 'text-emerald-400' : 'text-red-400'">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 block">{{
+        'DASHBOARD.GROSS_INCOME' | translate
+      }}</span>
+      <p class="text-2xl font-bold text-emerald-400">
+        {{ summary.totalIncome | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+      </p>
+      <span
+        class="text-xs mt-2 block"
+        [class]="summary.incomeChangePercent >= 0 ? 'text-emerald-400' : 'text-red-400'"
+      >
         <span *ngIf="summary.incomeChangePercent >= 0">&#8599;</span>
         <span *ngIf="summary.incomeChangePercent < 0">&#8600;</span>
-        {{ summary.incomeChangePercent >= 0 ? '+' : '' }}{{ summary.incomeChangePercent | percent:'1.0-0' }} {{ 'DASHBOARD.VS_PREV_MONTH' | translate }}
+        {{ summary.incomeChangePercent >= 0 ? '+' : ''
+        }}{{ summary.incomeChangePercent | percent: '1.0-0' }}
+        {{ 'DASHBOARD.VS_PREV_MONTH' | translate }}
       </span>
     </div>
 
     <!-- Gastos Deducibles -->
-    <div class="stat-card stat-danger animate-fade-in-up" style="animation-delay: 0.05s;">
-      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 block">{{ 'DASHBOARD.DEDUCTIBLE_EXPENSES' | translate }}</span>
-      <p class="text-2xl font-bold text-red-400">{{ summary.totalDeductibleExpenses | currency:'MXN':'symbol-narrow':'1.0-0' }}</p>
-      <span class="text-xs text-slate-400 mt-2 block">{{ summary.deductiblePercent | percent:'1.1-1' }} {{ 'DASHBOARD.OF_INCOME' | translate }}</span>
+    <div class="stat-card stat-danger animate-fade-in-up" style="animation-delay: 0.05s">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 block">{{
+        'DASHBOARD.DEDUCTIBLE_EXPENSES' | translate
+      }}</span>
+      <p class="text-2xl font-bold text-red-400">
+        {{ summary.totalDeductibleExpenses | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+      </p>
+      <span class="text-xs text-slate-400 mt-2 block"
+        >{{ summary.deductiblePercent | percent: '1.1-1' }}
+        {{ 'DASHBOARD.OF_INCOME' | translate }}</span
+      >
     </div>
 
     <!-- Utilidad Neta (Real) -->
-    <div class="stat-card stat-info animate-fade-in-up" style="animation-delay: 0.1s;">
-      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 block">{{ 'DASHBOARD.NET_PROFIT' | translate }}</span>
-      <p class="text-2xl font-bold text-indigo-300">{{ summary.taxableBase | currency:'MXN':'symbol-narrow':'1.0-0' }}</p>
-      <span class="text-xs text-slate-400 mt-2 block">{{ 'DASHBOARD.MARGIN_OF' | translate }} {{ summary.profitMargin | percent:'1.1-1' }}</span>
+    <div class="stat-card stat-info animate-fade-in-up" style="animation-delay: 0.1s">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 block">{{
+        'DASHBOARD.NET_PROFIT' | translate
+      }}</span>
+      <p class="text-2xl font-bold text-indigo-300">
+        {{ summary.taxableBase | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+      </p>
+      <span class="text-xs text-slate-400 mt-2 block"
+        >{{ 'DASHBOARD.MARGIN_OF' | translate }} {{ summary.profitMargin | percent: '1.1-1' }}</span
+      >
     </div>
 
     <!-- ISR Estimado -->
-    <div class="stat-card stat-warning animate-fade-in-up" style="animation-delay: 0.15s;">
-      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 block">{{ 'DASHBOARD.ESTIMATED_ISR' | translate }}</span>
-      <p class="text-2xl font-bold text-amber-400">{{ summary.isrNetDue | currency:'MXN':'symbol-narrow':'1.0-0' }}</p>
+    <div class="stat-card stat-warning animate-fade-in-up" style="animation-delay: 0.15s">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 block">{{
+        'DASHBOARD.ESTIMATED_ISR' | translate
+      }}</span>
+      <p class="text-2xl font-bold text-amber-400">
+        {{ summary.isrNetDue | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+      </p>
       <span class="inline-block mt-2 px-2 py-0.5 text-xs rounded-md badge-glow-warning">
-        {{ 'DASHBOARD.TAX_RATE' | translate }} {{ summary.effectiveTaxRate | percent:'1.2-2' }}
+        {{ 'DASHBOARD.TAX_RATE' | translate }} {{ summary.effectiveTaxRate | percent: '1.2-2' }}
       </span>
       <span *ngIf="summary.isrWithheld > 0" class="text-xs text-slate-400 mt-1 block">
-        {{ 'DASHBOARD.WITHHELD' | translate }}: &minus;{{ summary.isrWithheld | currency:'MXN':'symbol-narrow':'1.0-0' }}
+        {{ 'DASHBOARD.WITHHELD' | translate }}: &minus;{{
+          summary.isrWithheld | currency: 'MXN' : 'symbol-narrow' : '1.0-0'
+        }}
       </span>
     </div>
 
     <!-- IVA por Pagar -->
-    <div class="stat-card stat-primary animate-fade-in-up" style="animation-delay: 0.2s;">
-      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 block">{{ 'DASHBOARD.ESTIMATED_IVA' | translate }}</span>
-      <p class="text-2xl font-bold text-blue-300">{{ summary.ivaNetDue | currency:'MXN':'symbol-narrow':'1.0-0' }}</p>
+    <div class="stat-card stat-primary animate-fade-in-up" style="animation-delay: 0.2s">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 block">{{
+        'DASHBOARD.ESTIMATED_IVA' | translate
+      }}</span>
+      <p class="text-2xl font-bold text-blue-300">
+        {{ summary.ivaNetDue | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+      </p>
       <span *ngIf="summary.ivaWithheld > 0" class="text-xs text-slate-400 mt-2 block">
-        {{ 'DASHBOARD.WITHHELD' | translate }}: &minus;{{ summary.ivaWithheld | currency:'MXN':'symbol-narrow':'1.0-0' }}
+        {{ 'DASHBOARD.WITHHELD' | translate }}: &minus;{{
+          summary.ivaWithheld | currency: 'MXN' : 'symbol-narrow' : '1.0-0'
+        }}
       </span>
-      <span *ngIf="summary.ivaWithheld <= 0" class="text-xs text-slate-400 mt-2 block">{{ 'DASHBOARD.CURRENT_MONTH' | translate }}</span>
+      <span *ngIf="summary.ivaWithheld <= 0" class="text-xs text-slate-400 mt-2 block">{{
+        'DASHBOARD.CURRENT_MONTH' | translate
+      }}</span>
     </div>
   </div>
 
@@ -105,12 +174,27 @@
     <div class="flex items-center gap-2">
       <span class="text-xs text-slate-400">{{ 'DASHBOARD.CHART_PERIOD' | translate }}:</span>
       <div class="join">
-        <button class="join-item btn btn-xs" [class.btn-active]="chartPeriod === 12"
-          (click)="chartPeriod = 12; onChartPeriodChange()">{{ 'DASHBOARD.LAST_1_YEAR' | translate }}</button>
-        <button class="join-item btn btn-xs" [class.btn-active]="chartPeriod === 24"
-          (click)="chartPeriod = 24; onChartPeriodChange()">{{ 'DASHBOARD.LAST_2_YEARS' | translate }}</button>
-        <button class="join-item btn btn-xs" [class.btn-active]="chartPeriod === 60"
-          (click)="chartPeriod = 60; onChartPeriodChange()">{{ 'DASHBOARD.LAST_5_YEARS' | translate }}</button>
+        <button
+          class="join-item btn btn-xs"
+          [class.btn-active]="chartPeriod === 12"
+          (click)="chartPeriod = 12; onChartPeriodChange()"
+        >
+          {{ 'DASHBOARD.LAST_1_YEAR' | translate }}
+        </button>
+        <button
+          class="join-item btn btn-xs"
+          [class.btn-active]="chartPeriod === 24"
+          (click)="chartPeriod = 24; onChartPeriodChange()"
+        >
+          {{ 'DASHBOARD.LAST_2_YEARS' | translate }}
+        </button>
+        <button
+          class="join-item btn btn-xs"
+          [class.btn-active]="chartPeriod === 60"
+          (click)="chartPeriod = 60; onChartPeriodChange()"
+        >
+          {{ 'DASHBOARD.LAST_5_YEARS' | translate }}
+        </button>
       </div>
     </div>
   </div>
@@ -121,7 +205,9 @@
     <div class="lg:col-span-2 glass-card p-6">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h2 class="text-lg font-semibold text-white">{{ 'DASHBOARD.REAL_CASH_FLOW' | translate }}</h2>
+          <h2 class="text-lg font-semibold text-white">
+            {{ 'DASHBOARD.REAL_CASH_FLOW' | translate }}
+          </h2>
           <p class="text-sm text-slate-500">{{ 'DASHBOARD.CASH_FLOW_DESC' | translate }}</p>
         </div>
         <div class="flex gap-4 text-xs">
@@ -136,53 +222,96 @@
         </div>
       </div>
 
-      <div style="display: block; height: 300px;">
-        <canvas baseChart [data]="cashFlowChartData" [options]="cashFlowChartOptions" [type]="'bar'">
+      <div style="display: block; height: 300px">
+        <canvas
+          baseChart
+          [data]="cashFlowChartData"
+          [options]="cashFlowChartOptions"
+          [type]="'bar'"
+        >
         </canvas>
       </div>
     </div>
 
     <!-- RESICO Annual Limit Gauge (1/3) -->
     <div class="glass-card p-6 flex flex-col items-center justify-center">
-      <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-6">{{ 'DASHBOARD.RESICO_ANNUAL_LIMIT' | translate }}</h3>
+      <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-6">
+        {{ 'DASHBOARD.RESICO_ANNUAL_LIMIT' | translate }}
+      </h3>
 
       <!-- Semi-circle gauge -->
       <div class="relative w-48 h-24 mb-4">
         <svg viewBox="0 0 200 100" class="w-full h-full">
           <!-- Background arc -->
-          <path d="M 10 100 A 90 90 0 0 1 190 100" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="16" stroke-linecap="round" />
+          <path
+            d="M 10 100 A 90 90 0 0 1 190 100"
+            fill="none"
+            stroke="rgba(255,255,255,0.08)"
+            stroke-width="16"
+            stroke-linecap="round"
+          />
           <!-- Progress arc -->
-          <path d="M 10 100 A 90 90 0 0 1 190 100" fill="none"
-            [attr.stroke]="resicoPercent >= 90 ? '#ef4444' : resicoPercent >= 70 ? '#f59e0b' : '#10b981'"
-            stroke-width="16" stroke-linecap="round"
-            [attr.stroke-dasharray]="(resicoPercent / 100 * 283) + ' 283'" />
+          <path
+            d="M 10 100 A 90 90 0 0 1 190 100"
+            fill="none"
+            [attr.stroke]="
+              resicoPercent >= 90 ? '#ef4444' : resicoPercent >= 70 ? '#f59e0b' : '#10b981'
+            "
+            stroke-width="16"
+            stroke-linecap="round"
+            [attr.stroke-dasharray]="(resicoPercent / 100) * 283 + ' 283'"
+          />
         </svg>
         <!-- Percentage text -->
         <div class="absolute inset-0 flex flex-col items-center justify-end pb-0">
-          <span class="text-3xl font-bold"
-            [class]="resicoPercent >= 90 ? 'text-red-400' : resicoPercent >= 70 ? 'text-amber-400' : 'text-emerald-400'">
-            {{ resicoPercent | number:'1.0-0' }}%
+          <span
+            class="text-3xl font-bold"
+            [class]="
+              resicoPercent >= 90
+                ? 'text-red-400'
+                : resicoPercent >= 70
+                  ? 'text-amber-400'
+                  : 'text-emerald-400'
+            "
+          >
+            {{ resicoPercent | number: '1.0-0' }}%
           </span>
-          <span class="text-xs text-slate-500 uppercase tracking-wider">{{ 'DASHBOARD.RESICO_EXERCISED' | translate }}</span>
+          <span class="text-xs text-slate-500 uppercase tracking-wider">{{
+            'DASHBOARD.RESICO_EXERCISED' | translate
+          }}</span>
         </div>
       </div>
 
       <!-- Accumulated amount -->
       <div class="w-full mt-4">
         <div class="flex justify-between text-xs mb-2">
-          <span class="text-slate-400">{{ 'DASHBOARD.RESICO_ACCUMULATED' | translate }} {{ currentYear }}:</span>
-          <span class="text-white font-semibold">{{ summary.annualAccumulatedIncome | currency:'MXN':'symbol-narrow':'1.0-0' }}</span>
+          <span class="text-slate-400"
+            >{{ 'DASHBOARD.RESICO_ACCUMULATED' | translate }} {{ currentYear }}:</span
+          >
+          <span class="text-white font-semibold">{{
+            summary.annualAccumulatedIncome | currency: 'MXN' : 'symbol-narrow' : '1.0-0'
+          }}</span>
         </div>
         <!-- Progress bar -->
         <div class="w-full h-2 rounded-full bg-white/[0.08] overflow-hidden">
-          <div class="h-full rounded-full transition-all duration-500"
+          <div
+            class="h-full rounded-full transition-all duration-500"
             [style.width.%]="resicoPercent"
-            [class]="resicoPercent >= 90 ? 'bg-red-500' : resicoPercent >= 70 ? 'bg-amber-500' : 'bg-emerald-500'">
-          </div>
+            [class]="
+              resicoPercent >= 90
+                ? 'bg-red-500'
+                : resicoPercent >= 70
+                  ? 'bg-amber-500'
+                  : 'bg-emerald-500'
+            "
+          ></div>
         </div>
         <div class="flex justify-between text-xs mt-2">
           <span class="text-slate-500">$0</span>
-          <span class="text-slate-500">{{ 'DASHBOARD.RESICO_SAT_LIMIT' | translate }}: {{ RESICO_LIMIT | currency:'MXN':'symbol-narrow':'1.0-0' }}</span>
+          <span class="text-slate-500"
+            >{{ 'DASHBOARD.RESICO_SAT_LIMIT' | translate }}:
+            {{ RESICO_LIMIT | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}</span
+          >
         </div>
       </div>
     </div>
@@ -193,7 +322,9 @@
     <!-- Operations Breakdown (2/3) -->
     <div class="lg:col-span-2 glass-card p-6">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-white">{{ 'DASHBOARD.OPERATIONS_TITLE' | translate }}</h2>
+        <h2 class="text-lg font-semibold text-white">
+          {{ 'DASHBOARD.OPERATIONS_TITLE' | translate }}
+        </h2>
       </div>
 
       <div class="overflow-x-auto">
@@ -201,21 +332,41 @@
           <thead>
             <tr>
               <th class="text-slate-400 text-xs">{{ 'DASHBOARD.MONTH' | translate }}</th>
-              <th class="text-right text-slate-400 text-xs">{{ 'DASHBOARD.INCOME_LABEL' | translate }}</th>
-              <th class="text-right text-slate-400 text-xs">{{ 'DASHBOARD.OPS_DEDUCTIBLE' | translate }}</th>
+              <th class="text-right text-slate-400 text-xs">
+                {{ 'DASHBOARD.INCOME_LABEL' | translate }}
+              </th>
+              <th class="text-right text-slate-400 text-xs">
+                {{ 'DASHBOARD.OPS_DEDUCTIBLE' | translate }}
+              </th>
               <th class="text-right text-slate-400 text-xs">ISR</th>
-              <th class="text-right text-slate-400 text-xs">{{ 'DASHBOARD.OPS_IVA_NET' | translate }}</th>
-              <th class="text-right text-slate-400 text-xs">{{ 'DASHBOARD.OPS_PROFIT' | translate }}</th>
+              <th class="text-right text-slate-400 text-xs">
+                {{ 'DASHBOARD.OPS_IVA_NET' | translate }}
+              </th>
+              <th class="text-right text-slate-400 text-xs">
+                {{ 'DASHBOARD.OPS_PROFIT' | translate }}
+              </th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let op of operations" class="border-t border-white/[0.04]">
-              <td class="text-white font-medium">{{ getMonthKey(op.month) | translate }} {{ op.year }}</td>
-              <td class="text-right font-mono text-emerald-400">{{ op.income | currency:'MXN':'symbol-narrow':'1.0-0' }}</td>
-              <td class="text-right font-mono text-slate-300">{{ op.deductibleExpenses | currency:'MXN':'symbol-narrow':'1.0-0' }}</td>
-              <td class="text-right font-mono text-amber-400">{{ op.isr | currency:'MXN':'symbol-narrow':'1.0-0' }}</td>
-              <td class="text-right font-mono text-sky-400">{{ op.ivaNet | currency:'MXN':'symbol-narrow':'1.0-0' }}</td>
-              <td class="text-right font-mono text-blue-300 font-semibold">{{ op.profit | currency:'MXN':'symbol-narrow':'1.0-0' }}</td>
+              <td class="text-white font-medium">
+                {{ getMonthKey(op.month) | translate }} {{ op.year }}
+              </td>
+              <td class="text-right font-mono text-emerald-400">
+                {{ op.income | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+              </td>
+              <td class="text-right font-mono text-slate-300">
+                {{ op.deductibleExpenses | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+              </td>
+              <td class="text-right font-mono text-amber-400">
+                {{ op.isr | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+              </td>
+              <td class="text-right font-mono text-sky-400">
+                {{ op.ivaNet | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+              </td>
+              <td class="text-right font-mono text-blue-300 font-semibold">
+                {{ op.profit | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -225,32 +376,192 @@
     <!-- Volatility Card (1/3) -->
     <div class="glass-card p-6 flex flex-col" *ngIf="volatilitySummary">
       <div class="flex items-center justify-between mb-2">
-        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">{{ 'DASHBOARD.VOLATILITY_USD' | translate }}</h3>
-        <span class="text-xs px-2 py-0.5 rounded-full font-semibold"
-          [class]="volatilitySummary.trend === 'up' ? 'bg-emerald-500/20 text-emerald-400' : volatilitySummary.trend === 'down' ? 'bg-red-500/20 text-red-400' : 'bg-slate-500/20 text-slate-400'">
-          {{ volatilitySummary.trend === 'up' ? ('DASHBOARD.VOL_UP' | translate) : volatilitySummary.trend === 'down' ? ('DASHBOARD.VOL_DOWN' | translate) : 'Neutral' }}
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          {{ 'DASHBOARD.VOLATILITY_USD' | translate }}
+        </h3>
+        <span
+          class="text-xs px-2 py-0.5 rounded-full font-semibold"
+          [class]="
+            volatilitySummary.trend === 'up'
+              ? 'bg-emerald-500/20 text-emerald-400'
+              : volatilitySummary.trend === 'down'
+                ? 'bg-red-500/20 text-red-400'
+                : 'bg-slate-500/20 text-slate-400'
+          "
+        >
+          {{
+            volatilitySummary.trend === 'up'
+              ? ('DASHBOARD.VOL_UP' | translate)
+              : volatilitySummary.trend === 'down'
+                ? ('DASHBOARD.VOL_DOWN' | translate)
+                : 'Neutral'
+          }}
         </span>
       </div>
 
       <div class="flex items-baseline gap-3 mb-4">
-        <span class="text-3xl font-bold text-white">{{ volatilitySummary.currentRate | currency:'':'':'1.2-2' }}</span>
-        <span class="text-sm" [class]="volatilitySummary.changePercent >= 0 ? 'text-emerald-400' : 'text-red-400'">
+        <span class="text-3xl font-bold text-white">{{
+          volatilitySummary.currentRate | currency: '' : '' : '1.2-2'
+        }}</span>
+        <span
+          class="text-sm"
+          [class]="volatilitySummary.changePercent >= 0 ? 'text-emerald-400' : 'text-red-400'"
+        >
           {{ volatilitySummary.changePercent >= 0 ? '&#8599;' : '&#8600;' }}
-          {{ volatilitySummary.changePercent >= 0 ? '+' : '' }}{{ volatilitySummary.changePercent | percent:'1.1-1' }}
+          {{ volatilitySummary.changePercent >= 0 ? '+' : ''
+          }}{{ volatilitySummary.changePercent | percent: '1.1-1' }}
         </span>
       </div>
 
       <!-- Exchange rate chart -->
-      <div style="display: block; height: 150px;" class="mb-4">
-        <canvas baseChart [data]="volatilityMiniData" [options]="volatilityMiniOptions" [type]="'line'">
+      <div style="display: block; height: 150px" class="mb-4">
+        <canvas
+          baseChart
+          [data]="volatilityMiniData"
+          [options]="volatilityMiniOptions"
+          [type]="'line'"
+        >
         </canvas>
       </div>
 
       <!-- Analyst Note -->
       <div class="mt-auto p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-        <p class="text-xs font-semibold text-blue-300 mb-1">{{ 'DASHBOARD.ANALYST_NOTE' | translate }}:</p>
+        <p class="text-xs font-semibold text-blue-300 mb-1">
+          {{ 'DASHBOARD.ANALYST_NOTE' | translate }}:
+        </p>
         <p class="text-xs text-blue-200/80 leading-relaxed">{{ getVolatilityNote() }}</p>
       </div>
+    </div>
+  </div>
+
+  <!-- Credit Card Statement Calendar + Best Card Today -->
+  <div
+    *ngIf="!loading && cardSchedule.length > 0"
+    class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8"
+  >
+    <!-- Month calendar (2/3) -->
+    <div class="lg:col-span-2 glass-card p-6">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <div>
+          <h2 class="text-lg font-semibold text-white">
+            {{ 'DASHBOARD.CARD_CALENDAR' | translate }} &mdash;
+            {{ getMonthKey(calMonth) | translate }} {{ calYear }}
+          </h2>
+          <p class="text-sm text-slate-500">{{ 'DASHBOARD.CARD_CALENDAR_DESC' | translate }}</p>
+        </div>
+        <div class="flex gap-4 text-xs">
+          <div class="flex items-center gap-1.5">
+            <span class="w-3 h-3 rounded-full" [style.background]="CUTOFF_COLOR"></span>
+            <span class="text-slate-400">{{ 'DASHBOARD.CUTOFF' | translate }}</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-3 h-3 rounded-full" [style.background]="PAYMENT_COLOR"></span>
+            <span class="text-slate-400">{{ 'DASHBOARD.PAYMENT' | translate }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-7 gap-1.5 text-center">
+        <div
+          *ngFor="let wd of weekdayKeys"
+          class="text-xs font-semibold text-slate-500 uppercase py-1"
+        >
+          {{ wd | translate }}
+        </div>
+        <div
+          *ngFor="let cell of calendarCells"
+          class="h-12 rounded-lg flex flex-col items-center justify-center gap-1"
+          [class]="
+            cell.isToday
+              ? 'bg-blue-500/15 ring-1 ring-blue-400/60'
+              : cell.day > 0
+                ? 'bg-white/[0.03]'
+                : ''
+          "
+          [title]="calCellTitle(cell)"
+        >
+          <ng-container *ngIf="cell.day > 0">
+            <span
+              class="text-xs leading-none"
+              [class]="cell.isToday ? 'text-blue-300 font-bold' : 'text-slate-400'"
+              >{{ cell.day }}</span
+            >
+            <div class="flex gap-1 h-2">
+              <span
+                *ngIf="cell.cutoffCards.length"
+                class="w-2 h-2 rounded-full"
+                [style.background]="CUTOFF_COLOR"
+              ></span>
+              <span
+                *ngIf="cell.paymentCards.length"
+                class="w-2 h-2 rounded-full"
+                [style.background]="PAYMENT_COLOR"
+              ></span>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+    <!-- Best card to buy with today (1/3) -->
+    <div class="glass-card p-6 flex flex-col">
+      <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">
+        {{ 'DASHBOARD.BEST_CARD_TITLE' | translate }}
+      </h3>
+
+      <div
+        *ngIf="bestCard as best"
+        class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 mb-4"
+      >
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <p class="text-lg font-bold text-white">{{ best.card.nickname }}</p>
+            <p class="text-xs text-slate-400">
+              {{ best.card.bank }} &middot; **** {{ best.card.lastFourDigits }}
+            </p>
+          </div>
+          <span
+            class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 whitespace-nowrap"
+          >
+            {{ best.floatDays }} {{ 'DASHBOARD.BEST_CARD_FLOAT_DAYS' | translate }}
+          </span>
+        </div>
+        <p class="text-xs text-emerald-200/80 mt-2">
+          {{ 'DASHBOARD.BEST_CARD_PAY_ON' | translate }}
+          <span class="font-semibold">{{ formatCalDate(best.paymentDate!) }}</span>
+        </p>
+      </div>
+
+      <div class="space-y-2">
+        <div
+          *ngFor="let entry of cardSchedule"
+          class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-white/[0.03] text-xs"
+        >
+          <div class="min-w-0">
+            <p class="text-slate-200 font-medium truncate">{{ entry.card.nickname }}</p>
+            <p class="text-slate-500">
+              {{ 'DASHBOARD.CUTOFF' | translate }} {{ entry.card.cutoffDay }}
+              <ng-container *ngIf="entry.card.paymentDueDay">
+                &middot; {{ 'DASHBOARD.PAYMENT' | translate }} {{ entry.card.paymentDueDay }}
+              </ng-container>
+            </p>
+          </div>
+          <span
+            *ngIf="entry.floatDays !== null"
+            class="font-mono font-semibold whitespace-nowrap"
+            [class]="entry === cardSchedule[0] ? 'text-emerald-400' : 'text-slate-400'"
+          >
+            {{ entry.floatDays }}d &rarr; {{ formatCalDate(entry.paymentDate!) }}
+          </span>
+          <span *ngIf="entry.floatDays === null" class="text-slate-600 whitespace-nowrap">
+            {{ 'DASHBOARD.BEST_CARD_NO_PAYMENT_DAY' | translate }}
+          </span>
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-500 mt-auto pt-4">
+        {{ 'DASHBOARD.BEST_CARD_HINT' | translate }}
+      </p>
     </div>
   </div>
 
@@ -258,12 +569,23 @@
   <div *ngIf="!loading" class="mb-6">
     <button
       class="btn btn-sm border border-white/[0.08] bg-white/[0.03] text-slate-300 hover:bg-white/[0.06] hover:text-white"
-      (click)="loadAnnualSummary()">
-      <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round"
-          d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5" />
+      (click)="loadAnnualSummary()"
+    >
+      <svg
+        class="w-4 h-4 mr-1"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5"
+        />
       </svg>
-      {{ showAnnual ? ('COMMON.CANCEL' | translate) : ('DASHBOARD.ANNUAL_SUMMARY' | translate) }} {{ currentYear }}
+      {{ showAnnual ? ('COMMON.CANCEL' | translate) : ('DASHBOARD.ANNUAL_SUMMARY' | translate) }}
+      {{ currentYear }}
     </button>
   </div>
 
@@ -285,33 +607,47 @@
         <tbody>
           <tr *ngFor="let row of annualSummary.monthlySummaries">
             <td class="text-slate-300">{{ getMonthKey(row.month) | translate }}</td>
-            <td class="text-right font-mono text-emerald-400">{{ row.totalIncome |
-              currency:'MXN':'symbol-narrow':'1.0-0' }}</td>
-            <td class="text-right font-mono text-red-400">{{ row.totalDeductibleExpenses |
-              currency:'MXN':'symbol-narrow':'1.0-0' }}</td>
-            <td class="text-right font-mono text-slate-300">{{ row.taxableBase | currency:'MXN':'symbol-narrow':'1.0-0'
-              }}</td>
-            <td class="text-right font-mono text-amber-400">{{ row.estimatedISR | currency:'MXN':'symbol-narrow':'1.0-0'
-              }}</td>
-            <td class="text-right font-mono text-orange-300">{{ row.isrNetDue | currency:'MXN':'symbol-narrow':'1.0-0'
-              }}</td>
-            <td class="text-right font-mono text-slate-400">{{ row.effectiveTaxRate | percent:'1.2-2' }}</td>
+            <td class="text-right font-mono text-emerald-400">
+              {{ row.totalIncome | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+            </td>
+            <td class="text-right font-mono text-red-400">
+              {{ row.totalDeductibleExpenses | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+            </td>
+            <td class="text-right font-mono text-slate-300">
+              {{ row.taxableBase | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+            </td>
+            <td class="text-right font-mono text-amber-400">
+              {{ row.estimatedISR | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+            </td>
+            <td class="text-right font-mono text-orange-300">
+              {{ row.isrNetDue | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+            </td>
+            <td class="text-right font-mono text-slate-400">
+              {{ row.effectiveTaxRate | percent: '1.2-2' }}
+            </td>
           </tr>
         </tbody>
         <tfoot>
           <tr class="border-t border-white/[0.08]">
             <td class="font-bold text-white">{{ 'DASHBOARD.ANNUAL_TOTAL' | translate }}</td>
-            <td class="text-right font-mono font-bold text-emerald-400">{{ annualSummary.totalAnnualIncome |
-              currency:'MXN':'symbol-narrow':'1.0-0' }}</td>
-            <td class="text-right font-mono font-bold text-red-400">{{ annualSummary.totalAnnualDeductible |
-              currency:'MXN':'symbol-narrow':'1.0-0' }}</td>
+            <td class="text-right font-mono font-bold text-emerald-400">
+              {{ annualSummary.totalAnnualIncome | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+            </td>
+            <td class="text-right font-mono font-bold text-red-400">
+              {{
+                annualSummary.totalAnnualDeductible | currency: 'MXN' : 'symbol-narrow' : '1.0-0'
+              }}
+            </td>
             <td class="text-right font-mono text-slate-500">-</td>
-            <td class="text-right font-mono font-bold text-amber-400">{{ annualSummary.totalAnnualISR |
-              currency:'MXN':'symbol-narrow':'1.0-0' }}</td>
-            <td class="text-right font-mono font-bold text-orange-300">{{ annualSummary.totalAnnualIsrNetDue |
-              currency:'MXN':'symbol-narrow':'1.0-0' }}</td>
-            <td class="text-right font-mono font-bold text-slate-300">{{ annualSummary.averageEffectiveTaxRate |
-              percent:'1.2-2' }}</td>
+            <td class="text-right font-mono font-bold text-amber-400">
+              {{ annualSummary.totalAnnualISR | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+            </td>
+            <td class="text-right font-mono font-bold text-orange-300">
+              {{ annualSummary.totalAnnualIsrNetDue | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+            </td>
+            <td class="text-right font-mono font-bold text-slate-300">
+              {{ annualSummary.averageEffectiveTaxRate | percent: '1.2-2' }}
+            </td>
           </tr>
         </tfoot>
       </table>

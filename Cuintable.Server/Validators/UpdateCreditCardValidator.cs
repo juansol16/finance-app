@@ -13,5 +13,9 @@ public class UpdateCreditCardValidator : AbstractValidator<UpdateCreditCardReque
             .NotEmpty()
             .Length(4)
             .Matches(@"^\d{4}$").WithMessage("Must be exactly 4 digits.");
+        RuleFor(x => x.CutoffDay)
+            .InclusiveBetween(1, 31).When(x => x.CutoffDay.HasValue);
+        RuleFor(x => x.PaymentDueDay)
+            .InclusiveBetween(1, 31).When(x => x.PaymentDueDay.HasValue);
     }
 }

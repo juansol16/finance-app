@@ -8,6 +8,9 @@ public class CreditCard
     public string Bank { get; set; } = string.Empty;
     public string Nickname { get; set; } = string.Empty;
     public string LastFourDigits { get; set; } = string.Empty;
+    // Day of month (1-31); days beyond a month's end fall on its last day
+    public int? CutoffDay { get; set; }
+    public int? PaymentDueDay { get; set; }
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

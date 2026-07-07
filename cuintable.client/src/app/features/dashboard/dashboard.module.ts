@@ -7,17 +7,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { DashboardComponent } from './dashboard.component';
 
 @NgModule({
-    declarations: [
-        DashboardComponent
-    ],
-    imports: [
-        CommonModule,
-        FormsModule,
-        BaseChartDirective,
-        TranslateModule
-    ],
-    providers: [
-        provideCharts(withDefaultRegisterables())
-    ]
+  declarations: [DashboardComponent],
+  imports: [CommonModule, FormsModule, BaseChartDirective, TranslateModule],
+  providers: [provideCharts(withDefaultRegisterables())],
 })
-export class DashboardModule { }
+export class DashboardModule {}

@@ -60,7 +60,10 @@
     "NICKNAME": "Alias",
     "LAST_FOUR": "Últimos 4 Dígitos",
     "ACTIVE": "Activa",
-    "INACTIVE": "Inactiva"
+    "INACTIVE": "Inactiva",
+    "CUTOFF_DAY": "Día de corte",
+    "PAYMENT_DAY": "Día de pago",
+    "DAYS_HINT": "Día del mes (1-31). Las compras después del corte se cobran hasta el siguiente periodo."
   },
   "EXPENSE": {
     "CATEGORY": "Categoría",
@@ -182,7 +185,23 @@
     "VOL_DOWN": "Baja",
     "ANALYST_NOTE": "Nota de Analista",
     "VOLATILITY_NOTE_DOWN": "La tendencia bajista del USD impacta negativamente tu facturación si cobras en dólares. Considera coberturas.",
-    "VOLATILITY_NOTE_UP": "La tendencia alcista del USD favorece tu facturación en dólares. Buen momento para facturar en USD."
+    "VOLATILITY_NOTE_UP": "La tendencia alcista del USD favorece tu facturación en dólares. Buen momento para facturar en USD.",
+    "CARD_CALENDAR": "Fechas de tarjetas",
+    "CARD_CALENDAR_DESC": "Días de corte y pago de tus tarjetas este mes",
+    "CUTOFF": "Corte",
+    "PAYMENT": "Pago",
+    "BEST_CARD_TITLE": "¿Con cuál tarjeta comprar hoy?",
+    "BEST_CARD_FLOAT_DAYS": "días para pagar",
+    "BEST_CARD_PAY_ON": "Una compra hecha hoy la pagarías el",
+    "BEST_CARD_NO_PAYMENT_DAY": "Sin día de pago",
+    "BEST_CARD_HINT": "La mejor tarjeta es la que acaba de pasar su corte: tu compra se va al siguiente periodo.",
+    "WD_1": "Lu",
+    "WD_2": "Ma",
+    "WD_3": "Mi",
+    "WD_4": "Ju",
+    "WD_5": "Vi",
+    "WD_6": "Sá",
+    "WD_7": "Do"
   },
   "TAX_PAYMENT": {
     "TITLE": "Pagos SAT",

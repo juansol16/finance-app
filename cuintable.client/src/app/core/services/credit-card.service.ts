@@ -7,6 +7,8 @@ export interface CreditCard {
   bank: string;
   nickname: string;
   lastFourDigits: string;
+  cutoffDay: number | null;
+  paymentDueDay: number | null;
   isActive: boolean;
   createdAt: string;
 }
@@ -15,6 +17,8 @@ export interface CreateCreditCardRequest {
   bank: string;
   nickname: string;
   lastFourDigits: string;
+  cutoffDay: number | null;
+  paymentDueDay: number | null;
 }
 
 export interface UpdateCreditCardRequest extends CreateCreditCardRequest {

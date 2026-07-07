@@ -58,7 +58,10 @@
     "NICKNAME": "Nickname",
     "LAST_FOUR": "Last 4 Digits",
     "ACTIVE": "Active",
-    "INACTIVE": "Inactive"
+    "INACTIVE": "Inactive",
+    "CUTOFF_DAY": "Cut-off day",
+    "PAYMENT_DAY": "Payment day",
+    "DAYS_HINT": "Day of the month (1-31). Purchases made after the cut-off are billed on the next statement."
   },
   "EXPENSE": {
     "CATEGORY": "Category",
@@ -179,7 +182,23 @@
     "VOL_DOWN": "Down",
     "ANALYST_NOTE": "Analyst Note",
     "VOLATILITY_NOTE_DOWN": "The bearish USD trend negatively impacts your billing if you charge in dollars. Consider hedging.",
-    "VOLATILITY_NOTE_UP": "The bullish USD trend favors your dollar billing. Good time to invoice in USD."
+    "VOLATILITY_NOTE_UP": "The bullish USD trend favors your dollar billing. Good time to invoice in USD.",
+    "CARD_CALENDAR": "Card dates",
+    "CARD_CALENDAR_DESC": "Cut-off and payment days of your credit cards this month",
+    "CUTOFF": "Cut-off",
+    "PAYMENT": "Payment",
+    "BEST_CARD_TITLE": "Best card to buy with today",
+    "BEST_CARD_FLOAT_DAYS": "days to pay",
+    "BEST_CARD_PAY_ON": "A purchase made today would be paid on",
+    "BEST_CARD_NO_PAYMENT_DAY": "No payment day set",
+    "BEST_CARD_HINT": "The best card is the one whose cut-off just passed: your purchase rolls to the next statement.",
+    "WD_1": "Mo",
+    "WD_2": "Tu",
+    "WD_3": "We",
+    "WD_4": "Th",
+    "WD_5": "Fr",
+    "WD_6": "Sa",
+    "WD_7": "Su"
   },
   "TAX_PAYMENT": {
     "TITLE": "SAT Payments",
