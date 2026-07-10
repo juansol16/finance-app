@@ -23,6 +23,12 @@ import { Expense } from '../../core/services/expense.service';
             <option class="bg-slate-800" [ngValue]="2">{{ 'TAXABLE.CELULAR' | translate }}</option>
             <option class="bg-slate-800" [ngValue]="3">{{ 'TAXABLE.EQUIPO' | translate }}</option>
             <option class="bg-slate-800" [ngValue]="4">{{ 'TAXABLE.SOFTWARE' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="6">{{ 'TAXABLE.INSUMOS_LIMPIEZA' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="7">{{ 'TAXABLE.GASOLINA' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="8">{{ 'TAXABLE.MANTENIMIENTO' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="9">{{ 'TAXABLE.EQUIPO_OFICINA' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="10">{{ 'TAXABLE.PAPELERIA' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="11">{{ 'TAXABLE.INSUMOS_OFICINA' | translate }}</option>
             <option class="bg-slate-800" [ngValue]="5">{{ 'EXPENSE.OTRO' | translate }}</option>
           </select>
         </div>

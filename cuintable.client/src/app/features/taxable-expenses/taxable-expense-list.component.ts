@@ -5,7 +5,9 @@ import { CreditCard, CreditCardService } from '../../core/services/credit-card.s
 import { Expense, ExpenseService } from '../../core/services/expense.service';
 
 const CATEGORY_KEYS = ['TAXABLE.LUZ', 'TAXABLE.INTERNET', 'TAXABLE.CELULAR',
-  'TAXABLE.EQUIPO', 'TAXABLE.SOFTWARE', 'EXPENSE.OTRO'];
+  'TAXABLE.EQUIPO', 'TAXABLE.SOFTWARE', 'EXPENSE.OTRO',
+  'TAXABLE.INSUMOS_LIMPIEZA', 'TAXABLE.GASOLINA', 'TAXABLE.MANTENIMIENTO',
+  'TAXABLE.EQUIPO_OFICINA', 'TAXABLE.PAPELERIA', 'TAXABLE.INSUMOS_OFICINA'];
 
 @Component({
   selector: 'app-taxable-expense-list',

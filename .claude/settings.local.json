@@ -39,7 +39,8 @@
       "Bash(echo \"build exit: $?\")",
       "Bash(python \"C:\\\\Users\\\\sol_1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-sol-1-Documents-Cuintable\\\\7e4592f6-9b2f-44f2-b504-1aa6e40a5792\\\\scratchpad\\\\test_extraction.py\")",
       "PowerShell(dotnet build Cuintable.Server -v q --nologo)",
-      "PowerShell(dotnet test Cuintable.Server.Tests --nologo -v q)"
+      "PowerShell(dotnet test Cuintable.Server.Tests --nologo -v q)",
+      "PowerShell(node -e \"['es','en'].forEach\\(l => { JSON.parse\\(require\\('fs'\\).readFileSync\\('cuintable.client/public/i18n/' + l + '.json', 'utf8'\\)\\); console.log\\(l + '.json OK'\\); }\\)\")"
     ]
   }
 }
