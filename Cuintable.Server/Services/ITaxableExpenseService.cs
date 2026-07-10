@@ -9,5 +9,5 @@ public interface ITaxableExpenseService
     Task<TaxableExpenseResponse> CreateAsync(Guid tenantId, Guid userId, CreateTaxableExpenseRequest request);
     Task<TaxableExpenseResponse?> UpdateAsync(Guid tenantId, Guid id, UpdateTaxableExpenseRequest request);
     Task<bool> DeleteAsync(Guid tenantId, Guid id);
-    Task<TaxableExpenseResponse?> UpdateFileUrlsAsync(Guid tenantId, Guid id, string? pdfUrl, string? xmlUrl, string? xmlMetadata);
+    Task<TaxableExpenseResponse?> UpdateFileUrlsAsync(Guid tenantId, Guid id, string? pdfUrl, string? xmlUrl, string? xmlMetadata, decimal? ivaMXN = null);
 }

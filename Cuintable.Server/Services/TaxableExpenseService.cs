@@ -48,6 +48,9 @@ public class TaxableExpenseService : ITaxableExpenseService
             ExpenseId = request.ExpenseId,
             Date = request.Date,
             AmountMXN = request.AmountMXN,
+            IvaMXN = request.IvaMXN,
+            ValidationStatus = request.ValidationStatus,
+            ValidationComment = request.ValidationComment,
             Description = request.Description,
             Vendor = request.Vendor
         };
@@ -73,6 +76,9 @@ public class TaxableExpenseService : ITaxableExpenseService
         item.ExpenseId = request.ExpenseId;
         item.Date = request.Date;
         item.AmountMXN = request.AmountMXN;
+        item.IvaMXN = request.IvaMXN;
+        item.ValidationStatus = request.ValidationStatus;
+        item.ValidationComment = request.ValidationComment;
         item.Description = request.Description;
         item.Vendor = request.Vendor;
 
@@ -94,7 +100,7 @@ public class TaxableExpenseService : ITaxableExpenseService
         return true;
     }
 
-    public async Task<TaxableExpenseResponse?> UpdateFileUrlsAsync(Guid tenantId, Guid id, string? pdfUrl, string? xmlUrl, string? xmlMetadata)
+    public async Task<TaxableExpenseResponse?> UpdateFileUrlsAsync(Guid tenantId, Guid id, string? pdfUrl, string? xmlUrl, string? xmlMetadata, decimal? ivaMXN = null)
     {
         var item = await _db.TaxableExpenses
             .Include(t => t.CreditCard)
@@ -105,6 +111,8 @@ public class TaxableExpenseService : ITaxableExpenseService
         if (pdfUrl is not null) item.InvoicePdfUrl = pdfUrl;
         if (xmlUrl is not null) item.InvoiceXmlUrl = xmlUrl;
         if (xmlMetadata is not null) item.XmlMetadata = xmlMetadata;
+        // The CFDI is the source of truth for the invoice IVA
+        if (ivaMXN is not null) item.IvaMXN = ivaMXN;
 
         await _db.SaveChangesAsync();
         return MapToResponse(item);
@@ -124,6 +132,9 @@ public class TaxableExpenseService : ITaxableExpenseService
             : null,
         Date = t.Date,
         AmountMXN = t.AmountMXN,
+        IvaMXN = t.IvaMXN,
+        ValidationStatus = t.ValidationStatus,
+        ValidationComment = t.ValidationComment,
         Description = t.Description,
         Vendor = t.Vendor,
         InvoicePdfUrl = t.InvoicePdfUrl,

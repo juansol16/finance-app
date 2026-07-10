@@ -17,7 +17,10 @@ export interface TaxSummaryResponse {
     profitMargin: number;
     estimatedIVA: number;
     ivaWithheld: number;
+    ivaCreditable: number;
     ivaNetDue: number;
+    ivaFavorBalance: number;
+    totalDue: number;
     annualAccumulatedIncome: number;
 }
 

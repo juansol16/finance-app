@@ -1,14 +1,19 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Xml.Linq;
 
 namespace Cuintable.Server.Services;
+
+public record CfdiParseResult(string Json, decimal? IvaTrasladado);
 
 public static class CfdiParser
 {
     private static readonly XNamespace CfdiNs = "http://www.sat.gob.mx/cfd/4";
     private static readonly XNamespace TfdNs = "http://www.sat.gob.mx/TimbreFiscalDigital";
 
-    public static string? Parse(Stream xmlStream)
+    public static string? Parse(Stream xmlStream) => ParseDetailed(xmlStream)?.Json;
+
+    public static CfdiParseResult? ParseDetailed(Stream xmlStream)
     {
         try
         {
@@ -31,6 +36,8 @@ public static class CfdiParser
                 })
                 .ToList();
 
+            var iva = ExtractIvaTrasladado(comprobante);
+
             var metadata = new
             {
                 RfcEmisor = emisor?.Attribute("Rfc")?.Value,
@@ -40,18 +47,47 @@ public static class CfdiParser
                 Fecha = comprobante.Attribute("Fecha")?.Value,
                 UUID = timbre?.Attribute("UUID")?.Value,
                 FechaTimbrado = timbre?.Attribute("FechaTimbrado")?.Value,
+                IvaTrasladado = iva,
                 Conceptos = conceptos
             };
 
-            return JsonSerializer.Serialize(metadata, new JsonSerializerOptions
+            var json = JsonSerializer.Serialize(metadata, new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 WriteIndented = false
             });
+
+            return new CfdiParseResult(json, iva);
         }
         catch
         {
             return null;
         }
+    }
+
+    // IVA is the "002" tax in the comprobante-level Impuestos/Traslados nodes;
+    // summing only 002 keeps IEPS and other taxes out of the creditable amount.
+    private static decimal? ExtractIvaTrasladado(XElement comprobante)
+    {
+        var traslados = comprobante
+            .Element(CfdiNs + "Impuestos")?
+            .Element(CfdiNs + "Traslados")?
+            .Elements(CfdiNs + "Traslado")
+            .Where(t => t.Attribute("Impuesto")?.Value == "002")
+            .Select(t => t.Attribute("Importe")?.Value)
+            .Where(v => v is not null)
+            .ToList();
+
+        if (traslados is null || traslados.Count == 0) return null;
+
+        decimal sum = 0;
+        foreach (var value in traslados)
+        {
+            if (!decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var importe))
+                return null;
+            sum += importe;
+        }
+
+        return sum;
     }
 }

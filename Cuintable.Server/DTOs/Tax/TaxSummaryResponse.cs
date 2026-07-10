@@ -16,6 +16,11 @@ public class TaxSummaryResponse
     public decimal ProfitMargin { get; set; }
     public decimal EstimatedIVA { get; set; }
     public decimal IvaWithheld { get; set; }
+    public decimal IvaCreditable { get; set; }
     public decimal IvaNetDue { get; set; }
+    // Excess IVA credit left after this month; rolls into the next month
+    public decimal IvaFavorBalance { get; set; }
+    // ISR + IVA due this month: the accountant's "total de impuestos por pagar"
+    public decimal TotalDue { get; set; }
     public decimal AnnualAccumulatedIncome { get; set; }
 }

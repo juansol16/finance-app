@@ -75,6 +75,131 @@ public class ResicoTaxServiceTests
         // Tax on 50k: 50,000 <= 50,000 => 1.10% => 550
         Assert.Equal(550, result.EstimatedISR);
         Assert.Equal(0.011m, result.EffectiveTaxRate, 4); // 550 / 50000 = 0.011
+
+        // IVA: charged 16% of 50k = 8,000; expense without CFDI IVA is
+        // estimated at 16/116 of 5,000 = 689.66 creditable
+        Assert.Equal(8_000m, result.EstimatedIVA);
+        Assert.Equal(689.66m, result.IvaCreditable);
+        Assert.Equal(7_310.34m, result.IvaNetDue);
+        Assert.Equal(550m + 7_310.34m, result.TotalDue);
+    }
+
+    [Fact]
+    public async Task GetMonthlySummaryAsync_MatchesAccountantMonthlyStatement()
+    {
+        // Regression: mirrors the accountant's May 2026 statement.
+        // Invoiced 87,328.07 => ISR 2% (1,746.56) minus 1.25% withheld (1,091.60) => 655
+        // IVA charged 13,972.49 minus withheld 9,314.41 minus creditable 1,660 => 2,998
+        var tenantId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        _context.Incomes.Add(new Income
+        {
+            Id = Guid.NewGuid(), TenantId = tenantId, UserId = userId,
+            Date = new DateOnly(2026, 5, 15), Source = "US Company", Type = IncomeType.Honorarios,
+            AmountMXN = 90_894.55m,
+            HonorarioMXN = 87_328.07m, IvaMXN = 13_972.49m,
+            IsrWithheldMXN = 1_091.60m, IvaWithheldMXN = 9_314.41m
+        });
+
+        _context.TaxableExpenses.Add(new TaxableExpense
+        {
+            Id = Guid.NewGuid(), TenantId = tenantId, UserId = userId,
+            Date = new DateOnly(2026, 5, 20), AmountMXN = 12_035.00m, IvaMXN = 1_660.00m,
+            Vendor = "Amazon MX", Category = TaxableExpenseCategory.EquipoOficina,
+            ValidationStatus = TaxableExpenseValidationStatus.Valida
+        });
+
+        await _context.SaveChangesAsync();
+
+        var result = await _service.GetMonthlySummaryAsync(tenantId, 5, 2026);
+
+        Assert.Equal(87_328.07m, result.TotalIncome);
+        Assert.Equal(1_746.5614m, result.EstimatedISR);       // 2% bracket
+        Assert.Equal(654.9614m, result.IsrNetDue);            // accountant: $655
+        Assert.Equal(13_972.49m, result.EstimatedIVA);
+        Assert.Equal(9_314.41m, result.IvaWithheld);
+        Assert.Equal(1_660.00m, result.IvaCreditable);
+        Assert.Equal(2_998.08m, result.IvaNetDue);            // accountant: $2,998
+        Assert.Equal(3_653.0414m, result.TotalDue);           // accountant: $3,653
+        Assert.Equal(0m, result.IvaFavorBalance);
+    }
+
+    [Fact]
+    public async Task GetMonthlySummaryAsync_RejectedExpensesAreExcluded()
+    {
+        var tenantId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        _context.Incomes.Add(new Income
+        {
+            Id = Guid.NewGuid(), TenantId = tenantId, UserId = userId,
+            Date = new DateOnly(2026, 5, 5), AmountMXN = 50_000m, Source = "Job", Type = IncomeType.Honorarios
+        });
+
+        _context.TaxableExpenses.AddRange(
+            new TaxableExpense
+            {
+                Id = Guid.NewGuid(), TenantId = tenantId, UserId = userId,
+                Date = new DateOnly(2026, 5, 10), AmountMXN = 5_800m, IvaMXN = 800m,
+                Vendor = "Telmex", Category = TaxableExpenseCategory.Internet,
+                ValidationStatus = TaxableExpenseValidationStatus.Valida
+            },
+            new TaxableExpense
+            {
+                Id = Guid.NewGuid(), TenantId = tenantId, UserId = userId,
+                Date = new DateOnly(2026, 5, 12), AmountMXN = 11_600m, IvaMXN = 1_600m,
+                Vendor = "Liverpool", Category = TaxableExpenseCategory.Otro,
+                ValidationStatus = TaxableExpenseValidationStatus.Rechazada,
+                ValidationComment = "Gasto personal, no deducible"
+            });
+
+        await _context.SaveChangesAsync();
+
+        var result = await _service.GetMonthlySummaryAsync(tenantId, 5, 2026);
+
+        // Only the approved expense counts for deduction and IVA credit
+        Assert.Equal(5_800m, result.TotalDeductibleExpenses);
+        Assert.Equal(44_200m, result.TaxableBase);
+        Assert.Equal(800m, result.IvaCreditable);
+        Assert.Equal(8_000m - 800m, result.IvaNetDue);
+    }
+
+    [Fact]
+    public async Task GetMonthlySummaryAsync_IvaFavorCarriesToNextMonth()
+    {
+        var tenantId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        // Month 1: IVA charged 1,600 but 2,000 creditable => 400 in favor, nothing due
+        _context.Incomes.Add(new Income
+        {
+            Id = Guid.NewGuid(), TenantId = tenantId, UserId = userId,
+            Date = new DateOnly(2026, 1, 10), AmountMXN = 10_000m, Source = "Job", Type = IncomeType.Honorarios
+        });
+        _context.TaxableExpenses.Add(new TaxableExpense
+        {
+            Id = Guid.NewGuid(), TenantId = tenantId, UserId = userId,
+            Date = new DateOnly(2026, 1, 15), AmountMXN = 14_500m, IvaMXN = 2_000m,
+            Vendor = "Office Depot", Category = TaxableExpenseCategory.EquipoOficina
+        });
+
+        // Month 2: IVA charged 1,600, no expenses => 1,600 minus 400 carried over
+        _context.Incomes.Add(new Income
+        {
+            Id = Guid.NewGuid(), TenantId = tenantId, UserId = userId,
+            Date = new DateOnly(2026, 2, 10), AmountMXN = 10_000m, Source = "Job", Type = IncomeType.Honorarios
+        });
+
+        await _context.SaveChangesAsync();
+
+        var january = await _service.GetMonthlySummaryAsync(tenantId, 1, 2026);
+        Assert.Equal(0m, january.IvaNetDue);
+        Assert.Equal(400m, january.IvaFavorBalance);
+
+        var february = await _service.GetMonthlySummaryAsync(tenantId, 2, 2026);
+        Assert.Equal(1_200m, february.IvaNetDue);
+        Assert.Equal(0m, february.IvaFavorBalance);
     }
 
     [Fact]

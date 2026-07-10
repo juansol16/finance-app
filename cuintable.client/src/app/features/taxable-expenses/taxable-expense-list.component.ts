@@ -9,6 +9,9 @@ const CATEGORY_KEYS = ['TAXABLE.LUZ', 'TAXABLE.INTERNET', 'TAXABLE.CELULAR',
   'TAXABLE.INSUMOS_LIMPIEZA', 'TAXABLE.GASOLINA', 'TAXABLE.MANTENIMIENTO',
   'TAXABLE.EQUIPO_OFICINA', 'TAXABLE.PAPELERIA', 'TAXABLE.INSUMOS_OFICINA'];
 
+const VALIDATION_KEYS = ['TAXABLE.VALIDATION_PENDING', 'TAXABLE.VALIDATION_VALID', 'TAXABLE.VALIDATION_REJECTED'];
+const VALIDATION_BADGES = ['badge-glow-secondary', 'badge-glow-success', 'badge-glow-danger'];
+
 @Component({
   selector: 'app-taxable-expense-list',
   standalone: false,
@@ -101,6 +104,7 @@ const CATEGORY_KEYS = ['TAXABLE.LUZ', 'TAXABLE.INTERNET', 'TAXABLE.CELULAR',
                 <th>{{ 'EXPENSE.CATEGORY' | translate }}</th>
                 <th>{{ 'TAXABLE.VENDOR' | translate }}</th>
                 <th class="text-right">{{ 'COMMON.AMOUNT' | translate }} (MXN)</th>
+                <th>{{ 'TAXABLE.VALIDATION_SHORT' | translate }}</th>
                 <th>{{ 'TAXABLE.LINKED_PAYMENT' | translate }}</th>
                 <th>{{ 'INCOME.INVOICES' | translate }}</th>
                 <th class="text-right">{{ 'COMMON.ACTIONS' | translate }}</th>
@@ -114,6 +118,17 @@ const CATEGORY_KEYS = ['TAXABLE.LUZ', 'TAXABLE.INTERNET', 'TAXABLE.CELULAR',
                 </td>
                 <td class="text-slate-300 text-sm">{{ item.vendor }}</td>
                 <td class="text-right font-mono text-sm text-red-400 font-medium">$ {{ item.amountMXN | number:'1.2-2' }}</td>
+                <td>
+                  <span class="text-xs font-medium px-2 py-1 rounded-md cursor-default"
+                        [ngClass]="validationBadges[item.validationStatus]"
+                        [title]="item.validationComment || ''">
+                    {{ validationKeys[item.validationStatus] | translate }}
+                  </span>
+                  <p *ngIf="item.validationStatus === 2 && item.validationComment"
+                     class="text-xs text-slate-500 mt-1 max-w-[180px] truncate" [title]="item.validationComment">
+                    {{ item.validationComment }}
+                  </p>
+                </td>
                 <td class="text-sm">
                   <span *ngIf="item.linkedExpenseLabel" class="text-slate-400">{{ item.linkedExpenseLabel }}</span>
                   <span *ngIf="!item.linkedExpenseLabel" class="text-slate-600">&mdash;</span>
@@ -239,6 +254,8 @@ export class TaxableExpenseListComponent implements OnInit {
   pdfPreviewUrl: SafeResourceUrl | null = null;
   pdfPreviewItem: TaxableExpense | null = null;
   categoryKeys = CATEGORY_KEYS;
+  validationKeys = VALIDATION_KEYS;
+  validationBadges = VALIDATION_BADGES;
   startDate: string = '';
   endDate: string = '';
 

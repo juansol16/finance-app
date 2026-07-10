@@ -82,7 +82,7 @@
   <!-- Stat Cards -->
   <div
     *ngIf="summary && !loading"
-    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8"
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-8"
   >
     <!-- Ingresos Brutos (Mes) -->
     <div class="stat-card stat-success animate-fade-in-up">
@@ -162,9 +162,29 @@
           summary.ivaWithheld | currency: 'MXN' : 'symbol-narrow' : '1.0-0'
         }}
       </span>
-      <span *ngIf="summary.ivaWithheld <= 0" class="text-xs text-slate-400 mt-2 block">{{
+      <span *ngIf="summary.ivaCreditable > 0" class="text-xs text-slate-400 mt-1 block">
+        {{ 'DASHBOARD.CREDITABLE' | translate }}: &minus;{{
+          summary.ivaCreditable | currency: 'MXN' : 'symbol-narrow' : '1.0-0'
+        }}
+      </span>
+      <span *ngIf="summary.ivaFavorBalance > 0" class="text-xs text-emerald-400 mt-1 block">
+        {{ 'DASHBOARD.IVA_IN_FAVOR' | translate }}:
+        {{ summary.ivaFavorBalance | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+      </span>
+      <span *ngIf="summary.ivaWithheld <= 0 && summary.ivaCreditable <= 0" class="text-xs text-slate-400 mt-2 block">{{
         'DASHBOARD.CURRENT_MONTH' | translate
       }}</span>
+    </div>
+
+    <!-- Total SAT del Mes -->
+    <div class="stat-card stat-danger animate-fade-in-up" style="animation-delay: 0.25s">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 block">{{
+        'DASHBOARD.TOTAL_TAXES' | translate
+      }}</span>
+      <p class="text-2xl font-bold text-rose-300">
+        {{ summary.totalDue | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+      </p>
+      <span class="text-xs text-slate-400 mt-2 block">ISR + IVA</span>
     </div>
   </div>
 

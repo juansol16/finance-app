@@ -23,6 +23,17 @@ public class ResicoTaxService : IResicoTaxService
     private static decimal IvaCharged(Income i) =>
         i.IvaMXN ?? Math.Round(FiscalIncome(i) * 0.16m, 2, MidpointRounding.AwayFromZero);
 
+    // Expenses rejected by the accountant don't count as deductions and
+    // their IVA is not creditable.
+    private static bool CountsForDeduction(TaxableExpense te) =>
+        te.ValidationStatus != TaxableExpenseValidationStatus.Rechazada;
+
+    // Creditable IVA of a deductible expense: the amount parsed from the CFDI
+    // when available, otherwise estimated as 16/116 of the invoice total
+    // (assumes the standard 16% rate).
+    private static decimal CreditableIva(TaxableExpense te) =>
+        te.IvaMXN ?? Math.Round(te.AmountMXN * 0.16m / 1.16m, 2, MidpointRounding.AwayFromZero);
+
     public decimal CalculateResicoISR(decimal monthlyIncome)
     {
         return monthlyIncome switch
@@ -39,17 +50,25 @@ public class ResicoTaxService : IResicoTaxService
     {
         var startDate = new DateOnly(year, month, 1);
         var endDate = startDate.AddMonths(1).AddDays(-1);
+        var yearStart = new DateOnly(year, 1, 1);
 
-        var incomes = await _context.Incomes
-            .Where(i => i.TenantId == tenantId && i.Date >= startDate && i.Date <= endDate)
+        // Single year-to-date pull: feeds the month figures, the annual
+        // accumulated income and the month-by-month IVA carryforward chain.
+        var yearIncomes = await _context.Incomes
+            .Where(i => i.TenantId == tenantId && i.Date >= yearStart && i.Date <= endDate)
             .ToListAsync();
 
-        var taxableExpenses = await _context.TaxableExpenses
-            .Where(te => te.TenantId == tenantId && te.Date >= startDate && te.Date <= endDate)
+        var yearExpenses = await _context.TaxableExpenses
+            .Where(te => te.TenantId == tenantId && te.Date >= yearStart && te.Date <= endDate)
             .ToListAsync();
+
+        var incomes = yearIncomes.Where(i => i.Date >= startDate).ToList();
+        var deductibleExpenses = yearExpenses
+            .Where(te => te.Date >= startDate && CountsForDeduction(te))
+            .ToList();
 
         var totalIncome = incomes.Sum(FiscalIncome);
-        var totalDeductible = taxableExpenses.Sum(te => te.AmountMXN);
+        var totalDeductible = deductibleExpenses.Sum(te => te.AmountMXN);
         var taxableBase = totalIncome - totalDeductible;
 
         // In RESICO, ISR is calculated on Total Income, not Taxable Base (Profit).
@@ -74,18 +93,34 @@ public class ResicoTaxService : IResicoTaxService
         // Profit margin
         var profitMargin = totalIncome > 0 ? (taxableBase / totalIncome) : 0;
 
-        // IVA: 16% charged on the invoiced honorario; the 10.666% withheld
-        // by personas morales is subtracted from what is owed to SAT.
+        // IVA owed = IVA charged − IVA withheld by clients − IVA paid on
+        // deductible expenses (acreditable). Walking the year month by month
+        // lets a month's excess credit (saldo a favor) roll into the next one.
         var estimatedIVA = incomes.Sum(IvaCharged);
         var ivaWithheld = incomes.Sum(i => i.IvaWithheldMXN ?? 0m);
-        var ivaNetDue = Math.Max(estimatedIVA - ivaWithheld, 0m);
+        var ivaCreditable = deductibleExpenses.Sum(CreditableIva);
+
+        decimal ivaNetDue = 0m;
+        decimal ivaFavorCarry = 0m;
+        for (var m = 1; m <= month; m++)
+        {
+            var mIncomes = yearIncomes.Where(i => i.Date.Month == m).ToList();
+            var mCreditable = yearExpenses
+                .Where(te => te.Date.Month == m && CountsForDeduction(te))
+                .Sum(CreditableIva);
+
+            var net = mIncomes.Sum(IvaCharged)
+                      - mIncomes.Sum(i => i.IvaWithheldMXN ?? 0m)
+                      - mCreditable
+                      - ivaFavorCarry;
+
+            if (net >= 0) { ivaNetDue = net; ivaFavorCarry = 0m; }
+            else { ivaNetDue = 0m; ivaFavorCarry = -net; }
+        }
 
         // Annual accumulated income (Jan 1 to end of selected month);
         // the RESICO 3.5M limit applies to invoiced income
-        var yearStart = new DateOnly(year, 1, 1);
-        var annualAccumulated = await _context.Incomes
-            .Where(i => i.TenantId == tenantId && i.Date >= yearStart && i.Date <= endDate)
-            .SumAsync(i => i.HonorarioMXN ?? i.AmountMXN);
+        var annualAccumulated = yearIncomes.Sum(FiscalIncome);
 
         return new TaxSummaryResponse
         {
@@ -103,7 +138,10 @@ public class ResicoTaxService : IResicoTaxService
             ProfitMargin = profitMargin,
             EstimatedIVA = estimatedIVA,
             IvaWithheld = ivaWithheld,
+            IvaCreditable = ivaCreditable,
             IvaNetDue = ivaNetDue,
+            IvaFavorBalance = ivaFavorCarry,
+            TotalDue = isrNetDue + ivaNetDue,
             AnnualAccumulatedIncome = annualAccumulated
         };
     }
@@ -200,12 +238,15 @@ public class ResicoTaxService : IResicoTaxService
             });
 
             // Operations breakdown: taxes net of what the client already withheld
-            var deductibleExpenses = await _context.TaxableExpenses
-                .Where(x => x.TenantId == tenantId && x.Date >= startDate && x.Date <= endDate)
-                .SumAsync(x => x.AmountMXN);
+            // and of the creditable IVA of accountant-approved deductible expenses
+            var monthTaxableExpenses = await _context.TaxableExpenses
+                .Where(x => x.TenantId == tenantId && x.Date >= startDate && x.Date <= endDate &&
+                            x.ValidationStatus != TaxableExpenseValidationStatus.Rechazada)
+                .ToListAsync();
+            var deductibleExpenses = monthTaxableExpenses.Sum(x => x.AmountMXN);
 
             var isr = Math.Max(CalculateResicoISR(fiscalIncome) - incomes.Sum(x => x.IsrWithheldMXN ?? 0m), 0m);
-            var iva = Math.Max(incomes.Sum(IvaCharged) - incomes.Sum(x => x.IvaWithheldMXN ?? 0m), 0m);
+            var iva = Math.Max(incomes.Sum(IvaCharged) - incomes.Sum(x => x.IvaWithheldMXN ?? 0m) - monthTaxableExpenses.Sum(CreditableIva), 0m);
 
             response.Operations.Add(new OperationsItem
             {

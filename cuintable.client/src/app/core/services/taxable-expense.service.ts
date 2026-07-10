@@ -11,6 +11,9 @@ export interface TaxableExpense {
   linkedExpenseLabel: string | null;
   date: string;
   amountMXN: number;
+  ivaMXN: number | null;
+  validationStatus: number;
+  validationComment: string | null;
   description: string | null;
   vendor: string;
   invoicePdfUrl: string | null;
@@ -26,9 +29,18 @@ export interface CreateTaxableExpenseRequest {
   expenseId?: string | null;
   date: string;
   amountMXN: number;
+  ivaMXN?: number | null;
+  validationStatus?: number;
+  validationComment?: string | null;
   description?: string | null;
   vendor: string;
 }
+
+export const VALIDATION_STATUS = {
+  PENDIENTE: 0,
+  VALIDA: 1,
+  RECHAZADA: 2
+} as const;
 
 export type UpdateTaxableExpenseRequest = CreateTaxableExpenseRequest;
 

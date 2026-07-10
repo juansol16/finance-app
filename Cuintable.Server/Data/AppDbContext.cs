@@ -124,6 +124,8 @@ public class AppDbContext : DbContext
         {
             e.HasKey(t => t.Id);
             e.Property(t => t.AmountMXN).HasPrecision(18, 2);
+            e.Property(t => t.IvaMXN).HasPrecision(18, 2);
+            e.Property(t => t.ValidationComment).HasMaxLength(500);
             e.Property(t => t.Vendor).IsRequired().HasMaxLength(200);
             e.Property(t => t.XmlMetadata).HasColumnType("jsonb");
 

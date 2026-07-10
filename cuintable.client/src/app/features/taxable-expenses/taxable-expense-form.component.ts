@@ -53,6 +53,30 @@ import { Expense } from '../../core/services/expense.service';
                  step="0.01" min="0" />
         </div>
 
+        <!-- IVA (optional, auto-filled from CFDI XML) -->
+        <div class="form-group mb-3">
+          <label class="form-label">{{ 'TAXABLE.IVA' | translate }} (MXN)</label>
+          <input type="number" class="input input-bordered w-full" [(ngModel)]="form.ivaMXN"
+                 step="0.01" min="0" [placeholder]="estimatedIva" />
+          <p class="text-xs text-base-content/50 mt-1">{{ 'TAXABLE.IVA_HINT' | translate }}</p>
+        </div>
+
+        <!-- Accountant validation -->
+        <div class="form-group mb-3">
+          <label class="form-label">{{ 'TAXABLE.VALIDATION' | translate }}</label>
+          <select class="select select-bordered w-full" [(ngModel)]="form.validationStatus">
+            <option class="bg-slate-800" [ngValue]="0">{{ 'TAXABLE.VALIDATION_PENDING' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="1">{{ 'TAXABLE.VALIDATION_VALID' | translate }}</option>
+            <option class="bg-slate-800" [ngValue]="2">{{ 'TAXABLE.VALIDATION_REJECTED' | translate }}</option>
+          </select>
+        </div>
+
+        <div class="form-group mb-3" *ngIf="form.validationStatus !== 0">
+          <label class="form-label">{{ 'TAXABLE.VALIDATION_COMMENT' | translate }}</label>
+          <textarea class="textarea textarea-bordered w-full" [(ngModel)]="form.validationComment" rows="2"
+                    [placeholder]="'TAXABLE.VALIDATION_COMMENT_HINT' | translate"></textarea>
+        </div>
+
         <!-- Credit Card (optional) -->
         <div class="form-group mb-3">
           <label class="form-label">{{ 'TAXABLE.PAID_WITH' | translate }}</label>
@@ -126,6 +150,9 @@ export class TaxableExpenseFormComponent implements OnInit {
     vendor: '',
     date: '',
     amountMXN: 0,
+    ivaMXN: null as number | null,
+    validationStatus: 0,
+    validationComment: '',
     creditCardId: null as string | null,
     expenseId: null as string | null,
     description: ''
@@ -144,11 +171,21 @@ export class TaxableExpenseFormComponent implements OnInit {
         vendor: this.item.vendor,
         date: this.item.date,
         amountMXN: this.item.amountMXN,
+        ivaMXN: this.item.ivaMXN,
+        validationStatus: this.item.validationStatus,
+        validationComment: this.item.validationComment || '',
         creditCardId: this.item.creditCardId,
         expenseId: this.item.expenseId,
         description: this.item.description || ''
       };
     }
+  }
+
+  // Placeholder shown when no IVA is captured: the 16/116 estimate the
+  // backend falls back to
+  get estimatedIva(): string {
+    if (!this.form.amountMXN) return '';
+    return ((this.form.amountMXN * 0.16) / 1.16).toFixed(2);
   }
 
   onPdfSelected(event: Event) {
@@ -168,6 +205,9 @@ export class TaxableExpenseFormComponent implements OnInit {
       vendor: this.form.vendor,
       date: this.form.date,
       amountMXN: this.form.amountMXN,
+      ivaMXN: this.form.ivaMXN,
+      validationStatus: this.form.validationStatus,
+      validationComment: this.form.validationComment || null,
       creditCardId: this.form.creditCardId,
       expenseId: this.form.expenseId,
       description: this.form.description || null

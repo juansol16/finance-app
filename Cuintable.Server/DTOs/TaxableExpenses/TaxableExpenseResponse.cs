@@ -12,6 +12,9 @@ public class TaxableExpenseResponse
     public string? LinkedExpenseLabel { get; set; }
     public DateOnly Date { get; set; }
     public decimal AmountMXN { get; set; }
+    public decimal? IvaMXN { get; set; }
+    public TaxableExpenseValidationStatus ValidationStatus { get; set; }
+    public string? ValidationComment { get; set; }
     public string? Description { get; set; }
     public string Vendor { get; set; } = string.Empty;
     public string? InvoicePdfUrl { get; set; }

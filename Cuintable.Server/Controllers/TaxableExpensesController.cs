@@ -90,6 +90,7 @@ public class TaxableExpensesController : ControllerBase
         string? pdfUrl = null;
         string? xmlUrl = null;
         string? xmlMetadata = null;
+        decimal? ivaMXN = null;
 
         if (pdf is not null)
         {
@@ -103,10 +104,12 @@ public class TaxableExpensesController : ControllerBase
             xmlUrl = await _fileStorage.UploadAsync(stream, xml.FileName, xml.ContentType, $"taxable-expenses/{id}");
 
             stream.Position = 0;
-            xmlMetadata = CfdiParser.Parse(stream);
+            var parsed = CfdiParser.ParseDetailed(stream);
+            xmlMetadata = parsed?.Json;
+            ivaMXN = parsed?.IvaTrasladado;
         }
 
-        var updated = await _service.UpdateFileUrlsAsync(tenantId, id, pdfUrl, xmlUrl, xmlMetadata);
+        var updated = await _service.UpdateFileUrlsAsync(tenantId, id, pdfUrl, xmlUrl, xmlMetadata, ivaMXN);
         return Ok(updated);
     }
 
