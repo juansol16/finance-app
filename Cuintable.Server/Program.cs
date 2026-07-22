@@ -83,6 +83,7 @@ builder.Services.AddSingleton<IFileStorageService, GcsFileStorageService>();
 builder.Services.AddHttpClient<IGeminiClient, GeminiClient>();
 builder.Services.AddScoped<IStatementAnalysisService, StatementAnalysisService>();
 builder.Services.AddScoped<IFinancialAdvisorService, FinancialAdvisorService>();
+builder.Services.AddScoped<IMonthlyAdviceService, MonthlyAdviceService>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 // Controllers + Swagger

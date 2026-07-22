@@ -167,13 +167,36 @@ public class FinancialAdvisorService : IFinancialAdvisorService
                 .Select(MapToCluster)
                 .ToList(),
             Trend = await GetTrendAsync(tenantId, year, month),
-            Reconciliation = await ComputeMonthReconciliationAsync(tenantId, year, month, statements)
+            Reconciliation = await ComputeMonthReconciliationAsync(tenantId, year, month, statements),
+            MonthlyAdvice = await GetMonthlyAdviceAsync(tenantId, year, month, statements)
         };
 
         return response;
     }
 
     // ---------- Helpers ----------
+
+    /// <summary>
+    /// Persisted monthly AI advice for the period; stale when statements were added,
+    /// reprocessed or removed after it was generated.
+    /// </summary>
+    private async Task<MonthlyAdviceResponse?> GetMonthlyAdviceAsync(
+        Guid tenantId, int year, int month, List<CardStatement> statements)
+    {
+        var advice = await _context.MonthlyAdvices
+            .FirstOrDefaultAsync(a => a.TenantId == tenantId && a.PeriodYear == year && a.PeriodMonth == month);
+
+        if (advice is null) return null;
+
+        return new MonthlyAdviceResponse
+        {
+            AdviceJson = advice.AdviceJson,
+            GeneratedAt = advice.GeneratedAt,
+            StatementCount = advice.StatementCount,
+            IsStale = advice.StatementCount != statements.Count ||
+                      statements.Any(s => s.ProcessedAt > advice.GeneratedAt)
+        };
+    }
 
     /// <summary>Charge totals for the selected period and the 5 periods before it.</summary>
     private async Task<List<TrendPointItem>> GetTrendAsync(Guid tenantId, int year, int month)

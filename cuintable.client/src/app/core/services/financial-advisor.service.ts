@@ -103,6 +103,13 @@ export interface TrendPoint {
   totalChargesMXN: number;
 }
 
+export interface MonthlyAdvice {
+  adviceJson: string;
+  generatedAt: string;
+  statementCount: number;
+  isStale: boolean;
+}
+
 export interface AdvisorDashboard {
   year: number;
   month: number;
@@ -119,6 +126,7 @@ export interface AdvisorDashboard {
   trend: TrendPoint[];
   antClusters: AntCluster[];
   reconciliation: ReconciliationSummary | null;
+  monthlyAdvice: MonthlyAdvice | null;
 }
 
 export interface StatementAdvice {
@@ -174,6 +182,14 @@ export class FinancialAdvisorService {
 
   getDashboard(year: number, month: number): Observable<AdvisorDashboard> {
     return this.http.get<AdvisorDashboard>(`${this.API}/dashboard`, { params: { year, month } });
+  }
+
+  generateMonthlyAdvice(year: number, month: number): Observable<MonthlyAdvice> {
+    return this.http.post<MonthlyAdvice>(
+      `${this.API}/monthly-advice/generate`,
+      {},
+      { params: { year, month } },
+    );
   }
 
   /** Safely parses the advice JSON produced by the model. */

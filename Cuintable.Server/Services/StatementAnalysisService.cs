@@ -321,7 +321,7 @@ public class StatementAnalysisService : IStatementAnalysisService
             systemPrompt,
             JsonSerializer.Serialize(aggregates, JsonOptions),
             null,
-            AdviceSchema);
+            AdviceContract.Schema);
     }
 
     // ---------- Helpers & schemas ----------
@@ -462,25 +462,4 @@ public class StatementAnalysisService : IStatementAnalysisService
     }
     """;
 
-    private const string AdviceSchema = """
-    {
-      "type": "OBJECT",
-      "properties": {
-        "summary": { "type": "STRING" },
-        "suggestions": {
-          "type": "ARRAY",
-          "items": {
-            "type": "OBJECT",
-            "properties": {
-              "title": { "type": "STRING" },
-              "detail": { "type": "STRING" },
-              "impactMXN": { "type": "NUMBER", "nullable": true }
-            },
-            "required": ["title", "detail"]
-          }
-        }
-      },
-      "required": ["summary", "suggestions"]
-    }
-    """;
 }

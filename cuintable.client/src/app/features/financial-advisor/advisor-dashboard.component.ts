@@ -6,6 +6,8 @@ import { CreditCard, CreditCardService } from '../../core/services/credit-card.s
 import {
   AdvisorDashboard,
   FinancialAdvisorService,
+  MonthlyAdvice,
+  StatementAdvice,
   StatementDetail,
   StatementStatus,
   StatementSummary,
@@ -34,6 +36,11 @@ export class AdvisorDashboardComponent implements OnInit {
   showUpload = false;
   deleting: StatementSummary | null = null;
   reprocessingId: string | null = null;
+
+  monthlyAdvice: StatementAdvice | null = null;
+  monthlyAdviceMeta: MonthlyAdvice | null = null;
+  generatingAdvice = false;
+  adviceError = false;
 
   // Single-series magnitude charts: one hue each, no legend (the title names the series)
   public categoryChartData: ChartData<'bar'> = { labels: [], datasets: [] };
@@ -113,11 +120,15 @@ export class AdvisorDashboardComponent implements OnInit {
     this.service.getDashboard(this.year, this.month).subscribe({
       next: (data) => {
         this.dashboard = data;
+        this.monthlyAdviceMeta = data.monthlyAdvice;
+        this.monthlyAdvice = this.service.parseAdvice(data.monthlyAdvice?.adviceJson ?? null);
         this.buildCharts(data);
         this.loading = false;
       },
       error: () => {
         this.dashboard = null;
+        this.monthlyAdviceMeta = null;
+        this.monthlyAdvice = null;
         this.loading = false;
       },
     });
@@ -129,6 +140,23 @@ export class AdvisorDashboardComponent implements OnInit {
 
   onPeriodChange(): void {
     this.load();
+  }
+
+  generateMonthlyAdvice(): void {
+    if (this.generatingAdvice) return;
+    this.generatingAdvice = true;
+    this.adviceError = false;
+    this.service.generateMonthlyAdvice(this.year, this.month).subscribe({
+      next: (meta) => {
+        this.monthlyAdviceMeta = meta;
+        this.monthlyAdvice = this.service.parseAdvice(meta.adviceJson);
+        this.generatingAdvice = false;
+      },
+      error: () => {
+        this.generatingAdvice = false;
+        this.adviceError = true;
+      },
+    });
   }
 
   private buildCharts(data: AdvisorDashboard): void {

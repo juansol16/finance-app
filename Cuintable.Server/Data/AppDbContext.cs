@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<TaxPayment> TaxPayments => Set<TaxPayment>();
     public DbSet<CardStatement> CardStatements => Set<CardStatement>();
     public DbSet<StatementTransaction> StatementTransactions => Set<StatementTransaction>();
+    public DbSet<MonthlyAdvice> MonthlyAdvices => Set<MonthlyAdvice>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -219,6 +220,20 @@ public class AppDbContext : DbContext
             e.HasIndex(t => t.StatementId);
         });
 
+        // MonthlyAdvice
+        modelBuilder.Entity<MonthlyAdvice>(e =>
+        {
+            e.HasKey(a => a.Id);
+            e.Property(a => a.AdviceJson).HasColumnType("jsonb");
+
+            e.HasOne(a => a.Tenant)
+                .WithMany()
+                .HasForeignKey(a => a.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasIndex(a => new { a.TenantId, a.PeriodYear, a.PeriodMonth }).IsUnique();
+        });
+
         // TaxPayment
         modelBuilder.Entity<TaxPayment>(e =>
         {
@@ -267,6 +282,7 @@ public class AppDbContext : DbContext
             else if (entry.Entity is User user) user.UpdatedAt = DateTime.UtcNow;
             else if (entry.Entity is CardStatement statement) statement.UpdatedAt = DateTime.UtcNow;
             else if (entry.Entity is StatementTransaction transaction) transaction.UpdatedAt = DateTime.UtcNow;
+            else if (entry.Entity is MonthlyAdvice advice) advice.UpdatedAt = DateTime.UtcNow;
         }
     }
 }

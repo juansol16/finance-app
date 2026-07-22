@@ -19,6 +19,7 @@ public class AdvisorDashboardResponse
     public List<TrendPointItem> Trend { get; set; } = [];
     public List<AntExpenseClusterResponse> AntClusters { get; set; } = [];
     public ReconciliationSummaryResponse? Reconciliation { get; set; }
+    public MonthlyAdviceResponse? MonthlyAdvice { get; set; }
 }
 
 public class CategoryTotalItem

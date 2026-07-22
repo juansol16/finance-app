@@ -17,17 +17,20 @@ public class FinancialAdvisorController : ControllerBase
 
     private readonly IFinancialAdvisorService _service;
     private readonly IStatementAnalysisService _analysis;
+    private readonly IMonthlyAdviceService _monthlyAdvice;
     private readonly IFileStorageService _fileStorage;
     private readonly IValidator<ReviewTransactionRequest> _reviewValidator;
 
     public FinancialAdvisorController(
         IFinancialAdvisorService service,
         IStatementAnalysisService analysis,
+        IMonthlyAdviceService monthlyAdvice,
         IFileStorageService fileStorage,
         IValidator<ReviewTransactionRequest> reviewValidator)
     {
         _service = service;
         _analysis = analysis;
+        _monthlyAdvice = monthlyAdvice;
         _fileStorage = fileStorage;
         _reviewValidator = reviewValidator;
     }
@@ -142,5 +145,18 @@ public class FinancialAdvisorController : ControllerBase
             return BadRequest("Invalid period.");
 
         return Ok(await _service.GetDashboardAsync(GetTenantId(), year, month));
+    }
+
+    [HttpPost("monthly-advice/generate")]
+    public async Task<ActionResult<MonthlyAdviceResponse>> GenerateMonthlyAdvice([FromQuery] int year, [FromQuery] int month)
+    {
+        if (year < 2000 || year > 2100 || month < 1 || month > 12)
+            return BadRequest("Invalid period.");
+
+        var advice = await _monthlyAdvice.GenerateAsync(GetTenantId(), GetUserId(), year, month);
+        if (advice is null)
+            return BadRequest("There are no completed statements for this period.");
+
+        return Ok(advice);
     }
 }

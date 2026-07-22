@@ -15,6 +15,7 @@
    (DaisyUI 5 reads these --color-* / --radius-* tokens.)
    ════════════════════════════════════════════════════ */
 [data-theme="dark"] {
+  color-scheme: dark;
   --color-base-100: oklch(18.5% 0.03 262);     /* card / surface */
   --color-base-200: oklch(15.5% 0.028 263);    /* page background */
   --color-base-300: oklch(24% 0.038 261);      /* raised surface */
@@ -62,6 +63,7 @@
    bg-white/[x], border-white/[x], slate text scale).
    ════════════════════════════════════════════════════ */
 [data-theme="light"] {
+  color-scheme: light;
   --color-base-100: oklch(99% 0.003 255);
   --color-base-200: oklch(96% 0.008 255);
   --color-base-300: oklch(92% 0.012 255);
@@ -272,6 +274,23 @@ html, body {
 }
 
 /* ── Modal Styles ──────────────────────────────── */
+/* daisyUI 5's .modal is a single-cell grid: its official
+   children (.modal-box / .modal-backdrop) pin themselves to
+   the 1/1 cell so they overlap. Our custom .modal-overlay /
+   .modal-content must declare the same placement, otherwise
+   they stack in two rows and the dialog renders below center. */
+.modal .modal-overlay {
+  grid-row-start: 1;
+  grid-column-start: 1;
+  place-self: stretch stretch;
+}
+.modal .modal-content {
+  grid-row-start: 1;
+  grid-column-start: 1;
+  max-height: calc(100vh - 4em);
+  overflow-y: auto;
+}
+
 [data-theme="dark"] .modal-box,
 [data-theme="dark"] .modal-content {
   background: linear-gradient(160deg, rgba(23, 32, 58, 0.97), rgba(15, 23, 42, 0.97));
@@ -673,3 +692,24 @@ router-outlet + * {
 
 /* <option> elements hardcode a dark dropdown background */
 [data-theme="light"] option.bg-slate-800 { background-color: #ffffff; color: #0f172a; }
+
+/* ── Native <select> opacity fix ────────────────────
+   Chromium derives the options-popup background from the
+   control's background-color; any alpha channel makes the
+   open dropdown see-through. Force solid backgrounds here,
+   with higher specificity (select.select) than both the
+   themed .select rules and the utility remaps above. */
+[data-theme="dark"] select.select {
+  background-color: #151c31;
+}
+[data-theme="dark"] select.select option {
+  background-color: #151c31;
+  color: #dbe3f4;
+}
+[data-theme="light"] select.select {
+  background-color: #ffffff;
+}
+[data-theme="light"] select.select option {
+  background-color: #ffffff;
+  color: #1e293b;
+}

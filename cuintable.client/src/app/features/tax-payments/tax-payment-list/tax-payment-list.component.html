@@ -56,17 +56,17 @@
     </div>
 
     <!-- Filters -->
-    <div class="flex flex-wrap gap-2 mb-6 ml-0">
+    <div class="flex flex-wrap items-end gap-2 mb-6 ml-0">
         <div class="form-control">
             <label class="label py-1"><span class="label-text text-xs text-slate-400">{{ 'COMMON.START_DATE' | translate
                     }}</span></label>
-            <input type="date" class="input input-sm input-bordered bg-white/[0.04] border-white/[0.08] text-slate-300"
+            <input type="date" class="input input-sm input-bordered bg-white/[0.04] border-white/[0.08] text-slate-300 min-h-0 h-9"
                 [(ngModel)]="startDate" (change)="loadPayments()">
         </div>
         <div class="form-control">
             <label class="label py-1"><span class="label-text text-xs text-slate-400">{{ 'COMMON.END_DATE' | translate
                     }}</span></label>
-            <input type="date" class="input input-sm input-bordered bg-white/[0.04] border-white/[0.08] text-slate-300"
+            <input type="date" class="input input-sm input-bordered bg-white/[0.04] border-white/[0.08] text-slate-300 min-h-0 h-9"
                 [(ngModel)]="endDate" (change)="loadPayments()">
         </div>
         <select class="select select-sm bg-white/[0.04] border-white/[0.08] text-slate-300 text-sm min-h-0 h-9"
